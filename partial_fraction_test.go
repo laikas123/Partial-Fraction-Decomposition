@@ -9,7 +9,15 @@ import (
 
 )
 
+
 func TestFindingHighestDegree(t *testing.T) {		
+
+	Init()	
+
+	originalNumerator := []S_Var{S_Var{-1, 3}, S_Var{2, 2}, S_Var{-9, 1}}
+
+	originalNumeratorConstant := float64(24)
+
 
 
 
@@ -55,27 +63,56 @@ func TestFindingHighestDegree(t *testing.T) {
 
 	constant2 := float64(15)
 
-	newGenVar1 := MultiplyNumeratorByOppositeDenominator(sliceGenVars1, sVarSlice2, constant2)
+	oneDEqtnSlice := MultiplyNumeratorByOppositeDenominatorAndOrganizeTheData(sliceGenVars1, sVarSlice2, constant2, sliceGenVars2, sVarSlice1, constant1, originalNumerator, originalNumeratorConstant)
 
-	fmt.Println("NEW Gen Vars 1")
+	fmt.Println("eqtns")
 
-
-	for i := 0; i < len(newGenVar1); i++ {
-		fmt.Printf("%#v\n", newGenVar1[i])
-	}	
-
-
-	newGenVar2 := MultiplyNumeratorByOppositeDenominator(sliceGenVars2, sVarSlice1, constant1)
-
-	fmt.Println("NEW Gen Vars 2")
+	for i := 0; i < len(oneDEqtnSlice); i++ {
+		fmt.Printf("%#v\n", oneDEqtnSlice[i])
+	}
 
 
-	for i := 0; i < len(newGenVar2); i++ {
-		fmt.Printf("%#v\n", newGenVar2[i])
-	}	
+	allAliases :=  ReturnAllPossibleAliases(oneDEqtnSlice)
+
+
+	fmt.Println("aliases")
+
+	for i := 0; i < len(allAliases); i++ {
+		fmt.Printf("%#v\n", allAliases[i])
+	}
+
+
+	cleanedUpAliases := CleanUpVars(allAliases)
+
+	fmt.Println("cleaned up aliases")
+
+	AliasDatabase = []AliasOneDEquationSimple{}
+
+	
+
+	newAlias := AliasOneDEquationSimple{[]GenVar{GenVar{"A", -1000000}}, []GenVar{}, []float64{}, []float64{}}
+
+
+	AddToAliasDataBase(newAlias)
+
+	PrintAliasDataBase()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+	for i := 0; i < len(cleanedUpAliases); i++ {
+		fmt.Printf("%#v\n", cleanedUpAliases[i])
+	}
 
 
 	if (result != 2) {
@@ -84,6 +121,22 @@ func TestFindingHighestDegree(t *testing.T) {
     }
 
 }
+
+func TestCleanUpForGenVar(t *testing.T) {
+
+
+
+	testGenVar := GenVar{[]}
+
+
+
+	if (false) {
+       t.Errorf("failure")
+    
+    }
+
+}
+
 
 
 func aboutEquals(checkVal float64, result float64) bool {
