@@ -43,20 +43,24 @@ type GenVar struct {
 
 type OneDEquation struct {
 
+	//this represents variables on either side of equation
 	LGenVar []GeneralVariable
 	RGenVar []GeneralVariable
 
+	//this represents constants on either side of equations
 	LNum []float64
 	RNum []float64
 
 }
 
 
-type AliasOneDEquationSimple struct {
+type Alias struct {
 
+	//this represents variables on either side of equations
 	LGenVar []GenVar
 	RGenVar []GenVar
 
+	//this represents constants on either side of equations
 	LNum []float64
 	RNum []float64
 }
@@ -78,7 +82,7 @@ type ConcreteSolution struct {
 
 }
 
-var AliasDatabase []AliasOneDEquationSimple
+var AliasDatabase []Alias
 
 var mutex *sync.Mutex 
 
@@ -105,8 +109,8 @@ func main() {
 
 
 
-
-func MultiplyNumeratorByOppositeDenominatorAndOrganizeTheData(genVarSlice1 []GeneralVariable, sVarSlice1 []S_Var, constant1 float64, genVarSlice2 []GeneralVariable, sVarSlice2 []S_Var, constant2 float64, originalNumeratorSVarSlice []S_Var, originalNumeratorConstant float64) []OneDEquation {
+// this function passes all tests
+func MultiplyNumeratorByOppositeDenominatorAndOrganizeTheData(leftNumerator []GeneralVariable, rightDenomS []S_Var, rightDenomConstant float64, rightNumerator []GeneralVariable, leftDenomS []S_Var, leftDenomConstant float64, originalNumeratorSVarSlice []S_Var, originalNumeratorConstant float64) []OneDEquation {
 
 
 
@@ -120,40 +124,33 @@ func MultiplyNumeratorByOppositeDenominatorAndOrganizeTheData(genVarSlice1 []Gen
 
 
 	//multiply every general variable by the opposite denominator
-	for i := 0; i < len(genVarSlice1); i++ {
-		for j := 0; j < len(sVarSlice1); j++ {
-			returnGeneralVariablesSlice1 = append(returnGeneralVariablesSlice1, genVarTimesSVar(genVarSlice1[i], sVarSlice1[j]))
+	for i := 0; i < len(leftNumerator); i++ {
+		for j := 0; j < len(rightDenomS); j++ {
+			returnGeneralVariablesSlice1 = append(returnGeneralVariablesSlice1, genVarTimesSVar(leftNumerator[i], rightDenomS[j]))
 		}
-		
 	}
 
 
-	for i := 0; i < len(genVarSlice1); i++ {
-
-
-
-		returnGeneralVariablesSlice1 = append(returnGeneralVariablesSlice1, GeneralVariable{genVarSlice1[i].Name, (genVarSlice1[i].Multiplier * constant1), genVarSlice1[i].DegreeToCompareToS})
-	
+	for i := 0; i < len(leftNumerator); i++ {
+		returnGeneralVariablesSlice1 = append(returnGeneralVariablesSlice1, CreateGeneralVariable(leftNumerator[i].Name, (leftNumerator[i].Multiplier * rightDenomConstant), leftNumerator[i].DegreeToCompareToS))	
 	}
 
 
-	//#2 operations	
+	//fraction #2 operations	
 
 	returnGeneralVariablesSlice2 := []GeneralVariable{}
 
-	for i := 0; i < len(genVarSlice2); i++ {
-		for j := 0; j < len(sVarSlice2); j++ {
-			returnGeneralVariablesSlice2 = append(returnGeneralVariablesSlice2, genVarTimesSVar(genVarSlice2[i], sVarSlice2[j]))
+	for i := 0; i < len(rightNumerator); i++ {
+		for j := 0; j < len(leftDenomS); j++ {
+			returnGeneralVariablesSlice2 = append(returnGeneralVariablesSlice2, genVarTimesSVar(rightNumerator[i], leftDenomS[j]))
 		}
 		
 	}
 
 
-	for i := 0; i < len(genVarSlice2); i++ {
-
-
-
-		returnGeneralVariablesSlice2 = append(returnGeneralVariablesSlice2, GeneralVariable{genVarSlice2[i].Name, (genVarSlice2[i].Multiplier * constant2), genVarSlice2[i].DegreeToCompareToS})
+	for i := 0; i < len(rightNumerator); i++ {
+		
+		returnGeneralVariablesSlice2 = append(returnGeneralVariablesSlice2, CreateGeneralVariable(rightNumerator[i].Name, (rightNumerator[i].Multiplier * leftDenomConstant), rightNumerator[i].DegreeToCompareToS))
 	
 	}
 
@@ -161,9 +158,13 @@ func MultiplyNumeratorByOppositeDenominatorAndOrganizeTheData(genVarSlice1 []Gen
 
 
 
-
+	//combined return slices is a slice containing all the values 
+	//from both numerators beings multiplied by their opposite denominators
+	//each value holds its own sign
 	combinedReturnSlices := append(returnGeneralVariablesSlice1, returnGeneralVariablesSlice2...)
 
+
+	//this will be the one dimensional equation to return
 	oneDEqtnSliceToReturn := []OneDEquation{}
 
 
@@ -171,15 +172,22 @@ func MultiplyNumeratorByOppositeDenominatorAndOrganizeTheData(genVarSlice1 []Gen
 
 	var powerToFocusOn int
 
+
 	for i := 0; i < len(combinedReturnSlices); i++ {
+		
+		//for indices that havent already been added to the output
 		if(!(isRestrictedIndex(restrictedIndices, i))){
 			
 			restrictedIndices = append(restrictedIndices, i)
 
+
 			oneDEqtn := OneDEquation{[]GeneralVariable{}, []GeneralVariable{}, []float64{}, []float64{}}
 
+			//what power of S did this variable get multiplied against
 			powerToFocusOn = combinedReturnSlices[i].DegreeToCompareToS
 
+
+			//plug in all variables on the left hand side initially
 			oneDEqtn.LGenVar = append(oneDEqtn.LGenVar, combinedReturnSlices[i])
 
 
@@ -188,6 +196,9 @@ func MultiplyNumeratorByOppositeDenominatorAndOrganizeTheData(genVarSlice1 []Gen
 				if(!(isRestrictedIndex(restrictedIndices, j))){
 					if(combinedReturnSlices[j].DegreeToCompareToS == powerToFocusOn){
 						
+						//gather all other variables that are of this Power of S
+						//and append them to the slice
+
 						restrictedIndices = append(restrictedIndices, j)
 
 						oneDEqtn.LGenVar = append(oneDEqtn.LGenVar, combinedReturnSlices[j])
@@ -198,6 +209,8 @@ func MultiplyNumeratorByOppositeDenominatorAndOrganizeTheData(genVarSlice1 []Gen
 			}
 
 
+			//when the "S Power" is 0 
+			//this really means a constant 
 			if(powerToFocusOn != 0){
 			for k := 0; k < len(originalNumeratorSVarSlice); k++ {
 				if(originalNumeratorSVarSlice[k].Exponent == powerToFocusOn){
@@ -232,6 +245,13 @@ func MultiplyNumeratorByOppositeDenominatorAndOrganizeTheData(genVarSlice1 []Gen
 
 }
 
+
+//this function takes the system of linear equations generated 
+//and returns all possible rearrangements such that there is only one 
+//variable on the left hand side
+//all possible permutations of this are returned
+
+//this function passes all tests
 func ReturnAllPossibleAliases(oneDEqtnSlice []OneDEquation) []OneDEquation {
 
 	returnOneDEqtnSlice := []OneDEquation{}
@@ -269,11 +289,11 @@ func ReturnAllPossibleAliases(oneDEqtnSlice []OneDEquation) []OneDEquation {
 }
 
 
-//this function needs one more test
-func CleanUpVars(oneDSlice []OneDEquation) []AliasOneDEquationSimple {
+//this function passes all tests
+func CleanUpAliases(oneDSlice []OneDEquation) []Alias {
 
 
-	returnOneDEqtnSlice := []AliasOneDEquationSimple{}
+	returnOneDEqtnSlice := []Alias{}
 
 	for i := 0; i < len(oneDSlice); i++ {
 
@@ -309,6 +329,61 @@ func CleanUpVars(oneDSlice []OneDEquation) []AliasOneDEquationSimple {
 
 }
 
+
+//this method passes all tests
+func SubstituteAnAlias(originalAlias Alias, substituteAlias Alias) Alias{
+
+	
+
+	CheckLeftSideIsOnly1Long(originalAlias.LGenVar, "SubstituteAnAlias")
+	CheckLeftSideIsOnly1Long(substituteAlias.LGenVar, "SubstituteAnAlias")
+
+
+	//its ok to index 0 since above its checked that there is only one element
+	// leftSideMultiplierSub := substituteAlias.LGenVar[0].Multiplier
+
+	cleanCopyRGenVarSub := CleanCopySliceDataGenVar(substituteAlias.RGenVar)
+	cleanCopyRNumSub := CleanCopySliceDataFloat(substituteAlias.RNum)
+
+	scaleValSub := substituteAlias.LGenVar[0].Multiplier
+
+
+
+	cleanCopyRGenVarSubScaled := ScaleDownSliceGenVar(cleanCopyRGenVarSub, scaleValSub)
+	cleanCopyRNumSubScaled := ScaleDownSliceFloat(cleanCopyRNumSub, scaleValSub)
+
+
+
+
+	cleanCopyRNumOriginal := CleanCopySliceDataFloat(originalAlias.RNum)
+
+
+
+
+
+	//this is the variable slice of the original alias without the variable to remove
+	//and the multiplier of that variable since it will mutliply the newly added substitute values
+	originalAliasSubstituteVariableRemoved, multiplierForSubstitute := RemoveExisitngGenVarReturnMultiplier(originalAlias.RGenVar, substituteAlias.LGenVar[0].Name)
+
+
+	for i := 0; i < len(cleanCopyRGenVarSubScaled); i++ {
+		cleanCopyRGenVarSubScaled[i].Multiplier = cleanCopyRGenVarSubScaled[i].Multiplier * multiplierForSubstitute
+	}
+
+	for i := 0; i < len(cleanCopyRNumSub); i++ {
+		cleanCopyRNumSubScaled[i] = cleanCopyRNumSubScaled[i] * multiplierForSubstitute
+	}
+
+	originalAliasSubstituteVariableRemoved = append(originalAliasSubstituteVariableRemoved, cleanCopyRGenVarSubScaled...)
+
+	cleanCopyRNumOriginal = append(cleanCopyRNumOriginal, cleanCopyRNumSubScaled...)
+
+
+
+	return CreateAlias(CleanCopySliceDataGenVar(originalAlias.LGenVar), originalAliasSubstituteVariableRemoved, CleanCopySliceDataFloat(originalAlias.LNum), cleanCopyRNumOriginal)
+
+
+}
 
 
 
@@ -355,7 +430,7 @@ func WorkerSpawnAndAliasListener(soltnsChan chan ConcreteSolution)   {
 		os.Exit(1)
 	}
 
-	
+		
 
 	cursor := 0
 
@@ -399,7 +474,7 @@ func WorkerSpawnAndAliasListener(soltnsChan chan ConcreteSolution)   {
 }
 
 
-func WorkOnOneItem(singleOneD AliasOneDEquationSimple, solutionToSend chan ConcreteSolution, restrictedThisValue int) {
+func WorkOnOneItem(singleOneD Alias, solutionToSend chan ConcreteSolution, restrictedThisValue int) {
 
 
 	cursor := 0
@@ -436,7 +511,7 @@ func WorkOnOneItem(singleOneD AliasOneDEquationSimple, solutionToSend chan Concr
 
 
 
-func AddToAliasDataBase(newAlias AliasOneDEquationSimple, canReadAgain chan bool) {
+func AddToAliasDataBase(newAlias Alias, canReadAgain chan bool) {
 
 
 
@@ -464,7 +539,7 @@ func PrintAliasDataBase() {
 
 
 
-func ReadItemFromAliasDataBase(index int) (AliasOneDEquationSimple, bool) {
+func ReadItemFromAliasDataBase(index int) (Alias, bool) {
 
 	mutex.Lock()
 
@@ -478,51 +553,65 @@ func ReadItemFromAliasDataBase(index int) (AliasOneDEquationSimple, bool) {
 
 			
 		}else{
-			return AliasOneDEquationSimple{}, false
+			return Alias{}, false
 		}
 
 	mutex.Unlock()
 
-	return AliasOneDEquationSimple{}, false
+	return Alias{}, false
 
 }
 
 
 
-func FullCleanUp(genVarInput AliasOneDEquationSimple)  {
 
-	// copyGenVar := genVarInput
+// this function passes all tests
+func FullCleanUp(genVarInput Alias)  Alias {
 
-	// copyGenVar = SimplifyGenVarRightHandGenVarSlice(copyGenVar)
-	// copyGenVar = SimplifyRightHandNumSlice(copyGenVar)
-	// copyGenVar = MoveVarsEqualToLeftHandSideToLeftSide(copyGenVar)
+	cleanCopy := CleanCopyAlias(genVarInput)
 
-	// var leftSideNull bool
+	fmt.Println("main function clean copy")
+	VerbosePrintln(cleanCopy)
 
-	// copyGenVar, leftSideNull = RemoveZerosWarnIfLeftHandSideZero(copyGenVar)
+	cleanCopy = SimplifyGenVarRightHandGenVarSlice(cleanCopy)
 
-	// if(leftSideNull){
-	// 	fmt.Println("left side eqtn is null")
-	// 	os.Exit(1)
-	// }
+	fmt.Println("main function clean copy")
+	VerbosePrintln(cleanCopy)
 
-	// fmt.Println(copyGenVar)
+	cleanCopy = SimplifyRightHandNumSlice(cleanCopy)
+	
+	fmt.Println("main function clean copy")
+	VerbosePrintln(cleanCopy)
 
+	cleanCopy = MoveVarsEqualToLeftHandSideToLeftSide(cleanCopy)
+	
+	fmt.Println("main function clean copy special ")
+	VerbosePrintln(cleanCopy)
+
+	var leftSideZero bool
+
+	cleanCopy, leftSideZero = RemoveZerosWarnIfLeftHandSideZero(cleanCopy)
+
+	fmt.Println("main function clean copy")
+	VerbosePrintln(cleanCopy)
+
+	if(leftSideZero){
+		fmt.Println("left hand side 0")
+		os.Exit(1)
+	}
+
+
+	return cleanCopy
 
 } 
 
 
 
 //this function works well
-func SimplifyGenVarRightHandGenVarSlice(genVarInput AliasOneDEquationSimple) AliasOneDEquationSimple{
+func SimplifyGenVarRightHandGenVarSlice(genVarInput Alias) Alias{
 
 
-	//if there's more variables on the left than one something went wrong earlier in the program
-	if(len(genVarInput.LGenVar) > 1){
-		fmt.Println("equation doesn't only have one variable on the left side")
-		os.Exit(1)
-	}
-
+	CheckLeftSideIsOnly1Long(genVarInput.LGenVar, "SimplifyGenVarRightHandGenVarSlice")
 
 
 	//don't modify the underlying slice instead copy the data
@@ -622,108 +711,123 @@ func SimplifyGenVarRightHandGenVarSlice(genVarInput AliasOneDEquationSimple) Ali
 
 
 
-func SimplifyRightHandNumSlice(genVarInput AliasOneDEquationSimple) AliasOneDEquationSimple{
+func SimplifyRightHandNumSlice(genVarInput Alias) Alias{
 
 
+	CheckLeftSideIsOnly1Long(genVarInput.LGenVar, "SimplifyRightHandNumSlice")
 
 	//don't modify the underlying slice instead copy the data
-	copyRNumData := CleanCopySliceDataGenVar(genVarInput.RNum)
+	copyRNumData := CleanCopySliceDataFloat(genVarInput.RNum)
+
+	summation := float64(0)
+
+	for i := 0; i < len(copyRNumData); i++ {
+	
+		summation = summation + copyRNumData[i]
+
+	}
+
+	return CreateAlias(CleanCopySliceDataGenVar(genVarInput.LGenVar), CleanCopySliceDataGenVar(genVarInput.RGenVar), CleanCopySliceDataFloat(genVarInput.LNum), []float64{summation})
+
+}
 
 
-	//if there's more variables on the left than one something went wrong earlier in the program
-	if(len(genVarInput.LGenVar) > 1){
-		fmt.Println("equation doesn't only have one variable on the left side")
+
+func MoveVarsEqualToLeftHandSideToLeftSide(genVarInput Alias) Alias {
+
+	CheckLeftSideIsOnly1Long(genVarInput.LGenVar, "MoveVarsEqualToLeftHandSideToLeftSide")
+
+	leftHandVarName := genVarInput.LGenVar[0].Name
+
+	variablesMoved := 0
+
+	var variableToMove GenVar
+
+	for i := 0; i < len(genVarInput.RGenVar); i++ {
+		if(genVarInput.RGenVar[i].Name == leftHandVarName){
+			variablesMoved++
+			variableToMove = genVarInput.RGenVar[i]
+		}
+	}
+
+	//since right before this function 
+	//like terms should have been combined
+	//there never should be a case where two elements are 
+	//moved to the left
+	if(variablesMoved > 1){
+		fmt.Println("too many variables moved")
 		os.Exit(1)
 	}
 
-	leftSidedVar := genVarInput.LGenVar[0]
+	cleanCopyRightHandSideForRemoval := CleanCopySliceDataGenVar(genVarInput.RGenVar)
 
 
-	//these will be indices that already found a combination
-	//hence we don't want to double combine and corrupt the data
-	restrictedIndices := []int{}
+	//discard the multiplier variable returned since here the only goal is to remove the element
+	cleanCopyRightHandSideForRemoval, _ =  RemoveExisitngGenVarReturnMultiplier(cleanCopyRightHandSideForRemoval, leftHandVarName)
 
 
-	//this will be the output slice of the combined right hand side variables
-	outputRNumData := []float64{}
+	leftHandGenVar := genVarInput.LGenVar[0]
+
+	newCombinedVariable := GenVar{leftHandGenVar.Name, leftHandGenVar.Multiplier - variableToMove.Multiplier}
+
+
+	return CreateAlias([]GenVar{newCombinedVariable}, cleanCopyRightHandSideForRemoval, CleanCopySliceDataFloat(genVarInput.LNum), CleanCopySliceDataFloat(genVarInput.RNum))
+
+
+}
 
 
 
-	//keep track of indices that matched,
-	//this makes sure items that didnt match wont get lost
-	indicesThatMatched := []int{}
+//the boolean return value is set true only if the left hand side is 0
+//as this means we have nulled out the variable we need to know the value of
+func RemoveZerosWarnIfLeftHandSideZero(genVarInput Alias) (Alias, bool) {
+
+	CheckLeftSideIsOnly1Long(genVarInput.LGenVar, "RemoveZerosWarnIfLeftHandSideZero")
 
 
-	//since this function is called recursively 
-	//once no simplifications were made 
-	//the result can be returned
-	oneSimplificationWasMade :=	false
+	warnThatLeftVarIsNull := false
 
-	for i := 0; i < len(copyRNumData); i++ {
-		if(!isRestrictedIndex(restrictedIndices, i)){
+	if(genVarInput.LGenVar[0].Multiplier == 0){
+			warnThatLeftVarIsNull = true
+	}
 
-			restrictedIndices = append(restrictedIndices, i)
+	indicesToRemove := []int{}
 
-			checkVal1 := copyRNumData[i]
+	for i := 0; i < len(genVarInput.RGenVar); i++ {
+		if(genVarInput.RGenVar[i].Multiplier == 0){
+			VerbosePrintln(genVarInput.RGenVar)
+			indicesToRemove = append(indicesToRemove, i)
+		}
+	}
 
-			for j := 0; j < len(copyRNumData); j++ {
+	newRGenVarSlice := []GenVar{}
 
-				if(!isRestrictedIndex(restrictedIndices, j)){
-				//restrictedIndices = append(restrictedIndices, j)
-					checkVal2 := copyRNumData[j]
+	if(len(indicesToRemove) != 0){
+		for i := 0; i < len(genVarInput.RGenVar); i++ {
+		
+			okToAdd := false
 
+			for j := 0; j < len(indicesToRemove); j++ {
+				if(i != indicesToRemove[j]){
+					okToAdd = true
+					break
+				}
+			}
 
-					//if the two variables are of the same name
-					if(checkVal1 == checkVal2){
-
-
-						//add them together to the output slice
-						outputRNumData = append(outputRNumData, (checkVal1 + checkVal2))
-					
-						//add this j value to restricted indices so it is not double added
-						restrictedIndices = append(restrictedIndices, j)
-
-
-						//add the matching indices
-						indicesThatMatched = append(indicesThatMatched, i)
-
-						indicesThatMatched = append(indicesThatMatched, j)
-
-						oneSimplificationWasMade = true
-
-						break
-
-					}
-
-				}	
+			//this is a clean form of adding so no need to call clean function
+			if(okToAdd){
+				newRGenVarSlice = append(newRGenVarSlice, genVarInput.RGenVar[i])
 			}
 
 		}
 
-	}
-
-
-
-
-	for i := 0; i < len(copyRNumData); i++ {
-
-		//the restricted index function can be used
-		//also here, dont let the name play tricks
-		if(!isRestrictedIndex(indicesThatMatched, i)){
-				outputRNumData = append(outputRNumData, copyRNumData[i])
-		}
-
-
-	}
-
-	//if no simplifications were made return the data as is
-	if(!oneSimplificationWasMade){
-		return CreateAlias(CleanCopySliceDataGenVar(genVarInput.LGenVar), CleanCopySliceDataGenVar(genVarInput.RGenVar), CleanCopySliceDataFloat(genVarInput.LNum), outputRNumData))
-
-	//else recursively call until there can be no more simplifications
+		return CreateAlias(CleanCopySliceDataGenVar(genVarInput.LGenVar), CleanCopySliceDataGenVar(newRGenVarSlice), CleanCopySliceDataFloat(genVarInput.LNum), CleanCopySliceDataFloat(genVarInput.RNum)), warnThatLeftVarIsNull
 	}else{
-		return SimplifyGenVarRightHandGenVarSlice(CreateAlias(CleanCopySliceDataGenVar(genVarInput.LGenVar), CleanCopySliceDataGenVar(genVarInput.RGenVar), CleanCopySliceDataFloat(genVarInput.LNum), outputRNumData))
+		return CleanCopyAlias(genVarInput), warnThatLeftVarIsNull
 	}
+
+
+
 
 
 
@@ -731,189 +835,31 @@ func SimplifyRightHandNumSlice(genVarInput AliasOneDEquationSimple) AliasOneDEqu
 
 
 
-// func SimplifyRightHandNumSlice(genVarInput AliasOneDEquationSimple) AliasOneDEquationSimple {
+//this "new alias" should be the scaled down version 
+//scaled down being that its left side variable equals 1 and the right side is scaled
+//accordingly
+func NewAliasEqualsLeftSideVariableNoIncrease(oldAlias Alias, newAlias Alias) bool {
 
-// 	copyRNumData := []GenVar
 
-// 	for i := 0; i < len(genVarInput.RNum); i++ {
+	//the net result is what matters 
+	//a clean copy of old and new is taken
 
-// 		copyRNumData = append(copyRNumData, genVarInput.RNum[i])
+	// cleanCopyOldAlias := CleanCopyAlias(oldAlias)
+	// cleanCopyNewAlias := CleanCopyAlias(newAlias)
 
-// 	}
+	return false
 
-// 	restrictedIndices := []int{}
 
-// 	outputRNumData := []int{}
+}
 
-// 	indicesThatMatched := []int{}
 
-// 	oneSimplificationWasMade :=	false
 
-// 	for i := 0; i < len(copyRNumData); j++ {
-// 		if(!isRestrictedIndex(restrictedIndices, i)){
 
-// 			restrictedIndices = append(restrictedIndices, i)
-
-// 			checkVal1 := copyRNumData[i]
-
-// 			for j := 0; j < len(copyRNumData); j++ {
-
-// 				if(!isRestrictedIndex(restrictedIndices, j)){
-// 				//restrictedIndices = append(restrictedIndices, j)
-// 					checkVal2 := copyRNumData[j]
-
-// 					if(checkVal1.Name == checkVal2.Name){
-
-// 						outputRNumData = append(outputRNumData, (checkVal1+checkVal2) )
-					
-// 						restrictedIndices = append(restrictedIndices, j)
-
-// 						indicesThatMatched = append(indicesThatMatched, i)
-
-// 						indicesThatMatched = append(indicesThatMatched, j)
-
-// 						oneSimplificationWasMade = true
-
-// 						break
-
-// 					}
-
-// 				}	
-// 			}
-
-// 		}
-
-// 	}
-
-
-
-
-// 	for i := 0; i < len(copyRNumData); i++ {
-
-// 		if(!isRestrictedIndex(indicesThatMatched)){
-// 			outputRNumData = append(outputRNumData, copyRGenVarData[i])
-// 		}
-
-
-// 	}
-
-// 	if(!oneSimplificationWasMade){
-// 		return CreateAlias(genVarInput.LGenVar, genVarInput.RGenVar, genVarInput.LNum, outputRNumData)
-// 	}else{
-// 		return SimplifyGenVarRightHandGenVarSlice(CreateAlias(genVarInput.LGenVar, genVarInput.RGenVar, genVarInput.LNum, outputRNumData))
-// 	}
-
-
-
-// }
-
-
-// func MoveVarsEqualToLeftHandSideToLeftSide(genVarInput AliasOneDEquationSimple) AliasOneDEquationSimple {
-
-
-// 	if(len(genVarInput.LGenVar) > 0){
-// 		fmt.Println("equation doesn't only have one variable on the left side")
-// 		os.Exit(1)
-// 	}
-
-// 	leftSidedVarName := genVarInput.LGenVar[0].Name
-
-// 	indicesToRemove := []int{}
-
-// 	for i := 0; i < len(genVarInput.RGenVar); i++ {
-// 		if(genVarInput.RGenVar[i].Name == leftSidedVarName){
-// 			indicesToRemove = append(indicesToRemove, i)
-// 			genVarInput.LGenVar[0] = []GeneralVariable{GeneralVariable{leftSidedVarName, (genVarInput.RGenVar[i].Multiplier + genVarInput.LGenVar[0].Multiplier) } }
-// 		}
-// 	}
-
-// 	newRGenVar := []GeneralVariable{}
-
-// 	for i := 0; i < len(genVarInput.RGenVar); i++ {
-
-// 		okToAdd := false
-
-// 		for j := 0; j < len(indicesToRemove); j++ {
-// 			if(i == indicesToRemove[j]){
-// 				okToAdd = true
-// 				break
-// 			}
-// 		}
-
-// 		if(okToAdd){
-// 			newRGenVar = append(newRGenVar, genVarInput.RGenVar[i])
-// 		}
-
-
-// 	}
-
-
-// 	return CreateAlias(genVarInput.LGenVar, newRGenVar, genVarInput.LNum, genVarInput.RNum)
-
-
-// }
-
-
-
-// //the boolean return value is set true only if the left hand side is 0
-// //as this means we have nulled out the variable we need to know the value of
-// func RemoveZerosWarnIfLeftHandSideZero(genVarInput AliasOneDEquationSimple) (AliasOneDEquationSimple, bool) {
-
-
-// 	if(len(genVarInput.LGenVar) > 0){
-// 		fmt.Println("equation doesn't only have one variable on the left side")
-// 		os.Exit(1)
-// 	}
-	
-// 	warnThatLeftVarIsNull := false
-
-// 	if(genVarInput.LGenVar[0].Multiplier == 0){
-// 			warnThatLeftVarIsNull = true
-// 	}
-
-// 	indicesToRemove := []int{}
-
-// 	for i := 0; i < len(genVarInput.RGenVar); i++ {
-// 		if(genVarInput.RGenVar[i].Multiplier == 0){
-// 			indicesToRemove = append(indicesToRemove, i)
-// 		}
-// 	}
-
-// 	newRGenVarSlice := []GenVar{}
-
-// 	for i := 0; i < len(genVarInput.RGenVar); i++ {
-		
-// 		okToAdd := false
-
-// 		for j := 0; j < len(indicesToRemove); j++ {
-// 			if(i == indicesToRemove[j]){
-// 				okToAdd = true
-// 				break
-// 			}
-// 		}
-
-// 		if(okToAdd){
-// 			newRGenVarSlice = append(newRGenVarSlice, genVarInput.RGenVar[i])
-// 		}
-
-// 	}
-
-
-// 	return CreateAlias(genVarInput.LGenVar, newRGenVarSlice, genVarInput.LNum, genVarInput.RNum), warnThatLeftVarIsNull
-
-
-// }
-
-
-
-
-
-
-func NewAliasTransmuteToExistingVariableAndReducesTheVariablesOnTheRight(oldAlias AliasOneDEquationSimple, newAlias AliasOneDEquationSimple) bool {
+func NewAliasTransmuteToExistingVariableAndReducesTheVariablesOnTheRight(oldAlias Alias, newAlias Alias) bool {
 	return false
 }
 
-func NewAliasHasVariableAlreadyOnLeft(oldAlias AliasOneDEquationSimple, newAlias AliasOneDEquationSimple) bool {
+func NewAliasHasVariableAlreadyOnLeft(oldAlias Alias, newAlias Alias) bool {
 	return false
 }
 
@@ -941,7 +887,7 @@ func NewAliasHasVariableAlreadyOnLeft(oldAlias AliasOneDEquationSimple, newAlias
 func Init() {
 	mutex = &sync.Mutex{}
 	solvedMutex = &sync.Mutex{}
-	AliasDatabase = []AliasOneDEquationSimple{}
+	AliasDatabase = []Alias{}
 	Solutions = []ConcreteSolution{}
 	Solved = false
 	SolvedCheck = false
@@ -1209,8 +1155,21 @@ func ReturnGeneralVariablesForDegree(degree int, startIndex int) ([]GeneralVaria
 
 
 
-func CreateAlias(lGenVar []GenVar, rGenVar []GenVar, lNum []float64, rNum []float64) AliasOneDEquationSimple {
-	return AliasOneDEquationSimple{lGenVar, rGenVar, lNum, rNum}
+func CreateGeneralVariable(name string, multiplier float64, degreeCompareS int) GeneralVariable{
+	return GeneralVariable{name, multiplier, degreeCompareS}
+}
+
+func CreateGenVar(name string, multiplier float64) GenVar{
+	return GenVar{name, multiplier}
+}
+
+
+func CreateSVar(multiplier float64, exponent int) S_Var {
+	return S_Var{multiplier, exponent}
+}
+
+func CreateAlias(leftGenVar []GenVar, rightGenVar []GenVar, leftNum []float64, rightNum []float64) Alias {
+	return Alias{leftGenVar, rightGenVar, leftNum, rightNum}
 } 
 
 
@@ -1246,7 +1205,7 @@ func CleanCopySliceDataFloat(input []float64) []float64 {
 }
 
 
-func CleanCopySliceGeneralVariable(input []GeneralVariable) []GeneralVariable {
+func CleanCopySliceDataGeneralVariable(input []GeneralVariable) []GeneralVariable {
 
 	outputSlice := []GeneralVariable{}
 
@@ -1257,6 +1216,138 @@ func CleanCopySliceGeneralVariable(input []GeneralVariable) []GeneralVariable {
 	return outputSlice
 
 }
+
+
+
+func TwoGenVarsAreEqual(genvar1 GenVar, genvar2 GenVar) bool {
+
+
+	if((genvar1.Name == genvar2.Name) && (genvar1.Multiplier == genvar2.Multiplier) ){
+		return true
+	}else{
+		return false
+	}
+
+
+}
+
+
+func TwoGenVarsAreSameVariable(genvar1 GenVar, genvar2 GenVar) bool {
+
+
+	if(genvar1.Name == genvar2.Name){
+		return true
+	}else{
+		return false
+	}
+
+
+}
+
+
+
+func RemoveExisitngGenVarReturnMultiplier(genVarSlice []GenVar, removeName string) ([]GenVar, float64) {
+
+	returnSlice := []GenVar{}
+
+	var returnMultiplier float64
+
+	valRemovedMultiplierFound := false
+
+	removedItems := 0
+
+	for i := 0; i < len(genVarSlice); i++ {
+		currentVarName := genVarSlice[i].Name
+		if(currentVarName != removeName){
+			returnSlice = append(returnSlice, genVarSlice[i])
+		}else{
+			returnMultiplier = genVarSlice[i].Multiplier
+			valRemovedMultiplierFound = true
+			removedItems++
+		}
+	}
+
+	if(!valRemovedMultiplierFound){
+		fmt.Println("couldn't remove value from slice or couldn't find multiplier")
+		os.Exit(1)
+
+	}
+
+	if(removedItems > 1){
+		fmt.Println("more than one item removed")
+		os.Exit(1)
+	}
+
+	return returnSlice, returnMultiplier
+
+
+}
+
+
+
+func CheckLeftSideIsOnly1Long(genVarInput []GenVar, functionCaller string){
+	//if there's more variables on the left than one something went wrong earlier in the program
+	if(len(genVarInput) > 1){
+		fmt.Println("equation doesn't only have one variable on the left side from function:", functionCaller)
+		VerbosePrintln(genVarInput)
+		os.Exit(1)
+	}
+
+
+}
+
+func VerbosePrintln(input interface{}) {
+	fmt.Printf("%#v\n", input)
+}
+
+
+
+
+
+
+
+
+func ScaleDownSliceGenVar(genVarInput []GenVar, scaleVal float64) []GenVar {
+
+	copiedData := CleanCopySliceDataGenVar(genVarInput)
+
+	for i := 0; i < len(copiedData); i++ {
+		copiedData[i].Multiplier = (copiedData[i].Multiplier)/(scaleVal)
+	}
+
+	return copiedData
+
+}
+
+func ScaleDownSliceFloat(floatSlice []float64, scaleVal float64) []float64 {
+
+	copiedData := CleanCopySliceDataFloat(floatSlice)
+
+	for i := 0; i < len(copiedData); i++ {
+		copiedData[i] = (copiedData[i])/(scaleVal)
+	}
+
+	return copiedData
+
+}
+
+
+//this function passes all tests
+func CleanCopyAlias(oldAlias Alias) Alias{
+
+
+	return CreateAlias(CleanCopySliceDataGenVar(oldAlias.LGenVar), CleanCopySliceDataGenVar(oldAlias.RGenVar), CleanCopySliceDataFloat(oldAlias.LNum), CleanCopySliceDataFloat(oldAlias.RNum))
+
+
+}
+
+
+
+
+
+
+
+
 
 
 
