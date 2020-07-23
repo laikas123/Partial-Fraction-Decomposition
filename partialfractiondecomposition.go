@@ -331,12 +331,31 @@ func CleanUpAliases(oneDSlice []OneDEquation) []Alias {
 
 
 //this method passes all tests
-func SubstituteAnAlias(originalAlias Alias, substituteAlias Alias) Alias{
+func SubstituteAnAlias(originalAlias Alias, substituteAlias Alias) (Alias, bool){
+
+
 
 	
 
 	CheckLeftSideIsOnly1Long(originalAlias.LGenVar, "SubstituteAnAlias")
 	CheckLeftSideIsOnly1Long(substituteAlias.LGenVar, "SubstituteAnAlias")
+
+	dataValid := true
+
+	if(originalAlias.LGenVar[0].Name == substituteAlias.LGenVar[0].Name){
+		
+		fmt.Println("invalid substitution")
+		VerbosePrintln(originalAlias)
+		VerbosePrintln(substituteAlias)
+
+		dataValid = false
+
+		return Alias{}, dataValid
+
+
+	}
+
+
 
 
 	//its ok to index 0 since above its checked that there is only one element
@@ -380,7 +399,18 @@ func SubstituteAnAlias(originalAlias Alias, substituteAlias Alias) Alias{
 
 
 
-	return CreateAlias(CleanCopySliceDataGenVar(originalAlias.LGenVar), originalAliasSubstituteVariableRemoved, CleanCopySliceDataFloat(originalAlias.LNum), cleanCopyRNumOriginal)
+	returnAlias := CreateAlias(CleanCopySliceDataGenVar(originalAlias.LGenVar), originalAliasSubstituteVariableRemoved, CleanCopySliceDataFloat(originalAlias.LNum), cleanCopyRNumOriginal)
+
+	var leftSideZero bool
+
+	returnAlias, leftSideZero = FullCleanUp(returnAlias)
+
+	if(leftSideZero){
+		fmt.Println("error left side 0 in SubstituteAnAlias")	
+		os.Exit(1)
+	}
+
+	return returnAlias, dataValid
 
 
 }
@@ -410,6 +440,7 @@ func SolutionListener(numberOfSolutionsNeeded int ) []ConcreteSolution{
 
 		solNeededCount-- 
 
+		fmt.Println("hello!!!!")
 
 	}
 
@@ -474,13 +505,14 @@ func WorkerSpawnAndAliasListener(soltnsChan chan ConcreteSolution)   {
 }
 
 
-func WorkOnOneItem(singleOneD Alias, solutionToSend chan ConcreteSolution, restrictedThisValue int) {
+func WorkOnOneItem(seed Alias, solutionToSend chan ConcreteSolution, restrictedThisValue int) {
 
 
 	cursor := 0
 
 	doneWorking := false
 
+	cleanCopySeed := CleanCopyAlias(seed)
 
 	for !doneWorking {
 
@@ -488,9 +520,67 @@ func WorkOnOneItem(singleOneD Alias, solutionToSend chan ConcreteSolution, restr
 
 			valToWorkWith, dataValid := ReadItemFromAliasDataBase(cursor)
 
+			cleanCopyValToWorkWith := CleanCopyAlias(valToWorkWith)
+
 			if(dataValid){
 
-				fmt.Println(valToWorkWith)
+				var subValid bool
+
+				if(NewAliasEqualsLeftSideVariableNoIncrease(cleanCopySeed, cleanCopyValToWorkWith)){
+					cleanCopySeed, subValid  = SubstituteAnAlias(cleanCopySeed, cleanCopyValToWorkWith)
+					
+					if(subValid){
+
+						cleanCopySeed = CleanCopyAlias(cleanCopySeed)
+
+						AddToAliasDatabase(cleanCopySeed)
+
+
+						if(isConcreteSolution(cleanCopySeed)){
+
+							//Full clean up gets called via substitution above so it is 
+							//known there is only 1 variable on the left hand side
+							//and concrete solution check function checks there is only
+							//one constant on the right
+							solutionFound := ConcreteSolution{cleanCopySeed.LGenVar[0].Name,  cleanCopySeed.RNum[0]}
+
+							solutionToSend <- solutionFound
+
+						}
+
+					}else{
+						doneWorking = true
+					}
+
+					fmt.Println(cleanCopySeed, subValid)
+				}else if(NewAliasReducesVariablesOnRightHandSide(cleanCopySeed, cleanCopyValToWorkWith)){
+					cleanCopySeed, subValid = SubstituteAnAlias(cleanCopySeed, cleanCopyValToWorkWith)
+					fmt.Println(cleanCopySeed, subValid)
+					if(subValid){
+
+						cleanCopySeed = CleanCopyAlias(cleanCopySeed)
+
+						AddToAliasDatabase(cleanCopySeed)
+
+						if(isConcreteSolution(cleanCopySeed)){
+
+							//Full clean up gets called via substitution above so it is 
+							//known there is only 1 variable on the left hand side
+							//and concrete solution check function checks there is only
+							//one constant on the right
+							solutionFound := ConcreteSolution{cleanCopySeed.LGenVar[0].Name,  cleanCopySeed.RNum[0]}
+
+							solutionToSend <- solutionFound
+
+						}
+
+
+					}else{
+						doneWorking = true
+					}
+				}else{
+					doneWorking = true
+				}
 
 
 			}else{
@@ -510,22 +600,43 @@ func WorkOnOneItem(singleOneD Alias, solutionToSend chan ConcreteSolution, restr
 }
 
 
+func isConcreteSolution(checkAlias Alias) bool {
+	if(len(checkAlias.LGenVar)  == 1 && len(checkAlias.RGenVar) == 0 && len(checkAlias.LNum) == 0 && len(checkAlias.RNum) == 1){
+		return true
+	}else{
+		return false
+	}
+} 
 
-func AddToAliasDataBase(newAlias Alias, canReadAgain chan bool) {
+
+
+func AddToAliasDatabase(newAlias Alias) {
 
 
 
 
 	mutex.Lock()
-   
-	AliasDatabase = append(AliasDatabase, newAlias)
 
+	notDuplicateValue := true
+
+	for i := 0; i < len(AliasDatabase); i++ {
+		if(TwoAliasesAreEqual(CleanCopyAlias(newAlias), CleanCopyAlias(AliasDatabase[i]))){
+			notDuplicateValue = false
+		}
+	}	
+
+
+   	if(notDuplicateValue){
+		AliasDatabase = append(AliasDatabase, newAlias)
+	}
     mutex.Unlock()
 
 
 
 
 }
+
+
 
 func PrintAliasDataBase() {
 	
@@ -566,42 +677,34 @@ func ReadItemFromAliasDataBase(index int) (Alias, bool) {
 
 
 // this function passes all tests
-func FullCleanUp(genVarInput Alias)  Alias {
+func FullCleanUp(genVarInput Alias)  (Alias, bool) {
 
 	cleanCopy := CleanCopyAlias(genVarInput)
 
-	fmt.Println("main function clean copy")
-	VerbosePrintln(cleanCopy)
-
 	cleanCopy = SimplifyGenVarRightHandGenVarSlice(cleanCopy)
 
-	fmt.Println("main function clean copy")
-	VerbosePrintln(cleanCopy)
 
 	cleanCopy = SimplifyRightHandNumSlice(cleanCopy)
 	
-	fmt.Println("main function clean copy")
-	VerbosePrintln(cleanCopy)
 
 	cleanCopy = MoveVarsEqualToLeftHandSideToLeftSide(cleanCopy)
 	
-	fmt.Println("main function clean copy special ")
-	VerbosePrintln(cleanCopy)
 
 	var leftSideZero bool
 
 	cleanCopy, leftSideZero = RemoveZerosWarnIfLeftHandSideZero(cleanCopy)
 
-	fmt.Println("main function clean copy")
-	VerbosePrintln(cleanCopy)
 
-	if(leftSideZero){
-		fmt.Println("left hand side 0")
-		os.Exit(1)
-	}
+	// if(leftSideZero){
+	// 	fmt.Println("left hand side 0")
+	// 	os.Exit(1)
+	// }
 
 
-	return cleanCopy
+	CheckLeftSideIsOnly1Long(cleanCopy.LGenVar, "FullCleanUp")
+
+
+	return cleanCopy, leftSideZero
 
 } 
 
@@ -759,6 +862,10 @@ func MoveVarsEqualToLeftHandSideToLeftSide(genVarInput Alias) Alias {
 		os.Exit(1)
 	}
 
+	if(variablesMoved == 0){
+		return CleanCopyAlias(genVarInput)
+	}
+
 	cleanCopyRightHandSideForRemoval := CleanCopySliceDataGenVar(genVarInput.RGenVar)
 
 
@@ -795,7 +902,7 @@ func RemoveZerosWarnIfLeftHandSideZero(genVarInput Alias) (Alias, bool) {
 
 	for i := 0; i < len(genVarInput.RGenVar); i++ {
 		if(genVarInput.RGenVar[i].Multiplier == 0){
-			VerbosePrintln(genVarInput.RGenVar)
+			
 			indicesToRemove = append(indicesToRemove, i)
 		}
 	}
@@ -834,36 +941,127 @@ func RemoveZerosWarnIfLeftHandSideZero(genVarInput Alias) (Alias, bool) {
 }
 
 
-
-//this "new alias" should be the scaled down version 
-//scaled down being that its left side variable equals 1 and the right side is scaled
-//accordingly
+//this function passes all tests
 func NewAliasEqualsLeftSideVariableNoIncrease(oldAlias Alias, newAlias Alias) bool {
 
 
-	//the net result is what matters 
-	//a clean copy of old and new is taken
+	// the net result is what matters 
 
-	// cleanCopyOldAlias := CleanCopyAlias(oldAlias)
-	// cleanCopyNewAlias := CleanCopyAlias(newAlias)
+	oldAliasRightHandCountInitial := len(oldAlias.RGenVar)
+
+
+
+
+	// a clean copy of old and new is taken
+
+	cleanCopyOldAlias := CleanCopyAlias(oldAlias)
+	cleanCopyNewAlias := CleanCopyAlias(newAlias)
+
+
+	CheckLeftSideIsOnly1Long(cleanCopyOldAlias.LGenVar, "NewAliasEqualsLeftSideVariableNoIncrease")
+	CheckLeftSideIsOnly1Long(cleanCopyNewAlias.LGenVar, "NewAliasEqualsLeftSideVariableNoIncrease")
+
+
+
+	newAliasRightHandSideContainsOldAliasLeftHandSideVariable := false
+
+	oldAliasLeftHandSideVarName := cleanCopyOldAlias.LGenVar[0].Name
+
+	for i := 0; i < len(cleanCopyNewAlias.RGenVar); i++ {
+		if(cleanCopyNewAlias.RGenVar[i].Name == oldAliasLeftHandSideVarName){
+			newAliasRightHandSideContainsOldAliasLeftHandSideVariable = true
+		}
+	}
+
+	if(!newAliasRightHandSideContainsOldAliasLeftHandSideVariable){
+		return false
+	}
+
+
+	cleanSubstitute, dataValid := SubstituteAnAlias(cleanCopyOldAlias, cleanCopyNewAlias)
+
+	if(!dataValid){
+		return false
+	}
+
+
+	var leftSideZero bool
+
+	cleanSubstitute, leftSideZero = FullCleanUp(cleanSubstitute)
+
+	VerbosePrintln(cleanSubstitute)
+
+
+	if(leftSideZero){
+		fmt.Println("left side zero NewAliasHasVariableAlreadyOnLeft")
+		os.Exit(1)
+	}
+
+
+	cleanSubstituteRightHandSideCount := len(cleanSubstitute.RGenVar)
+
+	if(oldAliasRightHandCountInitial > cleanSubstituteRightHandSideCount){
+		return true
+	}
+
+
 
 	return false
 
 
 }
 
+//this function passes all tests 
+func NewAliasReducesVariablesOnRightHandSide(oldAlias Alias, newAlias Alias) bool {
+
+
+	// the net result is what matters 
+
+	oldAliasRightHandCountInitial := len(oldAlias.RGenVar)
+
+
+	// a clean copy of old and new is taken
+
+	cleanCopyOldAlias := CleanCopyAlias(oldAlias)
+	cleanCopyNewAlias := CleanCopyAlias(newAlias)
+
+
+	CheckLeftSideIsOnly1Long(cleanCopyOldAlias.LGenVar, "NewAliasEqualsLeftSideVariableNoIncrease")
+	CheckLeftSideIsOnly1Long(cleanCopyNewAlias.LGenVar, "NewAliasEqualsLeftSideVariableNoIncrease")
 
 
 
-func NewAliasTransmuteToExistingVariableAndReducesTheVariablesOnTheRight(oldAlias Alias, newAlias Alias) bool {
+	cleanSubstitute, dataValid := SubstituteAnAlias(cleanCopyOldAlias, cleanCopyNewAlias)
+
+	if(!dataValid){
+		return false
+	}
+
+	var leftSideZero bool
+
+	cleanSubstitute, leftSideZero = FullCleanUp(cleanSubstitute)
+
+	VerbosePrintln(cleanSubstitute)
+
+
+	if(leftSideZero){
+		fmt.Println("left side zero NewAliasReducesVariablesOnRightHandSide")
+		os.Exit(1)
+	}
+
+
+	cleanSubstituteRightHandSideCount := len(cleanSubstitute.RGenVar)
+
+	if(oldAliasRightHandCountInitial > cleanSubstituteRightHandSideCount){
+		return true
+	}
+
+
+
 	return false
+
+
 }
-
-func NewAliasHasVariableAlreadyOnLeft(oldAlias Alias, newAlias Alias) bool {
-	return false
-}
-
-
 
 
 
@@ -1342,8 +1540,121 @@ func CleanCopyAlias(oldAlias Alias) Alias{
 }
 
 
+func ScaleDownEntireAlias(aliasInput Alias, scaleVal float64) Alias{
+
+	cleanAliasInputCopy := CleanCopyAlias(aliasInput)
+
+	cleanAliasInputCopy.LGenVar = ScaleDownSliceGenVar(cleanAliasInputCopy.LGenVar, scaleVal)
+
+	cleanAliasInputCopy.RGenVar = ScaleDownSliceGenVar(cleanAliasInputCopy.RGenVar, scaleVal)
+
+	cleanAliasInputCopy.LNum = ScaleDownSliceFloat(cleanAliasInputCopy.LNum, scaleVal)
+
+	cleanAliasInputCopy.RNum = ScaleDownSliceFloat(cleanAliasInputCopy.RNum, scaleVal)
+
+	return cleanAliasInputCopy
+
+}
 
 
+//this function passes all tests
+func TwoAliasesAreEqual(alias1 Alias, alias2 Alias) bool {
+
+	CheckLeftSideIsOnly1Long(alias1.LGenVar, "twoAliasesAreEqual")
+	CheckLeftSideIsOnly1Long(alias2.LGenVar, "twoAliasesAreEqual")
+
+
+	alias1LGenVar := alias1.LGenVar
+
+	alias2LGenVar := alias2.LGenVar
+
+	if((alias1LGenVar[0].Name != alias2LGenVar[0].Name) && (alias1LGenVar[0].Multiplier != alias2LGenVar[0].Multiplier) ){
+		return false
+	}
+	
+	scaleValAlias1 := alias1.LGenVar[0].Multiplier
+
+	scaledAlias1 := ScaleDownEntireAlias(alias1, scaleValAlias1)
+
+
+	scaleValAlias2 := alias2.LGenVar[0].Multiplier
+
+	scaledAlias2 := ScaleDownEntireAlias(alias2, scaleValAlias2)
+
+
+
+	scaledAlias1, _ = FullCleanUp(scaledAlias1)
+	scaledAlias2, _ = FullCleanUp(scaledAlias2)
+
+
+	if(len(scaledAlias1.RGenVar) != len(scaledAlias2.RGenVar)){
+		return false
+	}
+
+	matchesNeededToConfirmEqual := len(scaledAlias1.RGenVar)
+
+	matchesMade := 0
+
+	for i := 0; i < len(scaledAlias1.RGenVar); i++ {
+
+		currentVal := scaledAlias1.RGenVar[i]
+
+		for j := 0; j < len(scaledAlias2.RGenVar); j++ {
+			compareVal := scaledAlias2.RGenVar[j]
+
+			if((currentVal.Name == compareVal.Name) && (currentVal.Multiplier == compareVal.Multiplier)){
+				matchesMade++
+			}
+
+		}
+
+
+	}
+
+	if(matchesMade != matchesNeededToConfirmEqual){
+		return false
+	}
+
+	summationLAlias1 := float64(0)
+
+	for i := 0; i < len(scaledAlias1.LNum); i++ {
+		summationLAlias1 = summationLAlias1 + scaledAlias1.LNum[i]
+	}
+
+	summationLAlias2 := float64(0)
+
+	for i := 0; i < len(scaledAlias2.LNum); i++ {
+		summationLAlias2 = summationLAlias2 + scaledAlias2.LNum[i]
+	}
+
+	if(summationLAlias1 != summationLAlias2){
+		return false
+	}	
+
+
+
+	summationRAlias1 := float64(0)
+
+	for i := 0; i < len(scaledAlias1.RNum); i++ {
+		summationRAlias1 = summationRAlias1 + scaledAlias1.RNum[i]
+	}
+
+	summationRAlias2 := float64(0)
+
+	for i := 0; i < len(scaledAlias2.RNum); i++ {
+		summationRAlias2 = summationRAlias2 + scaledAlias2.RNum[i]
+	}
+
+	if(summationRAlias1 != summationRAlias2){
+		return false
+	}	
+
+
+	return true
+
+
+
+}
 
 
 

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"fmt"
 	"math"
-
+	"os"
 )
 
 
@@ -91,6 +91,10 @@ func TestFindingHighestDegree(t *testing.T) {
 
 	VerbosePrintSlice(cleanedUpAliases)
 
+	for i := 0; i < len(cleanedUpAliases); i++ {
+		AddToAliasDatabase(cleanedUpAliases[i])
+	}
+
 
 
 	original := cleanedUpAliases[3]
@@ -147,7 +151,12 @@ func TestFindingHighestDegree(t *testing.T) {
 	VerbosePrint(cleanCopySubstitution)
 
 
-	testingSubstitution := SubstituteAnAlias(original, substitution)
+	testingSubstitution, dataValid := SubstituteAnAlias(original, substitution)
+
+	if(!dataValid){
+		fmt.Println("not data valid TestFindingHighestDegree")
+		os.Exit(1)
+	}
 
 	cleanCopyTestingSubstitution := CleanCopyAlias(testingSubstitution)
 
@@ -195,35 +204,62 @@ func TestFindingHighestDegree(t *testing.T) {
 	fmt.Println("check full clean up matches")
 
 
-	fullCleanUpTest := FullCleanUp(cleanCopyTestingSubstitution)
+	fullCleanUpTest, leftSideZero := FullCleanUp(cleanCopyTestingSubstitution)
 
 
 	VerbosePrint(fullCleanUpTest)
 
+	VerbosePrint(leftSideZero)
+
+
+	//TESTING BOOLEAN RETURNS FOR SUBSTITUTIONS
+
+	fmt.Println()
+	fmt.Println()
+
+
+	gVar1 := CreateGenVar("A", 3)
+	gVar2 := CreateGenVar("B", 22)
+	gVar3 := CreateGenVar("C", 1)
 
 
 
-	//TESTING THE ZERO FUNCTION
+
+	newAliasOld := CreateAlias([]GenVar{gVar1}, []GenVar{gVar2, gVar3}, []float64{}, []float64{})
 
 
-	// gVar1 := CreateGenVar("A", 0)
-	// gVar2 := CreateGenVar("B", 2)
-	// gVar3 := CreateGenVar("C", 0)
+
+	gVar4 := CreateGenVar("C", 1)
+	gVar5 := CreateGenVar("B", -22)
+	gVar6 := CreateGenVar("D", -22)
+	gVar7 := CreateGenVar("E", 12)
+	gVar8 := CreateGenVar("A", -3)
+
+	newAliasNew := CreateAlias([]GenVar{gVar4}, []GenVar{gVar5, gVar6, gVar7, gVar8}, []float64{}, []float64{})
 
 
-	// newAlias := CreateAlias([]GenVar{gVar1}, []GenVar{gVar2, gVar3}, []float64{}, []float64{})
+	VerbosePrint(NewAliasEqualsLeftSideVariableNoIncrease(newAliasOld, newAliasNew))
+	
 
-	// newOutput, leftSideZero := RemoveZerosWarnIfLeftHandSideZero(newAlias)
 
 
-	// fmt.Println()
+	VerbosePrint(NewAliasReducesVariablesOnRightHandSide(newAliasOld, newAliasNew))
 
-	// fmt.Println("New Alias Zero Removed")
 
-	// VerbosePrint(newOutput)
+	
+	testAliasEqual1 := CreateAlias([]GenVar{gVar4}, []GenVar{gVar5, gVar6, gVar7, gVar8}, []float64{}, []float64{})
 
-	// VerbosePrint(leftSideZero)
+	testAliasEqual2 := CreateAlias([]GenVar{gVar4}, []GenVar{ gVar6, gVar7, gVar8}, []float64{}, []float64{})
 
+
+	fmt.Println()
+
+	fmt.Println("two aliases are equal")
+
+	VerbosePrint(TwoAliasesAreEqual(testAliasEqual1, testAliasEqual2))
+
+
+	SolutionListener(4)
 
 
 
