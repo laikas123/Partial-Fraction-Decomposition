@@ -931,9 +931,9 @@ func WorkOnOneItem(seed Alias, solutionToSend chan ConcreteSolution) {
 func OnlyOneVarLeftOnRightSideWorker(alias Alias, solutionToSend chan ConcreteSolution) {
 
 
-	cursor := 0
+//	cursor := 0
 
-	testedAllVals := false
+//	testedAllVals := false
 
 	if(len(alias.RGenVar) == 0 || len(alias.LGenVar) == 0){
 		fmt.Println("invalid input to OnlyOneVarLeftOnRightSideWorker")
@@ -942,31 +942,46 @@ func OnlyOneVarLeftOnRightSideWorker(alias Alias, solutionToSend chan ConcreteSo
 
 	cleanCopyInputAlias := CleanCopyAlias(alias)
 
-	nameToMatchRight := alias.RGenVar[0].Name
+//	nameToMatchRight := alias.RGenVar[0].Name
 
-	nameToMatchLeft := alias.LGenVar[0].Name
+//	nameToMatchLeft := alias.LGenVar[0].Name
 
 
-	solutionAlias, dataValid := GetValidCanidateForOneVarLeftCase(cleanCopyInputAlias)
+	solutionAlias, dataValid1 := GetValidCanidateForOneVarLeftCase(cleanCopyInputAlias)
 
-	if(dataValid){
-	
-		if(IsConcreteSolution(solutionAlias)){
+	fmt.Println("SOLUTION ALIAS PRE SUB")
 
-							
-			solutionFound := ConcreteSolution{solutionAlias.LGenVar[0].Name,  solutionAlias.RNum[0]}
+	PrintOldAliasSubAliasAndNetChange(cleanCopyInputAlias, solutionAlias, Alias{})
 
-			solutionToSend <- solutionFound
 
-			testedAllVals = true
+	if(dataValid1){
 
-							
+		netSolutionAlias, dataValid2 := SubstituteAnAlias(cleanCopyInputAlias, solutionAlias)
 
-		}else{
-			fmt.Println("this must be a concrete solution...")
-			os.Exit(1)
+		fmt.Println("SOLUTION ALIAS")
+
+		PrintOldAliasSubAliasAndNetChange(cleanCopyInputAlias, solutionAlias, netSolutionAlias)
+
+
+		if(dataValid2){
+		
+			if(IsConcreteSolution(netSolutionAlias)){
+
+								
+				solutionFound := ConcreteSolution{netSolutionAlias.LGenVar[0].Name,  netSolutionAlias.RNum[0]}
+
+				solutionToSend <- solutionFound
+
+	//			testedAllVals = true
+
+								
+
+			}else{
+				fmt.Println("this must be a concrete solution...")
+				os.Exit(1)
+			}
+
 		}
-
 	}
 
 
@@ -2529,12 +2544,71 @@ func GetValidCanidateForOneVarLeftCase(aliasOneVarLeft Alias) (Alias, bool) {
 			if(cleanCopyPosition.LGenVar[0].Name == rightHandName && isLength1){
 
 				if(cleanCopyPosition.RGenVar[0].Name == leftHandName){
-					return cleanCopyPosition, true
+
+					dontCheckIfEqual := false
+
+					if(len(cleanCopyPosition.LGenVar) == 0){
+						
+						dontCheckIfEqual = true
+						
+					}
+
+
+					if(!dontCheckIfEqual){
+
+						dontReturn := false
+
+						if(TwoAliasesAreEqual(cleanCopyOfAlias, cleanCopyPosition, "GetValidCanidateForOneVarLeftCase")){
+							dontReturn = true
+							 
+						}
+
+
+						if(TwoAliasesAreVaritaionsOfEachOther(cleanCopyOfAlias, cleanCopyPosition)){
+							dontReturn = true
+							
+						}
+
+						if(!dontReturn){
+							return cleanCopyPosition, true
+						}
+
+					}					
+
+					
 				}
 
 			}else if(cleanCopyPosition.LGenVar[0].Name == rightHandName && isLength0){
 
-				return cleanCopyPosition, true
+					dontCheckIfEqual := false
+
+					if(len(cleanCopyPosition.LGenVar) == 0){
+						
+						dontCheckIfEqual = true
+						
+					}
+
+
+					if(!dontCheckIfEqual){
+
+						dontReturn := false
+
+						if(TwoAliasesAreEqual(cleanCopyOfAlias, cleanCopyPosition, "GetValidCanidateForOneVarLeftCase")){
+							dontReturn = true
+							 
+						}
+
+
+						if(TwoAliasesAreVaritaionsOfEachOther(cleanCopyOfAlias, cleanCopyPosition)){
+							dontReturn = true
+							
+						}
+
+						if(!dontReturn){
+							return cleanCopyPosition, true
+						}
+
+					}									
 
 			}
 

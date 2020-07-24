@@ -1,1 +1,611 @@
-FAIL	_/C_/Users/logan/Documents/GoPrograms/PartialFractionDecomposition [build failed]
+
+NEW VAL ADDED TO DATABASE
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+NEW VAL ADDED TO DATABASE
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NEW VAL ADDED TO DATABASE
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NEW VAL ADDED TO DATABASE
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+1
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+1
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+1
+1
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+
+NEW VAL ADDED TO DATABASE
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NEW VAL ADDED TO DATABASE
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+
+SOLUTION ALIAS PRE SUB
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+1
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+1
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+1.5
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+1
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+-1
+OLD ALIAS
+-1
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+1
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+1
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"B", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:1.5}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:1}, main.GenVar{Name:"B", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{-2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:2}}, RGenVar:[]main.GenVar{main.GenVar{Name:"D", Multiplier:1}}, LNum:[]float64{0}, RNum:[]float64{2}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+OLD ALIAS
+main.Alias{LGenVar:[]main.GenVar{main.GenVar{Name:"A", Multiplier:-1.5}}, RGenVar:[]main.GenVar{main.GenVar{Name:"C", Multiplier:-1}}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+SUB ALIAS
+main.Alias{LGenVar:[]main.GenVar{}, RGenVar:[]main.GenVar{}, LNum:[]float64{0}, RNum:[]float64{0}}
+
+NET ALIAS
+main.Alias{LGenVar:[]main.GenVar(nil), RGenVar:[]main.GenVar(nil), LNum:[]float64(nil), RNum:[]float64(nil)}
+
+exit status 2
+FAIL	_/C_/Users/logan/Documents/GoPrograms/PartialFractionDecomposition	9.930s
