@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	// "os"
+
 )
 
 
@@ -14,59 +15,128 @@ func TestFindingHighestDegree(t *testing.T) {
 
 	Init()	
 
-	gVar1 := CreateGenVar("A", 2)
-	gVar2 := CreateGenVar("D", 1)
+	gVar1 := CreateGenVar("A", 1)
+	gVar2 := CreateGenVar("B", 1)
+	gVar3 := CreateGenVar("C", 1)
+	gVar4 := CreateGenVar("D", 1)
+	gVar5 := CreateGenVar("E", 1)
 	
-	
-	alias1 := CreateAlias([]GenVar{gVar1}, []GenVar{gVar2}, []float64{}, []float64{2})
-
-
-	gVar3 := CreateGenVar("B", 2)
-	gVar4 := CreateGenVar("A", 1)
-	
-	alias2 := CreateAlias([]GenVar{gVar3}, []GenVar{gVar4}, []float64{}, []float64{})
-	
-	
-	gVar5 := CreateGenVar("C", 1)
-
-	gVar6 := CreateGenVar("A", 1)
-	
-	gVar7 := CreateGenVar("B", 1)
-
-
-
-	alias3 := CreateAlias([]GenVar{gVar5}, []GenVar{gVar6, gVar7}, []float64{}, []float64{})
+	x := CreateGenVar("X", 1)
+	y := CreateGenVar("Y", 1)
+	z := CreateGenVar("Z", 1)
 	
 
-	gVar8 := CreateGenVar("D", 1)
+//say A has pseudo name [x y]
+//B has pseudo name[y]
+//C has pseudo name[z]
+//D has pseudo name[y z]
+//E has pseduo name[x z]
 
-	gVar9 := CreateGenVar("C", 1)
+
+	alias1 := CreateAlias([]GenVar{gVar1}, []GenVar{x, y}, []float64{}, []float64{2})
 	
-	gVar10 := CreateGenVar("B", 1)
+	alias2 := CreateAlias([]GenVar{gVar2}, []GenVar{y}, []float64{}, []float64{2})
+
+	alias3 := CreateAlias([]GenVar{gVar3}, []GenVar{z}, []float64{}, []float64{2})
+
+	alias4 := CreateAlias([]GenVar{gVar4}, []GenVar{y, z}, []float64{}, []float64{2})
+
+	alias5 := CreateAlias([]GenVar{gVar5}, []GenVar{x, z}, []float64{}, []float64{2})
+
+	AllAliasPermutationsAndAddToDatabase(alias1)
+	AllAliasPermutationsAndAddToDatabase(alias2)
+	AllAliasPermutationsAndAddToDatabase(alias3)
+	AllAliasPermutationsAndAddToDatabase(alias4)
+	AllAliasPermutationsAndAddToDatabase(alias5)
+
+
+	PrintAliasDataBase()
+
+	pseudoNamesA := GetPseudoNamesForRGenVar("A")
+
+	pseudoNamesB := GetPseudoNamesForRGenVar("B")
+
+	pseudoNamesC := GetPseudoNamesForRGenVar("C")
+
+	pseudoNamesD := GetPseudoNamesForRGenVar("D")
+
+	pseudoNamesE := GetPseudoNamesForRGenVar("E")
+
+	listPseudoNames := [][]string{}
+
+	listPseudoNames = append(listPseudoNames, pseudoNamesA[1])
+	listPseudoNames = append(listPseudoNames, pseudoNamesB[1])
+	listPseudoNames = append(listPseudoNames, pseudoNamesC[1])
+	listPseudoNames = append(listPseudoNames, pseudoNamesD[1])
+	listPseudoNames = append(listPseudoNames, pseudoNamesE[1])
+
+	reductionAmount, dataValid := SumOfPseudoNamesNetChangeIsGood(listPseudoNames, "X")
+
+	VerbosePrint(dataValid)
+	VerbosePrint(reductionAmount)
+
+
+
+
+
+
+	// gVar3 := CreateGenVar("B", 2)
+	// gVar4 := CreateGenVar("A", 1)
+	
+	// alias2 := CreateAlias([]GenVar{gVar3}, []GenVar{gVar4}, []float64{}, []float64{})
+	
+	
+	// gVar5 := CreateGenVar("C", 1)
+
+	// gVar6 := CreateGenVar("A", 1)
+	
+	// gVar7 := CreateGenVar("B", 1)
+
+
+
+	// alias3 := CreateAlias([]GenVar{gVar5}, []GenVar{gVar6, gVar7}, []float64{}, []float64{})
+	
+
+	// gVar8 := CreateGenVar("D", 1)
+
+	// gVar9 := CreateGenVar("C", 1)
+	
+	// gVar10 := CreateGenVar("B", 1)
 
 	
-	alias4 := CreateAlias([]GenVar{gVar8}, []GenVar{gVar9, gVar10}, []float64{}, []float64{-2})
+	// alias4 := CreateAlias([]GenVar{gVar8}, []GenVar{gVar9, gVar10}, []float64{}, []float64{-2})
 		
 
 
-	AddToAliasDatabase(alias1)
-	AddToAliasDatabase(alias2)
-	AddToAliasDatabase(alias3)
-	AddToAliasDatabase(alias4)
+	// AddToAliasDatabase(alias1)
+	// AddToAliasDatabase(alias2)
+	// AddToAliasDatabase(alias3)
+	// AddToAliasDatabase(alias4)
 	
-
-	// gVar11 := CreateGenVar("A", 1)
-	// gVar12 := CreateGenVar("C", -20)
-
-	// alias5 := CreateAlias([]GenVar{gVar11}, []GenVar{gVar12}, []float64{}, []float64{22})
-
-	// AddToAliasDatabase(alias5)
-
-
-	SolutionListener(4)
+	// AllAliasPermutationsAndAddToDatabase(alias1)
+	// AllAliasPermutationsAndAddToDatabase(alias2)
+	// AllAliasPermutationsAndAddToDatabase(alias3)
+	// AllAliasPermutationsAndAddToDatabase(alias4)
 
 
 
+
+	// SolutionListener(4)
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
 
 
 	// gVar1 := CreateGenVar("A", -5)
@@ -467,6 +537,14 @@ func VerbosePrintSlice(item interface{}){
 
 	
 }
+
+
+
+
+
+
+
+
 
 
 
