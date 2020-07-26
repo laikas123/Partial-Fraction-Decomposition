@@ -15,67 +15,117 @@ func TestFindingHighestDegree(t *testing.T) {
 
 	Init()	
 
-	gVar1 := CreateGenVar("A", 1)
-	gVar2 := CreateGenVar("B", 1)
-	gVar3 := CreateGenVar("C", 1)
-	gVar4 := CreateGenVar("D", 1)
-	gVar5 := CreateGenVar("E", 1)
+// 	gVar1 := CreateGenVar("A", 1)
+// 	gVar2 := CreateGenVar("B", 1)
+// 	gVar3 := CreateGenVar("C", 1)
+// 	gVar4 := CreateGenVar("D", 1)
+// 	gVar5 := CreateGenVar("E", 1)
 	
-	x := CreateGenVar("X", 1)
-	y := CreateGenVar("Y", 1)
-	z := CreateGenVar("Z", 1)
+// 	x := CreateGenVar("X", 1)
+// 	y := CreateGenVar("Y", 1)
+// 	z := CreateGenVar("Z", 1)
 	
 
-//say A has pseudo name [x y]
-//B has pseudo name[y]
-//C has pseudo name[z]
-//D has pseudo name[y z]
-//E has pseduo name[x z]
+// //say A has pseudo name [x y]
+// //B has pseudo name[y]
+// //C has pseudo name[z]
+// //D has pseudo name[y z]
+// //E has pseduo name[x z]
 
 
-	alias1 := CreateAlias([]GenVar{gVar1}, []GenVar{x, y}, []float64{}, []float64{2})
+// 	alias1 := CreateAlias([]GenVar{gVar1}, []GenVar{x, y}, []float64{}, []float64{2})
 	
-	alias2 := CreateAlias([]GenVar{gVar2}, []GenVar{y}, []float64{}, []float64{2})
+// 	alias2 := CreateAlias([]GenVar{gVar2}, []GenVar{y}, []float64{}, []float64{2})
 
-	alias3 := CreateAlias([]GenVar{gVar3}, []GenVar{z}, []float64{}, []float64{2})
+// 	alias3 := CreateAlias([]GenVar{gVar3}, []GenVar{z}, []float64{}, []float64{2})
 
-	alias4 := CreateAlias([]GenVar{gVar4}, []GenVar{y, z}, []float64{}, []float64{2})
+// 	alias4 := CreateAlias([]GenVar{gVar4}, []GenVar{y, z}, []float64{}, []float64{2})
 
-	alias5 := CreateAlias([]GenVar{gVar5}, []GenVar{x, z}, []float64{}, []float64{2})
+// 	alias5 := CreateAlias([]GenVar{gVar5}, []GenVar{x, z}, []float64{}, []float64{2})
 
-	AllAliasPermutationsAndAddToDatabase(alias1)
-	AllAliasPermutationsAndAddToDatabase(alias2)
-	AllAliasPermutationsAndAddToDatabase(alias3)
-	AllAliasPermutationsAndAddToDatabase(alias4)
-	AllAliasPermutationsAndAddToDatabase(alias5)
-
-
-	PrintAliasDataBase()
-
-	pseudoNamesA := GetPseudoNamesForRGenVar("A")
-
-	pseudoNamesB := GetPseudoNamesForRGenVar("B")
-
-	pseudoNamesC := GetPseudoNamesForRGenVar("C")
-
-	pseudoNamesD := GetPseudoNamesForRGenVar("D")
-
-	pseudoNamesE := GetPseudoNamesForRGenVar("E")
-
-	listPseudoNames := [][]string{}
-
-	listPseudoNames = append(listPseudoNames, pseudoNamesA[1])
-	listPseudoNames = append(listPseudoNames, pseudoNamesB[1])
-	listPseudoNames = append(listPseudoNames, pseudoNamesC[1])
-	listPseudoNames = append(listPseudoNames, pseudoNamesD[1])
-	listPseudoNames = append(listPseudoNames, pseudoNamesE[1])
-
-	reductionAmount, dataValid := SumOfPseudoNamesNetChangeIsGood(listPseudoNames, "X")
-
-	VerbosePrint(dataValid)
-	VerbosePrint(reductionAmount)
+// 	AllAliasPermutationsAndAddToDatabase(alias1)
+// 	AllAliasPermutationsAndAddToDatabase(alias2)
+// 	AllAliasPermutationsAndAddToDatabase(alias3)
+// 	AllAliasPermutationsAndAddToDatabase(alias4)
+// 	AllAliasPermutationsAndAddToDatabase(alias5)
 
 
+// 	PrintAliasDataBase()
+
+// 	pseudoNamesA := GetPseudoNamesForRGenVar("A")
+
+// 	pseudoNamesB := GetPseudoNamesForRGenVar("B")
+
+// 	pseudoNamesC := GetPseudoNamesForRGenVar("C")
+
+// 	pseudoNamesD := GetPseudoNamesForRGenVar("D")
+
+// 	pseudoNamesE := GetPseudoNamesForRGenVar("E")
+
+// 	listPseudoNames := [][]string{}
+
+// 	listPseudoNames = append(listPseudoNames, pseudoNamesA[1])
+// 	listPseudoNames = append(listPseudoNames, pseudoNamesB[1])
+// 	listPseudoNames = append(listPseudoNames, pseudoNamesC[1])
+// 	listPseudoNames = append(listPseudoNames, pseudoNamesD[1])
+// 	listPseudoNames = append(listPseudoNames, pseudoNamesE[1])
+
+// 	reductionAmount, dataValid := SumOfPseudoNamesNetChangeIsGood(listPseudoNames, "X")
+
+// 	VerbosePrint(dataValid)
+// 	VerbosePrint(reductionAmount)
+
+
+	varswpname1 := VarPseudoNames{[][]string{[]string{"x, y, z"}, []string{"j"}, []string{"y"}}, "A"}
+
+
+	varswpname2 := VarPseudoNames{[][]string{[]string{"l"}, []string{"k"}, []string{"j"}}, "B"}
+
+	varswpname3 := VarPseudoNames{[][]string{[]string{"j"}, []string{"y"}}, "C"}
+
+
+	varswpname4 := VarPseudoNames{[][]string{[]string{"k"}, []string{"s"}, []string{"j"}}, "D"}
+	
+
+	varsChosen := []VarPseudoNames{varswpname1, varswpname2, varswpname3, varswpname4}
+
+
+
+
+	solution := BestAliasSliceForSubstitution(varsChosen, "j")	
+
+	VerbosePrint(solution)
+
+
+	// cursorSlice := []int{0, 0, 0, 0}
+
+	// maxVals := []int{3, 3, 2, 3}
+
+	// columnCursor := 3
+
+
+
+
+	// pseudoNamesReturned := ReturnPseudoNamesForCursor(cursorSlice, maxVals, varsChosen)
+
+
+	// for i := 0; i < len(pseudoNamesReturned); i++ {
+	// 	VerbosePrint(pseudoNamesReturned[i])
+	// }
+
+
+
+	// VerbosePrint(cursorSlice)
+	// VerbosePrint(maxVals)
+	// VerbosePrint(columnCursor)
+
+	// fmt.Println()
+
+	// newCurs, newColumnCurs, dv := IncrementCursorObject(cursorSlice, maxVals, columnCursor)
+
+	// VerbosePrint(newCurs)
+	// VerbosePrint(newColumnCurs)
+	// VerbosePrint(dv)
 
 
 
