@@ -463,7 +463,6 @@ func SubstituteAnAlias(originalAlias Alias, substituteAlias Alias) (Alias, bool)
 	//and the multiplier of that variable since it will mutliply the newly added substitute values
 	originalAliasSubstituteVariableRemoved, multiplierForSubstitute, validRemoval := RemoveExistingGenVarReturnMultiplier(originalAlias.RGenVar, substituteAlias.LGenVar[0].Name)
 
-	VerbosePrintln(multiplierForSubstitute)
 
 	if(!validRemoval){
 		dataValid = false
@@ -512,7 +511,9 @@ func SolutionListener(numberOfSolutionsNeeded int ) []ConcreteSolution{
 
 	soltnsChan := make(chan ConcreteSolution)
 
-	go WorkerSpawnAndAliasListener(soltnsChan)
+	// go WorkerSpawnAndAliasListener(soltnsChan)
+
+	go CircularSolutionSolver(soltnsChan)
 
 
 	solNeededCount := numberOfSolutionsNeeded
@@ -1052,183 +1053,6 @@ func OnlyOneVarLeftOnRightSideWorker(alias Alias, solutionToSend chan ConcreteSo
 		}
 	}
 
-
-
-// 	for !testedAllVals {
-
-
-
-
-
-
-
-// 		compareAlias, dataValid :=  ReadItemFromAliasDataBase(cursor)
-
-		
-
-// 		cleanCopyCompareAlias := CleanCopyAlias(compareAlias)
-
-
-// 		fmt.Println("ONE LEFT ATTEMPT")
-// 		PrintOldAliasSubAliasAndNetChange(cleanCopyInputAlias, cleanCopyCompareAlias, Alias{})
-
-
-
-// 		dontCheckIfEqual := false
-
-// 		if(len(cleanCopyCompareAlias.LGenVar)  == 0){
-// 				dataValid = false
-// 				dontCheckIfEqual = true		
-// 		}
-
-
-// 		if(!dontCheckIfEqual){
-
-
-// 			if(TwoAliasesAreEqual(cleanCopyInputAlias, cleanCopyCompareAlias, "OnlyOneVarLeftOnRightSideWorker")){
-// 					dataValid = false
-					
-// 			}
-
-
-// 			if(TwoAliasesAreVaritaionsOfEachOther(cleanCopyInputAlias, cleanCopyCompareAlias) && dataValid){
-// 				dataValid = false
-				
-
-// 			}	
-// 		}
-
-
-
-// 		if(IsImpossibleSubstitution(cleanCopyInputAlias, cleanCopyCompareAlias) && dataValid){
-// 			dataValid = false
-			
-// 		}
-
-
-// 		var compareAliasHasRightSideVars bool
-
-// 		if(len(cleanCopyCompareAlias.RGenVar) == 0){
-// 			compareAliasHasRightSideVars = false
-// 		}else{
-// 			compareAliasHasRightSideVars = true
-// 		}
-
-
-// 		if(dataValid && compareAliasHasRightSideVars){
-// 			cursor++
-
-
-
-// 			CheckLeftSideIsOnly1Long(compareAlias.LGenVar, "OnlyOneVarLeftOnRightSideWorker")
-
-// 			compareAliasLeftVarName := cleanCopyCompareAlias.LGenVar[0].Name
-
-// 			compareAliasRightVarName := cleanCopyCompareAlias.RGenVar[0].Name
-
-
-// 			fmt.Println(compareAliasRightVarName, nameToMatchLeft, compareAliasLeftVarName, nameToMatchRight)
-
-
-// 			if(compareAliasRightVarName == nameToMatchLeft && compareAliasLeftVarName == nameToMatchRight){
-
-					
-
-// 					testSub, subValid := SubstituteAnAlias(cleanCopyInputAlias, cleanCopyCompareAlias)
-
-
-// 					if(subValid){
-
-// 						PrintOldAliasSubAliasAndNetChange(cleanCopyInputAlias, cleanCopyCompareAlias, testSub)
-
-
-// 						cleanCopyTestSub1 := CleanCopyAlias(testSub)
-
-						
-
-// 						AddToAliasDatabase(cleanCopyTestSub1)
-
-// 						if(IsConcreteSolution(testSub)){
-
-							
-
-// 							//Full clean up gets called via substitution above so it is 
-// 							//known there is only 1 variable on the left hand side
-// 							//and concrete solution check function checks there is only
-// 							//one constant on the right
-// 							solutionFound := ConcreteSolution{testSub.LGenVar[0].Name,  testSub.RNum[0]}
-
-// 							solutionToSend <- solutionFound
-
-// 							testedAllVals = true
-
-							
-
-// 						}else{
-// 							fmt.Println("this must be a concrete solution...")
-// 							os.Exit(1)
-// 						}
-
-// 			} 
-
-
-
-// 		}
-
-// 	}else if(dataValid && !compareAliasHasRightSideVars){
-
-					
-				
-					
-
-// 					testSub, subValid := SubstituteAnAlias(cleanCopyInputAlias, cleanCopyCompareAlias)
-
-					
-
-// 					if(subValid){
-
-// 						cleanCopyTestSub1 := CleanCopyAlias(testSub)
-
-						
-// 						PrintOldAliasSubAliasAndNetChange(cleanCopyInputAlias, cleanCopyCompareAlias, testSub)
-						
-
-// 						AddToAliasDatabase(cleanCopyTestSub1)
-
-// 						if(IsConcreteSolution(testSub)){
-
-							
-
-// 							//Full clean up gets called via substitution above so it is 
-// 							//known there is only 1 variable on the left hand side
-// 							//and concrete solution check function checks there is only
-// 							//one constant on the right
-// 							solutionFound := ConcreteSolution{testSub.LGenVar[0].Name,  testSub.RNum[0]}
-
-// 							solutionToSend <- solutionFound
-
-// 							testedAllVals = true
-
-							
-
-// 						}else{
-// 							fmt.Println("this must be a concrete solution...")
-// 							os.Exit(1)
-// 						}
-
-// 					}
-// 	}else{
-// 		if(CursorIsLongAsOrLongerThanDatabase(cursor)){
-// 			time.Sleep(time.Duration(1) * time.Second)		
-// 		}else{
-// 			cursor++
-// 			time.Sleep(time.Duration(1) * time.Second)		
-// 		}	
-// 	}
-
-
-// }
-
 }
 
 
@@ -1550,6 +1374,7 @@ func FullCleanUp(genVarInput Alias)  (Alias, bool) {
 
 //this function works well
 func SimplifyGenVarRightHandGenVarSlice(genVarInput Alias) Alias{
+
 
 
 	CheckLeftSideIsOnly1Long(genVarInput.LGenVar, "SimplifyGenVarRightHandGenVarSlice")
@@ -2383,7 +2208,30 @@ func CheckLeftSideIsOnly1Long(genVarInput []GenVar, functionCaller string){
 }
 
 func VerbosePrintln(input interface{}) {
-	fmt.Printf("%#v\n", input)
+	
+	
+
+	switch input.(type) { 
+
+		case Alias:
+			 aliastype, ok := input.(Alias)
+			 if(ok){
+				PrettyPrintAlias(aliastype)
+			}
+		case VarPseudoNames:
+			
+			 varpseudonametype, ok := input.(VarPseudoNames)
+			 if(ok){
+				PrettyPrintVarPseudoNames(varpseudonametype)
+			}
+		default: 
+			fmt.Printf("%#v\n", input)
+
+	}
+
+
+
+	
 }
 
 
@@ -2880,7 +2728,12 @@ func GetPseudoNamesForRGenVar(varName string) VarPseudoNames {
 
 	scaledDownMultipliersToVars := [][]float64{}
 
+	//to match the length of pseudonames slice and since pseudonames slice appends the variable name
+	//itself, for the variable name itself it needs matching values, the constant is 0 and the 
+	//multiplier is 1
 	valsSlice = append(valsSlice, 0)
+
+	scaledDownMultipliersToVars = append(scaledDownMultipliersToVars, []float64{1})
 
 	mutex.Lock()
 
@@ -2917,6 +2770,7 @@ func GetPseudoNamesForRGenVar(varName string) VarPseudoNames {
 								os.Exit(1)
 							}	
 
+
 					}
 
 				}
@@ -2926,6 +2780,10 @@ func GetPseudoNamesForRGenVar(varName string) VarPseudoNames {
 
 	mutex.Unlock()
 
+	if(len(valsSlice) != len(pseudoNamesSlice) && len(pseudoNamesSlice) != len(scaledDownMultipliersToVars)){
+		fmt.Println("mismatch data for VarPseudoNames GetPseudoNamesForRGenVar()")
+		os.Exit(1)
+	}
 
 	return VarPseudoNames{pseudoNamesSlice, valsSlice, scaledDownMultipliersToVars, varName}
 
@@ -3046,32 +2904,6 @@ func SumOfPseudoNamesNetChangeIsGood(pseudoNamesSlice [][]string, parentLeftVar 
 
 	
 }
-
-
-func ConvertGoodNetChangePseudoNamesAndAddToDataBase(){
-	//TODO 
-	//even if during the search for the best pseudonames aka substituions,
-	//if one substitution wasn't the best it doesn't mean it couldn't be added to 
-	//the database and further help out other substitutions
-
-	//implement converting pseudonames to substitutions and adding to the data base
-
-	//do the following....
-
-	//in the method SumOfPseudoNamesNetChangeIsGood() change the input to 
-	//be VarPseudoNames that way each Pseudo name has a parent, then use 
-	//GetAliasFromDatabase via pseudoname, figure out a way to also get the equation
-	//being referred to
-	//and then perform the substitutions and add it to the database
-
-	//this is a good function so best to implement well, when more awake...
-
-
-
-
-
-}
-
 
 
 
@@ -3195,7 +3027,8 @@ func FindBestSubstitutionForAlias(aliasInput Alias, possibleVars []VarPseudoName
 	varsUsed := []VarPseudoNames{}
 
 	for i := 0; i < len(bestSolution.BinaryCursor); i++ {
-			bit := rune(binaryCursor[i])
+
+			bit := rune(bestSolution.BinaryCursor[i])
 
 			if(bit == rune('1')){
 				varsUsed = append(varsUsed, possibleVars[i])
@@ -3204,6 +3037,25 @@ func FindBestSubstitutionForAlias(aliasInput Alias, possibleVars []VarPseudoName
 	}	
 
 
+	concreteSolutionVal, dataValid := ReturnConcreteSolutionForBestSolution(varsUsed, bestSolution.PseudoNamesChosenCursor, aliasInput)
+
+	VerbosePrintln(concreteSolutionVal)
+	VerbosePrintln(dataValid) 
+
+//	os.Exit(1)
+
+
+	if(IsConcreteSolution(concreteSolutionVal) && dataValid){
+
+		
+
+		solutionChan <-  ConcreteSolution{concreteSolutionVal.LGenVar[0].Name, concreteSolutionVal.RNum[0]}
+	}else{
+		fmt.Println("not a concrete solution")
+		fmt.Println(concreteSolutionVal)
+	}
+
+	
 
 }
 
@@ -3224,24 +3076,15 @@ func BestAliasSliceForSubstitution(varsWithPseudoNames []VarPseudoNames, parentL
 	
 	maxNumberCombos = maxNumberCombos - 1
 
-
-
-
-
-
-
-
-
-	// highestNetChange := 0
-
-	// binaryCursorValForHighestNetChange := ""
-
-	// cursorForHighestNetChange := []int{}
-
-
 	cursor := 1
 
 	bestSolutions := []SolutionItem{}
+
+	fmt.Println("max combos")
+
+	VerbosePrintln(maxNumberCombos)
+
+	
 
 	for (cursor <= maxNumberCombos){
 
@@ -3306,7 +3149,6 @@ func BestAliasSliceForSubstitution(varsWithPseudoNames []VarPseudoNames, parentL
 //this function needs to track the best possible reduction for the given variable combination
 func AllDifferentPseudoNamesTested(chosenVars []VarPseudoNames, parentLeftVar string, inputAlias Alias) ([]int, int) {
 
-
 	//this tracks the selected pseudoname per variable
 
 	//the cursor slice ensures that for the current variable combination
@@ -3331,7 +3173,6 @@ func AllDifferentPseudoNamesTested(chosenVars []VarPseudoNames, parentLeftVar st
 		maxVals = append(maxVals, len(chosenVars[i].PseudoNames))
 	}
 
-	VerbosePrintln(maxVals)
 
 	
 	doneTesting := false
@@ -3350,30 +3191,34 @@ func AllDifferentPseudoNamesTested(chosenVars []VarPseudoNames, parentLeftVar st
 		netChange, goodNetChange := SumOfPseudoNamesNetChangeIsGood(pseudoNames, parentLeftVar)
 
 		if(goodNetChange){
-			if(netChange > highestNetChange){
+			
+
+			validAddition := AddPseudoNameSubToDatabase(CleanCopySliceDataVarPseudoNames(chosenVars), CleanCopySliceDataInt(cursorSlice), CleanCopyAlias(inputAlias))
+
+			if(!validAddition){
+				fmt.Println("error error ")
+			}
+
+			if(netChange > highestNetChange && validAddition){
 				highestNetChange = netChange
 				cursorForHighestNetChange = CleanCopySliceDataInt(cursorSlice)
 			}
 
 
 
-			AddPseudoNameSubToDatabase(CleanCopySliceDataVarPseudoNames(chosenVars), CleanCopySliceDataInt(cursorSlice), CleanCopyAlias(inputAlias))
+			
 
 		}
 
 
+		VerbosePrintln(cursorSlice)
+		VerbosePrintln(maxVals)
+
 		cursorSlice, cursorIsMaxedOut = IncrementCursorObject(CleanCopySliceDataInt(cursorSlice), maxVals)
 
-
-
-		VerbosePrintln(cursorSlice)
-
-
-		VerbosePrintln(cursorIsMaxedOut)
-
-
-
 		if(cursorIsMaxedOut){
+
+			fmt.Println("cursor is maxed out")
 
 			doneTesting = true
 		}
@@ -3465,12 +3310,171 @@ func IncrementCursorObject(cursorSlice []int, maxVals []int) ([]int, bool) {
 
 }
 
-func AddPseudoNameSubToDatabase(chosenVars []VarPseudoNames, cursorSlice []int, inputAlias Alias) {
+func AddPseudoNameSubToDatabase(chosenVars []VarPseudoNames, cursorSlice []int, inputAlias Alias) bool {
 
 	if(len(chosenVars) != len(cursorSlice)){
 		fmt.Println("error chosen vars slice must be same length as cursor slice AddPseudoNameSubToDatabase")
 		os.Exit(1)
 	}
+
+
+
+	if(len(chosenVars) == 0){
+		return false
+	}
+
+	fmt.Println("Alias Input")
+	VerbosePrintln(inputAlias)
+
+
+	CheckLeftSideIsOnly1Long(inputAlias.LGenVar, "AddPseudoNameSubToDatabase")
+
+
+
+	clnInput := CleanCopyAlias(inputAlias)
+
+	clnScaled := ScaleDownEntireAlias(clnInput, clnInput.LGenVar[0].Multiplier)
+
+	restrictedIndicesAliasRGenVar := []int{}
+
+	fmt.Println("Alias Scaled Down")
+	VerbosePrintln(clnScaled)	
+
+
+	fmt.Println("PseudoNamesChosen")
+	fmt.Println(chosenVars)
+	for o := 0; o < len(chosenVars); o++ {
+		VerbosePrintln(chosenVars[o])
+	}
+
+
+	fmt.Println("Cursor Value")
+	VerbosePrintln(cursorSlice)	
+
+	newRGenVar := []GenVar{}	
+
+	newRNum := []float64{}
+
+	if(len(clnScaled.RNum) == 0){
+		fmt.Println("invalid RNum for input alias AddPseudoNameSubToDatabase")
+		os.Exit(1)
+	}
+
+	newRNum = append(newRNum, clnScaled.RNum[0])
+	
+	for i := 0; i < len(chosenVars); i++ {
+		currentVar := chosenVars[i]
+
+
+		parentVarName := currentVar.ParentVar
+
+		currentVarIndividualNumber := currentVar.LoneNumberVals[cursorSlice[i]]
+
+
+		currentVarPseudoNames := currentVar.PseudoNames[cursorSlice[i]]
+
+
+		currentVarFloatMultiplierVals := currentVar.ScaledDownMultipliers[cursorSlice[i]]
+
+
+		if(len(currentVarPseudoNames) != len(currentVarFloatMultiplierVals)){
+			fmt.Println("something went wrong when creating this VarPseudoNames AddPseudoNameSubToDatabase")
+			os.Exit(1)
+		}
+
+		for j := 0; j < len(clnScaled.RGenVar); j++ {
+			if(!(isRestrictedIndex(restrictedIndicesAliasRGenVar, j))){
+				if(clnScaled.RGenVar[j].Name == parentVarName){
+
+					varToSubMultiplier := clnScaled.RGenVar[j].Multiplier
+
+					
+					
+					VerbosePrintln(currentVarPseudoNames)
+					
+					
+					
+
+					VerbosePrintln(currentVarFloatMultiplierVals)
+					VerbosePrintln(currentVarIndividualNumber)
+					VerbosePrintln(varToSubMultiplier)
+
+					//length check done above so ok to index both at k
+					for k := 0; k < len(currentVarPseudoNames); k++ {
+						newRGenVar = append(newRGenVar, CreateGenVar(currentVarPseudoNames[k], varToSubMultiplier * currentVarFloatMultiplierVals[k]))
+					}
+
+					currentVarIndividualNumber = currentVarIndividualNumber * varToSubMultiplier
+
+					newRNum = append(newRNum, currentVarIndividualNumber)
+
+					restrictedIndicesAliasRGenVar = append(restrictedIndicesAliasRGenVar, j)
+				}
+			}
+		}
+
+	}
+
+
+
+	if(len(restrictedIndicesAliasRGenVar) != len(chosenVars)){
+		fmt.Println("not all substitutions were made it appears... AddPseudoNameSubToDatabase")
+		os.Exit(1)
+	}
+
+
+	var leftSideNull bool
+
+	outPutAliasToAdd := CreateAlias(clnScaled.LGenVar, newRGenVar, clnScaled.LNum, newRNum)
+
+	fmt.Println("output alias")
+
+	VerbosePrintln(outPutAliasToAdd)
+
+	outPutAliasToAdd, leftSideNull = FullCleanUp(outPutAliasToAdd)
+
+	fmt.Println("output alias")
+
+
+	VerbosePrintln(outPutAliasToAdd)
+
+	if(!leftSideNull){
+		AddToAliasDatabase(outPutAliasToAdd)
+		return true
+	}else{
+		fmt.Println("error cleaning alias AddPseudoNameSubToDatabase")
+		// os.Exit(1)
+		return false
+	}
+
+
+}
+
+
+
+func ReturnConcreteSolutionForBestSolution(chosenVars []VarPseudoNames, cursorSlice []int, inputAlias Alias) (Alias, bool){
+
+	if(len(chosenVars) != len(cursorSlice)){
+		fmt.Println("error chosen vars slice must be same length as cursor slice AddPseudoNameSubToDatabase")
+		os.Exit(1)
+	}
+
+	fmt.Println("input alias")
+	VerbosePrintln(inputAlias)
+
+	fmt.Println("chosen vars")
+	VerbosePrintln(chosenVars)
+
+	fmt.Println("cursor slice")
+	VerbosePrintln(cursorSlice)
+
+	if(len(cursorSlice) == 0 || len(chosenVars) == 0 || len(inputAlias.RGenVar) == 0) {
+		return Alias{}, false
+	}
+
+
+	//os.Exit(1)
+
 
 	CheckLeftSideIsOnly1Long(inputAlias.LGenVar, "AddPseudoNameSubToDatabase")
 
@@ -3549,42 +3553,154 @@ func AddPseudoNameSubToDatabase(chosenVars []VarPseudoNames, cursorSlice []int, 
 		fmt.Println("not all substitutions were made it appears... AddPseudoNameSubToDatabase")
 		os.Exit(1)
 	}
-
-
-	// var outPutAliasToAdd Alias 
-
-	// var dataValid bool
-
-	// previousOutput := cleanCopyInput
-
-	// for l := 0; l < len(aliasesToSub); l++ {
-
-	// 	outPutAliasToAdd, dataValid = SubstituteAnAlias(previousOutput, aliasesToSub[l])
-
-	// 	previousOutput = CleanCopyAlias(outPutAliasToAdd)
-
-	// 	if(!dataValid){
-	// 		fmt.Println("bad substitution AddPseudoNameSubToDatabase")
-	// 		os.Exit(1)
-	// 	}
-
-	// }
-
 	var leftSideNull bool
 
 	outPutAliasToAdd := CreateAlias(clnScaled.LGenVar, newRGenVar, clnScaled.LNum, newRNum)
 
 	outPutAliasToAdd, leftSideNull = FullCleanUp(outPutAliasToAdd)
 
+
 	if(!leftSideNull){
-		AddToAliasDatabase(outPutAliasToAdd)
+		return outPutAliasToAdd, true
 	}else{
 		fmt.Println("error cleaning alias AddPseudoNameSubToDatabase")
-		os.Exit(1)
+		//os.Exit(1)
+		return Alias{}, false
 	}
+
+	
+
+}
+
+
+
+
+
+func PrettyPrintAlias(inputAlias Alias) {
+
+	clnCpyAlias := CleanCopyAlias(inputAlias)
+
+	if(len(inputAlias.RGenVar) == 0 || len(inputAlias.LGenVar) == 0){
+		fmt.Println(clnCpyAlias)
+		return
+	}
+
+	// fmt.Println(clnCpyAlias)
+
+	clnCln, _ := FullCleanUp(clnCpyAlias)
+
+	if(len(clnCln.RGenVar) == 0 || len(clnCln.LGenVar) == 0){
+		fmt.Println(clnCpyAlias)
+		return
+	}
+
+	// clnCln := clnCpyAlias
+
+	stringRGenVar := ""
+
+	for i := 0; i < len(clnCln.RGenVar); i++ {
+
+		if(i == (len(clnCln.RGenVar) - 1) ){
+			stringRGenVar = stringRGenVar +  " (" + fmt.Sprintf("%f", clnCln.RGenVar[0].Multiplier)  + "*" + clnCln.RGenVar[i].Name + ")"
+		}else{
+			stringRGenVar = stringRGenVar +  " (" + fmt.Sprintf("%f", clnCln.RGenVar[0].Multiplier)  + "*" + clnCln.RGenVar[i].Name + ")" + " + "
+		}
+	}
+
+	fmt.Println("( " +  fmt.Sprintf("%f", clnCln.LGenVar[0].Multiplier) + "*" + clnCln.LGenVar[0].Name + ")" + " =  " + stringRGenVar + " +(" + fmt.Sprintf("%f", clnCln.RNum[0]) + ")"  )
 
 
 }
+
+
+func PrettyPrintVarPseudoNames(in VarPseudoNames) {
+
+
+
+	fmt.Println("Var Pseudo Name Pretty Printed START")
+
+	fmt.Println("Original Variable", in.ParentVar)
+
+	fmt.Println()
+
+	fmt.Println("Pseudo Names For Var")
+
+	for i := 0; i < len(in.PseudoNames); i++ {
+		fmt.Println(i, " ", in.PseudoNames[i])
+	}
+
+
+	fmt.Println()
+
+	fmt.Println("Scaled Multipliers")
+
+	for i := 0; i < len(in.ScaledDownMultipliers); i++ {
+		fmt.Println(i, " ", in.ScaledDownMultipliers[i])
+	}
+
+	fmt.Println()
+
+	fmt.Println("Lone Number Vals")
+
+	for i := 0; i < len(in.LoneNumberVals); i++ {
+		fmt.Println(i, " ", in.LoneNumberVals[i])
+	}
+
+
+	fmt.Println("Var Pseudo Name Pretty Printed END")
+
+
+} 
+
+
+
+func PrettyPrintVarPseudoNamesGivenCursor(in VarPseudoNames, cursorVal int) {
+
+
+
+	fmt.Println("Var Pseudo Name w/ Cursor Pretty Printed START")
+
+	fmt.Println("Original Variable", in.ParentVar)
+
+	fmt.Println()
+
+	if(len())
+
+
+	fmt.Println(in.ParentVar + " = " +  in.PseudoNames[cursorVal] )
+
+	fmt.Println("Pseudo Names For Var")
+
+	for i := 0; i < len(in.PseudoNames); i++ {
+		fmt.Println(i, " ", in.PseudoNames[i])
+	}
+
+
+	fmt.Println()
+
+	fmt.Println("Scaled Multipliers")
+
+	for i := 0; i < len(in.ScaledDownMultipliers); i++ {
+		fmt.Println(i, " ", in.ScaledDownMultipliers[i])
+	}
+
+	fmt.Println()
+
+	fmt.Println("Lone Number Vals")
+
+	for i := 0; i < len(in.LoneNumberVals); i++ {
+		fmt.Println(i, " ", in.LoneNumberVals[i])
+	}
+
+
+	fmt.Println("Var Pseudo Name w/Cursor Pretty Printed END")
+
+
+} 
+
+
+
+
 
 
 

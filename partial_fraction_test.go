@@ -6,7 +6,7 @@ import (
 	"testing"
 	"fmt"
 	"math"
-	// "os"
+	
 
 )
 
@@ -76,20 +76,20 @@ func TestFindingHighestDegree(t *testing.T) {
 // 	VerbosePrint(reductionAmount)
 
 
-	parentAlias := CreateAlias([]GenVar{CreateGenVar("L", 10)}, []GenVar{CreateGenVar("A", 2), CreateGenVar("B", 2), CreateGenVar("C", 2)}, []float64{0}, []float64{44})
+	// parentAlias := CreateAlias([]GenVar{CreateGenVar("L", 10)}, []GenVar{CreateGenVar("A", 2), CreateGenVar("B", 2), CreateGenVar("C", 2)}, []float64{0}, []float64{44})
 
 
-	varswpname1 := VarPseudoNames{[][]string{[]string{"x, y, z"}, []string{"j"}, []string{"y"}}, []float64{1, 2, 4}, [][]float64{[]float64{3, 4, 5}, []float64{3}, []float64{3}}, "A"}
+	// varswpname1 := VarPseudoNames{[][]string{[]string{"x, y, z"}, []string{"j"}, []string{"y"}}, []float64{1, 2, 4}, [][]float64{[]float64{3, 4, 5}, []float64{3}, []float64{3}}, "A"}
 
-	varswpname2 := VarPseudoNames{[][]string{[]string{"l"}, []string{"k"}, []string{"j"}}, []float64{1, 2, 4}, [][]float64{[]float64{3}, []float64{3}, []float64{3}}, "B"}
+	// varswpname2 := VarPseudoNames{[][]string{[]string{"l"}, []string{"k"}, []string{"j"}}, []float64{1, 2, 4}, [][]float64{[]float64{3}, []float64{3}, []float64{3}}, "B"}
 
-	varswpname3 := VarPseudoNames{[][]string{[]string{"j"}, []string{"y"}}, []float64{1, 2}, [][]float64{[]float64{3}, []float64{3}}, "C"}
+	// varswpname3 := VarPseudoNames{[][]string{[]string{"j"}, []string{"y"}}, []float64{1, 2}, [][]float64{[]float64{3}, []float64{3}}, "C"}
 
-	chosenVars := []VarPseudoNames{varswpname1, varswpname2, varswpname3}
+	// chosenVars := []VarPseudoNames{varswpname1, varswpname2, varswpname3}
 
-	cursorSlice := []int{1, 2, 0}
+	// cursorSlice := []int{1, 2, 0}
 
-	AddPseudoNameSubToDatabase(chosenVars, cursorSlice, parentAlias)	
+	// AddPseudoNameSubToDatabase(chosenVars, cursorSlice, parentAlias)	
 
 
 	// varswpname4 := VarPseudoNames{[][]string{[]string{"k"}, []string{"s"}, []string{"j"}}, "D"}
@@ -103,85 +103,116 @@ func TestFindingHighestDegree(t *testing.T) {
 	// solution := BestAliasSliceForSubstitution(varsChosen, "j")	
 
 	// VerbosePrint(solution)
-
-
-	// cursorSlice := []int{0, 0, 0, 0}
-
-	// maxVals := []int{3, 3, 2, 3}
-
-	// columnCursor := 3
-
-
-
-
-	// pseudoNamesReturned := ReturnPseudoNamesForCursor(cursorSlice, maxVals, varsChosen)
-
-
-	// for i := 0; i < len(pseudoNamesReturned); i++ {
-	// 	VerbosePrint(pseudoNamesReturned[i])
-	// }
-
-
-
-	// VerbosePrint(cursorSlice)
-	// VerbosePrint(maxVals)
-	// VerbosePrint(columnCursor)
-
-	// fmt.Println()
-
-	// newCurs, newColumnCurs, dv := IncrementCursorObject(cursorSlice, maxVals, columnCursor)
-
-	// VerbosePrint(newCurs)
-	// VerbosePrint(newColumnCurs)
-	// VerbosePrint(dv)
-
-
-
-
-	// gVar3 := CreateGenVar("B", 2)
-	// gVar4 := CreateGenVar("A", 1)
-	
-	// alias2 := CreateAlias([]GenVar{gVar3}, []GenVar{gVar4}, []float64{}, []float64{})
-	
-	
-	// gVar5 := CreateGenVar("C", 1)
-
-	// gVar6 := CreateGenVar("A", 1)
-	
-	// gVar7 := CreateGenVar("B", 1)
-
-
-
-	// alias3 := CreateAlias([]GenVar{gVar5}, []GenVar{gVar6, gVar7}, []float64{}, []float64{})
 	
 
-	// gVar8 := CreateGenVar("D", 1)
 
-	// gVar9 := CreateGenVar("C", 1)
+
+//CURSOR TEST
+
+/*
+
 	
-	// gVar10 := CreateGenVar("B", 1)
+	cursorSlice := []int{0, 0, 0, 0}
+
+	maxVals := []int{3, 3, 2, 3}
+
+	columnCursor := 3
+
+
+	VerbosePrint(cursorSlice)
+	VerbosePrint(maxVals)
+	VerbosePrint(columnCursor)
+
+	fmt.Println()
+
+	newCurs := cursorSlice
+
+	cursorMaxed := false
+
+
+	for(!cursorMaxed){
+
+		newCurs,  cursorMaxed = IncrementCursorObject(cursorSlice, maxVals)
+
+		VerbosePrint(newCurs)
+
+	}
+*/
+
+//CURSOR TEST
+
+//PSEUDO NAME DATA 
+/*
+pseudoNamesReturned := ReturnPseudoNamesForCursor(cursorSlice, maxVals, varsChosen)
+
+
+	for i := 0; i < len(pseudoNamesReturned); i++ {
+		VerbosePrint(pseudoNamesReturned[i])
+	}
+
+*/
+//PSEUDO NAME DATA
+
+
+
+
+//MAIN TEST
+
+
+	gVar1 := CreateGenVar("A", 2)
+	gVar2 := CreateGenVar("D", 1)
+
+	alias1 := CreateAlias([]GenVar{gVar1}, []GenVar{gVar2}, []float64{}, []float64{2})
+
+
+	gVar3 := CreateGenVar("B", 2)
+	gVar4 := CreateGenVar("A", 1)
+	
+	alias2 := CreateAlias([]GenVar{gVar3}, []GenVar{gVar4}, []float64{}, []float64{})
+	
+	
+	gVar5 := CreateGenVar("C", 1)
+
+	gVar6 := CreateGenVar("A", 1)
+	
+	gVar7 := CreateGenVar("B", 1)
+
+
+
+	alias3 := CreateAlias([]GenVar{gVar5}, []GenVar{gVar6, gVar7}, []float64{}, []float64{})
+	
+
+	gVar8 := CreateGenVar("D", 1)
+
+	gVar9 := CreateGenVar("C", 1)
+	
+	gVar10 := CreateGenVar("B", 1)
 
 	
-	// alias4 := CreateAlias([]GenVar{gVar8}, []GenVar{gVar9, gVar10}, []float64{}, []float64{-2})
-		
-
-
-	// AddToAliasDatabase(alias1)
-	// AddToAliasDatabase(alias2)
-	// AddToAliasDatabase(alias3)
-	// AddToAliasDatabase(alias4)
+	alias4 := CreateAlias([]GenVar{gVar8}, []GenVar{gVar9, gVar10}, []float64{}, []float64{-2})
 	
-	// AllAliasPermutationsAndAddToDatabase(alias1)
-	// AllAliasPermutationsAndAddToDatabase(alias2)
-	// AllAliasPermutationsAndAddToDatabase(alias3)
-	// AllAliasPermutationsAndAddToDatabase(alias4)
 
 
 
 
-	// SolutionListener(4)
+	AddToAliasDatabase(alias1)
+	AddToAliasDatabase(alias2)
+	AddToAliasDatabase(alias3)
+	AddToAliasDatabase(alias4)
+	
+	AllAliasPermutationsAndAddToDatabase(alias1)
+	AllAliasPermutationsAndAddToDatabase(alias2)
+	AllAliasPermutationsAndAddToDatabase(alias3)
+	AllAliasPermutationsAndAddToDatabase(alias4)
 
 
+
+	SolutionListener(4)
+
+
+
+
+//MAIN TEST
 
 
 
