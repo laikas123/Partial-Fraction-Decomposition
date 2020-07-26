@@ -76,25 +76,33 @@ func TestFindingHighestDegree(t *testing.T) {
 // 	VerbosePrint(reductionAmount)
 
 
-	varswpname1 := VarPseudoNames{[][]string{[]string{"x, y, z"}, []string{"j"}, []string{"y"}}, "A"}
+	parentAlias := CreateAlias([]GenVar{CreateGenVar("L", 10)}, []GenVar{CreateGenVar("A", 2), CreateGenVar("B", 2), CreateGenVar("C", 2)}, []float64{0}, []float64{44})
 
 
-	varswpname2 := VarPseudoNames{[][]string{[]string{"l"}, []string{"k"}, []string{"j"}}, "B"}
+	varswpname1 := VarPseudoNames{[][]string{[]string{"x, y, z"}, []string{"j"}, []string{"y"}}, []float64{1, 2, 4}, [][]float64{[]float64{3, 4, 5}, []float64{3}, []float64{3}}, "A"}
 
-	varswpname3 := VarPseudoNames{[][]string{[]string{"j"}, []string{"y"}}, "C"}
+	varswpname2 := VarPseudoNames{[][]string{[]string{"l"}, []string{"k"}, []string{"j"}}, []float64{1, 2, 4}, [][]float64{[]float64{3}, []float64{3}, []float64{3}}, "B"}
+
+	varswpname3 := VarPseudoNames{[][]string{[]string{"j"}, []string{"y"}}, []float64{1, 2}, [][]float64{[]float64{3}, []float64{3}}, "C"}
+
+	chosenVars := []VarPseudoNames{varswpname1, varswpname2, varswpname3}
+
+	cursorSlice := []int{1, 2, 0}
+
+	AddPseudoNameSubToDatabase(chosenVars, cursorSlice, parentAlias)	
 
 
-	varswpname4 := VarPseudoNames{[][]string{[]string{"k"}, []string{"s"}, []string{"j"}}, "D"}
+	// varswpname4 := VarPseudoNames{[][]string{[]string{"k"}, []string{"s"}, []string{"j"}}, "D"}
 	
 
-	varsChosen := []VarPseudoNames{varswpname1, varswpname2, varswpname3, varswpname4}
+	// varsChosen := []VarPseudoNames{varswpname1, varswpname2, varswpname3, varswpname4}
 
 
 
 
-	solution := BestAliasSliceForSubstitution(varsChosen, "j")	
+	// solution := BestAliasSliceForSubstitution(varsChosen, "j")	
 
-	VerbosePrint(solution)
+	// VerbosePrint(solution)
 
 
 	// cursorSlice := []int{0, 0, 0, 0}

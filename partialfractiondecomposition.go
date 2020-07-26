@@ -21,7 +21,7 @@ type VarPseudoNames struct {
 	//vals for RNum for each variable
 	//0 if nil
 	LoneNumberVals []float64
-	ScaledDownMultipliers []float64
+	ScaledDownMultipliers [][]float64
 	ParentVar string
 }
 
@@ -2284,6 +2284,19 @@ func CleanCopySliceDataGeneralVariable(input []GeneralVariable) []GeneralVariabl
 }
 
 
+func CleanCopySliceDataVarPseudoNames(input []VarPseudoNames) []VarPseudoNames {
+
+	outputSlice := []VarPseudoNames{}
+
+	for i := 0; i < len(input); i++ {
+		outputSlice = append(outputSlice, input[i])
+	}
+
+	return outputSlice
+
+}
+
+
 
 func TwoGenVarsAreEqual(genvar1 GenVar, genvar2 GenVar) bool {
 
@@ -2865,7 +2878,7 @@ func GetPseudoNamesForRGenVar(varName string) VarPseudoNames {
 	//so add the variables own name to pseudonames
 	pseudoNamesSlice = append(pseudoNamesSlice, []string{varName})
 
-	scaledDownMultipliersToVars := []float64{}
+	scaledDownMultipliersToVars := [][]float64{}
 
 	valsSlice = append(valsSlice, 0)
 
@@ -2879,24 +2892,30 @@ func GetPseudoNamesForRGenVar(varName string) VarPseudoNames {
 				if(clnDB.LGenVar[0].Name == varName){
 					pseudoNameInner := []string{}
 
+					scaledDownMultipliersToVarsInner := []float64{}
+
 					leftSideScaleVal := clnDB.LGenVar[0].Multiplier
 
 					for i := 0; i < len(clnDB.RGenVar); i++ {
 						pseudoNameInner = append(pseudoNameInner, clnDB.RGenVar[i].Name)
-						scaledDownMultipliersToVars = append(scaledDownMultipliersToVars, (clnDB.RGenVar[i].Multiplier)/(leftSideScaleVal))
+						scaledDownMultipliersToVarsInner = append(scaledDownMultipliersToVarsInner, (clnDB.RGenVar[i].Multiplier)/(leftSideScaleVal))
 					}
-					if(len(clnDB.RNum) == 0){
-						valsSlice = append(valsSlice, 0)
-					}else if(len(clnDB.RNum) == 1){
-						valsSlice = append(valsSlice, (clnDB.RNum[0]/leftSideScaleVal) )
-					}else{
-						fmt.Println("nums not cleaned up GetPseudoNamesForRGenVar")
-						os.Exit(1)
-					}
+					
 
 					if(!(IsDuplicatePseudoName(pseudoNamesSlice, pseudoNameInner))){
 
 							pseudoNamesSlice = append(pseudoNamesSlice, pseudoNameInner)
+
+							scaledDownMultipliersToVars = append(scaledDownMultipliersToVars, scaledDownMultipliersToVarsInner)
+
+							if(len(clnDB.RNum) == 0){
+								valsSlice = append(valsSlice, 0)
+							}else if(len(clnDB.RNum) == 1){
+								valsSlice = append(valsSlice, (clnDB.RNum[0]/leftSideScaleVal) )
+							}else{
+								fmt.Println("nums not cleaned up GetPseudoNamesForRGenVar")
+								os.Exit(1)
+							}	
 
 					}
 
@@ -2908,7 +2927,7 @@ func GetPseudoNamesForRGenVar(varName string) VarPseudoNames {
 	mutex.Unlock()
 
 
-	return VarPseudoNames{pseudoNamesSlice, valsSlice, varName}
+	return VarPseudoNames{pseudoNamesSlice, valsSlice, scaledDownMultipliersToVars, varName}
 
 }
 
@@ -3108,7 +3127,7 @@ func GenVarSliceToVarNameStringSlice(gvSlice []GenVar) []string {
 
 func CircularSolutionSolver(solutionChan chan ConcreteSolution) {
 
-	doneSolving = false
+	doneSolving := false
 
 	cursor := 0
 
@@ -3122,7 +3141,13 @@ func CircularSolutionSolver(solutionChan chan ConcreteSolution) {
 
 			clnVal := CleanCopyAlias(val)
 
-			FindBestSubstitutionForAlias(clnVal, solutionChan)
+			sliceVarPseudoNames := []VarPseudoNames{}
+
+			for i := 0; i < len(clnVal.RGenVar); i++ {
+				sliceVarPseudoNames = append(sliceVarPseudoNames, GetPseudoNamesForRGenVar(clnVal.RGenVar[i].Name))
+			}
+
+			FindBestSubstitutionForAlias(clnVal, sliceVarPseudoNames, solutionChan)
 
 			cursor++ 
 		}else{
@@ -3137,12 +3162,12 @@ func CircularSolutionSolver(solutionChan chan ConcreteSolution) {
 
 
 
-func FindBestSubstitutionForAlias(aliasInput Alias, solutionChan chan ConcreteSolution) {
+func FindBestSubstitutionForAlias(aliasInput Alias, possibleVars []VarPseudoNames, solutionChan chan ConcreteSolution) {
 
 	CheckLeftSideIsOnly1Long(aliasInput.LGenVar,"FindBestSubstitutionForAlias")
 
 
-	parentLeftVar := aliasInput.LGenVar[0]
+	parentLeftVar := aliasInput.LGenVar[0].Name
 
 	if(len(aliasInput.RGenVar) == 0){
 		fmt.Println("Invalid Alias to test FindBestSubstitutionForAlias")
@@ -3165,7 +3190,19 @@ func FindBestSubstitutionForAlias(aliasInput Alias, solutionChan chan ConcreteSo
 
 	}
 
-	BestAliasSliceForSubstitution(varPseudoNamesSlice, parentLeftVar, clnInputalias)
+	bestSolution := BestAliasSliceForSubstitution(varPseudoNamesSlice, parentLeftVar, clnInputalias)
+
+	varsUsed := []VarPseudoNames{}
+
+	for i := 0; i < len(bestSolution.BinaryCursor); i++ {
+			bit := rune(binaryCursor[i])
+
+			if(bit == rune('1')){
+				varsUsed = append(varsUsed, possibleVars[i])
+			}
+
+	}	
+
 
 
 }
@@ -3318,7 +3355,9 @@ func AllDifferentPseudoNamesTested(chosenVars []VarPseudoNames, parentLeftVar st
 				cursorForHighestNetChange = CleanCopySliceDataInt(cursorSlice)
 			}
 
-			AddPseudoNameSubToDatabase(chosenVars, cursorSlice, inputAlias)
+
+
+			AddPseudoNameSubToDatabase(CleanCopySliceDataVarPseudoNames(chosenVars), CleanCopySliceDataInt(cursorSlice), CleanCopyAlias(inputAlias))
 
 		}
 
@@ -3367,7 +3406,6 @@ func ReturnPseudoNamesForCursor(cursorSlice []int, maxVals []int, chosenVars []V
 
 } 
 
-func Add
 
 
 
@@ -3434,45 +3472,69 @@ func AddPseudoNameSubToDatabase(chosenVars []VarPseudoNames, cursorSlice []int, 
 		os.Exit(1)
 	}
 
+	CheckLeftSideIsOnly1Long(inputAlias.LGenVar, "AddPseudoNameSubToDatabase")
+
+	clnInput := CleanCopyAlias(inputAlias)
+
+	clnScaled := ScaleDownEntireAlias(clnInput, clnInput.LGenVar[0].Multiplier)
+
 	restrictedIndicesAliasRGenVar := []int{}
 
-	aliasesToSub := []Alias{}
+	
 
+
+	newRGenVar := []GenVar{}	
+
+	newRNum := []float64{}
+
+	if(len(clnScaled.RNum) == 0){
+		fmt.Println("invalid RNum for input alias AddPseudoNameSubToDatabase")
+		os.Exit(1)
+	}
+
+	newRNum = append(newRNum, clnScaled.RNum[0])
 	
 	for i := 0; i < len(chosenVars); i++ {
 		currentVar := chosenVars[i]
 
 		parentVarName := currentVar.ParentVar
 
-		currentVarIndividualNumbers := currentVar.LoneNumberVals[cursorSlice[i]]
+		currentVarIndividualNumber := currentVar.LoneNumberVals[cursorSlice[i]]
 
 		currentVarPseudoNames := currentVar.PseudoNames[cursorSlice[i]]
 
 		currentVarFloatMultiplierVals := currentVar.ScaledDownMultipliers[cursorSlice[i]]
 
 
-		if(len(currentVarPseudoNames) != len(currentVarFloatVals)){
+		if(len(currentVarPseudoNames) != len(currentVarFloatMultiplierVals)){
 			fmt.Println("something went wrong when creating this VarPseudoNames AddPseudoNameSubToDatabase")
 		}
 
-		for j := 0; j < len(inputAlias.RGenVar); j++ {
+		for j := 0; j < len(clnScaled.RGenVar); j++ {
 			if(!(isRestrictedIndex(restrictedIndicesAliasRGenVar, j))){
-				if(inputAlias.RGenVar[j].Name == parentVarName){
+				if(clnScaled.RGenVar[j].Name == parentVarName){
 
-					varToSubMultiplier := inputAlias.RGenVar[j].Multiplier
+					varToSubMultiplier := clnScaled.RGenVar[j].Multiplier
 
-					rightGenVarsForSubAlias := []GenVar{}
+					
+
+					VerbosePrintln(currentVarPseudoNames)
+					VerbosePrintln(currentVarFloatMultiplierVals)
+					VerbosePrintln(currentVarIndividualNumber)
+					VerbosePrintln(varToSubMultiplier)
 
 					//length check done above so ok to index both at k
 					for k := 0; k < len(currentVarPseudoNames); k++ {
-						rightGenVarsForSubAlias = append(rightGenVarsForSubAlias, CreateGenVar(currentVarPseudoNames[k], varToSubMultiplier * currentVarFloatMultiplierVals[k]))
+						newRGenVar = append(newRGenVar, CreateGenVar(currentVarPseudoNames[k], varToSubMultiplier * currentVarFloatMultiplierVals[k]))
 					}
 
 					currentVarIndividualNumber = currentVarIndividualNumber * varToSubMultiplier
 
-					aliasToAdd := CreateAlias(CreateGenVar(parentVarName, 1), rightGenVarsForSubAlias, inputAlias.LNum, []float64{currentVarIndividualNumber})
+					newRNum = append(newRNum, currentVarIndividualNumber)
 
-					aliasesToSub = append(aliasesToSub, aliasToAdd)
+					// aliasToAdd := CreateAlias([]GenVar{CreateGenVar(parentVarName, 1)}, rightGenVarsForSubAlias, inputAlias.LNum, []float64{currentVarIndividualNumber})
+
+					// aliasesToSub = append(aliasesToSub, aliasToAdd)
 
 					restrictedIndicesAliasRGenVar = append(restrictedIndicesAliasRGenVar, j)
 				}
@@ -3488,21 +3550,38 @@ func AddPseudoNameSubToDatabase(chosenVars []VarPseudoNames, cursorSlice []int, 
 		os.Exit(1)
 	}
 
-	cleanCopyInput := CleanCopyAlias(aliasInput)
 
-	var outPutAliasToAdd Alias 
+	// var outPutAliasToAdd Alias 
 
-	previousOutput := cleanCopyInput
+	// var dataValid bool
 
-	for l := 0; l < len(aliasesToSub); l++ {
+	// previousOutput := cleanCopyInput
 
-		outPutAliasToAdd = SubstituteAnAlias(previousOutput, aliasesToSub[i])
+	// for l := 0; l < len(aliasesToSub); l++ {
 
-		previousOutput = CleanCopyAlias(outPutAliasToAdd)
+	// 	outPutAliasToAdd, dataValid = SubstituteAnAlias(previousOutput, aliasesToSub[l])
 
+	// 	previousOutput = CleanCopyAlias(outPutAliasToAdd)
+
+	// 	if(!dataValid){
+	// 		fmt.Println("bad substitution AddPseudoNameSubToDatabase")
+	// 		os.Exit(1)
+	// 	}
+
+	// }
+
+	var leftSideNull bool
+
+	outPutAliasToAdd := CreateAlias(clnScaled.LGenVar, newRGenVar, clnScaled.LNum, newRNum)
+
+	outPutAliasToAdd, leftSideNull = FullCleanUp(outPutAliasToAdd)
+
+	if(!leftSideNull){
+		AddToAliasDatabase(outPutAliasToAdd)
+	}else{
+		fmt.Println("error cleaning alias AddPseudoNameSubToDatabase")
+		os.Exit(1)
 	}
-
-	AddToAliasDatabase(outPutAliasToAdd)
 
 
 }
