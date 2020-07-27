@@ -202,6 +202,7 @@ pseudoNamesReturned := ReturnPseudoNamesForCursor(cursorSlice, maxVals, varsChos
 
 
 
+
 	SolutionListener(4)
 
 
@@ -589,7 +590,25 @@ func TestCleanUpForGenVar(t *testing.T) {
 
 
 func VerbosePrint(input interface{}) {
-	fmt.Printf("%#v\n", input)
+	
+	switch input.(type) { 
+
+		case Alias:
+			 aliastype, ok := input.(Alias)
+			 if(ok){
+				PrettyPrintAlias(aliastype)
+			}
+		case VarPseudoNames:
+			
+			 varpseudonametype, ok := input.(VarPseudoNames)
+			 if(ok){
+				PrettyPrintVarPseudoNames(varpseudonametype)
+			}
+		default: 
+			fmt.Printf("%#v\n", input)
+
+	}
+
 }
 
 
@@ -624,19 +643,191 @@ func VerbosePrintSlice(item interface{}){
 
 
 
+//works so far...
+func TestSubstituteAnAlias(t *testing.T) {
+
+
+
+	gv1 := CreateGenVar("A", 3)
+
+	gv2 := CreateGenVar("B", 1)
+
+	gv3 := CreateGenVar("C", 5)
+
+	alias1 := CreateAlias([]GenVar{gv1}, []GenVar{gv2, gv3}, []float64{}, []float64{})
+
+
+	gv4 := CreateGenVar("B", 1)
+
+	gv5 := CreateGenVar("C", -5)
+
+	alias2 := CreateAlias([]GenVar{gv4}, []GenVar{gv5}, []float64{}, []float64{33})
+
+	subAlias, dv := SubstituteAnAlias(alias1, alias2)
+
+	VerbosePrint(subAlias)
+
+	VerbosePrint(dv)
+
+	if (len(subAlias.RGenVar) != 0 || !dv) {
+       t.Errorf("failure")
+    
+    }
+
+
+}
+
+
+
+func TestIsDuplicateConcreteSolution(t *testing.T) {
+
+
+	concreteSolution1 := ConcreteSolution{"A", 55}
+	concreteSolution2 := ConcreteSolution{"A", 2}
+	
+	if (!IsDuplicateConcreteSolution([]ConcreteSolution{concreteSolution1}, concreteSolution2)) {
+       t.Errorf("failure")
+    
+    }	
+}
+
+
+
+func TestTwoAliasesAreEqual(t *testing.T) {
+
+
+	gv1 := CreateGenVar("C", 2)
+
+	gv2 := CreateGenVar("D", 1.5)
+
+
+
+	alias1 := CreateAlias([]GenVar{gv1}, []GenVar{gv2}, []float64{}, []float64{3})
+
+
+	gv4 := CreateGenVar("C", 2)
+
+	gv5 := CreateGenVar("D", 1.5)
+
+	alias2 := CreateAlias([]GenVar{gv4}, []GenVar{gv5}, []float64{}, []float64{3})
+
+	fmt.Println("Are Equal Result")
+	
+	areEqual, typeEqual := TwoAliasesAreEqual(alias1, alias2, "testing")
+
+	fmt.Println(typeEqual)
+
+	fmt.Println(areEqual)
+
+	if(!areEqual){
+		t.Errorf("failure")
+	}
+
+
+
+} 
+
+
+
+func TestPseudoNameFunctions(t *testing.T) {
+
+	// gVar1 := CreateGenVar("A", 2)
+	// gVar2 := CreateGenVar("D", 1)
+
+	// alias1 := CreateAlias([]GenVar{gVar1}, []GenVar{gVar2}, []float64{}, []float64{2})
+
+
+	// gVar3 := CreateGenVar("B", 2)
+	// gVar4 := CreateGenVar("A", 1)
+	
+	// alias2 := CreateAlias([]GenVar{gVar3}, []GenVar{gVar4}, []float64{}, []float64{})
+	
+	
+	// gVar5 := CreateGenVar("C", 1)
+
+	// gVar6 := CreateGenVar("A", 1)
+	
+	// gVar7 := CreateGenVar("B", 1)
+
+
+
+	// alias3 := CreateAlias([]GenVar{gVar5}, []GenVar{gVar6, gVar7}, []float64{}, []float64{})
+	
 
 
 
 
+	
+	// AllAliasPermutationsAndAddToDatabase(alias1)
+	// AllAliasPermutationsAndAddToDatabase(alias2)
+	// AllAliasPermutationsAndAddToDatabase(alias3)
+	// AllAliasPermutationsAndAddToDatabase(alias4)
+
+
+	// PrintAliasDataBase()
+
+
+	// clnVal := CleanCopyAlias(alias4)
+
+	// VerbosePrint(clnVal)
+
+	// sliceVarPseudoNames := []VarPseudoNames{}
 
 
 
+	// for i := 0; i < len(clnVal.RGenVar); i++ {
+	// 	sliceVarPseudoNames = append(sliceVarPseudoNames, GetPseudoNamesForRGenVar(clnVal.RGenVar[i].Name))
+	
+	// 	fmt.Printf("%#v\n", sliceVarPseudoNames[i])
+	// }
+
+
+	gVar8 := CreateGenVar("D", 1)
+
+	gVar9 := CreateGenVar("C", 1)
+	
+	gVar10 := CreateGenVar("B", 1)
+
+	gVar11 := CreateGenVar("F", 1)
+
+	gVar12 := CreateGenVar("G", 1)
+
+
+	
+	alias4 := CreateAlias([]GenVar{gVar8}, []GenVar{gVar9, gVar10, gVar11, gVar12}, []float64{}, []float64{-2})
+	
+
+// 	type VarPseudoNames struct {
+// 	PseudoNames [][]string
+// 	//vals for RNum for each variable
+// 	//0 if nil
+// 	LoneNumberVals []float64
+// 	ScaledDownMultipliers [][]float64
+// 	ParentVar string
+// }
+
+	pseudoName1 := VarPseudoNames{[][]string{[]string{"F", "G"}}, []float64{0}, [][]float64{[]float64{1, 1}},  "B"}
+	pseudoName2 := VarPseudoNames{[][]string{[]string{"F", "G"}}, []float64{0}, [][]float64{[]float64{1, 1}},  "C"}
+
+
+	slicepnames := []VarPseudoNames{pseudoName1, pseudoName2}
+
+	
+	//PrettyPrintVarPseudoNameSliceEveryCombo(sliceVarPseudoNames)
+
+	result, good := SumOfPseudoNamesNetChangeIsGood(slicepnames, []int{0, 0}, alias4)
+
+	fmt.Println(result, " ", good)
 
 
 
+	if(false){
+		t.Errorf("failure")
+	}
 
 
 
+}
 
 
 
