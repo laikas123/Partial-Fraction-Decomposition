@@ -5,8 +5,8 @@ import (
 
 	"testing"
 	"fmt"
-	"math"
-	
+	// "math"
+	// 
 
 )
 
@@ -107,7 +107,7 @@ func TestFindingHighestDegree(t *testing.T) {
 
 
 
-//CURSOR TEST
+//CURSOR TEST START
 
 /*
 
@@ -139,9 +139,9 @@ func TestFindingHighestDegree(t *testing.T) {
 	}
 */
 
-//CURSOR TEST
+//CURSOR TEST END
 
-//PSEUDO NAME DATA 
+//PSEUDO NAME DATA START
 /*
 pseudoNamesReturned := ReturnPseudoNamesForCursor(cursorSlice, maxVals, varsChosen)
 
@@ -151,12 +151,12 @@ pseudoNamesReturned := ReturnPseudoNamesForCursor(cursorSlice, maxVals, varsChos
 	}
 
 */
-//PSEUDO NAME DATA
+//PSEUDO NAME DATA END
 
 
 
 
-//MAIN TEST
+//MAIN TEST START
 
 
 	gVar1 := CreateGenVar("A", 2)
@@ -194,11 +194,6 @@ pseudoNamesReturned := ReturnPseudoNamesForCursor(cursorSlice, maxVals, varsChos
 
 
 
-
-	AddToAliasDatabase(alias1)
-	AddToAliasDatabase(alias2)
-	AddToAliasDatabase(alias3)
-	AddToAliasDatabase(alias4)
 	
 	AllAliasPermutationsAndAddToDatabase(alias1)
 	AllAliasPermutationsAndAddToDatabase(alias2)
@@ -212,7 +207,7 @@ pseudoNamesReturned := ReturnPseudoNamesForCursor(cursorSlice, maxVals, varsChos
 
 
 
-//MAIN TEST
+//MAIN TEST END
 
 
 
@@ -580,17 +575,17 @@ func TestCleanUpForGenVar(t *testing.T) {
 
 
 
-func aboutEquals(checkVal float64, result float64) bool {
+// func aboutEquals(checkVal float64, result float64) bool {
 	
-	difference := math.Abs(checkVal - result)
+// 	difference := math.Abs(checkVal - result)
 
 
-	if(difference < math.Abs(0.03) ) {
-		return true
-	}else{
-		return false
-	}
-}
+// 	if(difference < math.Abs(0.03) ) {
+// 		return true
+// 	}else{
+// 		return false
+// 	}
+// }
 
 
 func VerbosePrint(input interface{}) {
