@@ -1,3 +1,7 @@
+//This program is designed to be able to solve partial fraction decomposition
+//for 
+
+
 package main
 
 import (
@@ -68,6 +72,10 @@ type OneDEquation struct {
 }
 
 
+//An Alias is essentially just a way a variable can be represented
+//for a system of equations
+//for example if we have (y = x + 2) (y = z - 5)
+//both of these are aliases for y
 type Alias struct {
 
 	//this represents variables on either side of equations
@@ -79,7 +87,10 @@ type Alias struct {
 	RNum []float64
 }
 
-
+//Concrete Solutions are essentially just an alias without
+//variables on the right side if we have (y = x + 2) (y = z - 5)
+//and x is found to be 0.7 then the concrete solution is 
+//ConcreteSolution{x, 0.7}
 type ConcreteSolution struct {
 	Name string
 
@@ -87,6 +98,9 @@ type ConcreteSolution struct {
 
 }
 
+//this program makes use of a centralized database
+//as new aliases are found, they are written to the AliasDatabase
+//this helps new aliases use other aliases to solve the system of equations
 var AliasDatabase []Alias
 
 var mutex *sync.Mutex 
@@ -122,16 +136,7 @@ func main() {
 }
 
 
-
-
-
-
-
-//this is essentially the same as the "ReturnAllAliases" method
-//that method is called for when the data is still in OneDEquation format
-//whereas this is called when the data is already in an Alias format
-
-//this function passes all tests
+//PASS
 func AllAliasPermutationsAndAddToDatabase(alias Alias)  {
 
 
@@ -923,53 +928,6 @@ func VariableNameAlphabetIndex(index int) string {
 
 
 }
-
-
-
-func returnHighestDegree(terms []EquationItem) int {
-
-
-
-	var highestDegree int
-
-	foundAtLeastOneS := false
-
-	for i := 0; i < len(terms); i++ {
-
-		for j := 0; j < len(terms[i].Items); j++ {
-
-			value, ok := terms[i].Items[j].(S_Var)
-
-			if(ok){
-				if(!foundAtLeastOneS){
-					highestDegree = value.Exponent
-					foundAtLeastOneS = true
-				}else if(value.Exponent > highestDegree){
-					highestDegree = value.Exponent
-				}
-		}
-
-
-		}
-
-	}
-
-
-	if(!foundAtLeastOneS){
-		fmt.Println("error no s variables when searching for highest degree")
-		os.Exit(1)
-	}
-
-
-	return highestDegree
-
-
-}
-
-
-
-
-
 
 
 
@@ -2722,6 +2680,8 @@ func PrettyPrintAlias(inputAlias Alias) {
 	
 
 }
+
+
 
 
 func PrettyPrintVarPseudoNames(in VarPseudoNames) {
