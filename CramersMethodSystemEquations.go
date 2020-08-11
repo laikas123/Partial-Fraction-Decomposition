@@ -267,3 +267,19 @@ func CleanCopyMatrix(matrixInput Matrix) Matrix {
 
 
 }
+
+
+func ReturnItemType(item ItemInEquation) string {
+
+	switch item.ItemType() {
+		case "s":
+			return "s variable"
+		case "c":
+			return "constant"	
+		default:
+			panic("unknown item type")
+	}
+
+	return "error"
+
+}
