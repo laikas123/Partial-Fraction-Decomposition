@@ -7,9 +7,6 @@ import(
 
 )
 
-type ItemInEquation interface {
-	ItemType() string
-}
 
 type SVar struct {
 	Multiplier complex128
@@ -21,16 +18,9 @@ func(s SVar) ItemType() string{
 	return "s"
 }
 
-type Constant struct {
-	Value complex128
-}
-
-func(c Constant) ItemType() string{
-	return "c"
-}
-
 type Parenthesis struct {
-	Items []ItemInEquation
+	Items []SVar
+	Exponent complex128
 }
 
 func(p Parenthesis) ItemType() string{
@@ -38,12 +28,12 @@ func(p Parenthesis) ItemType() string{
 }
 
 type Numerator struct {
-	Items []ItemInEquation
+	ParenthesisTerms []Parenthesis
 
 }
 
 type Denominator struct {
-	Items []ItemInEquation
+	ParenthesisTerms []Parenthesis
 }
 
 type Fraction struct {
@@ -74,33 +64,38 @@ type Determinant struct {
 
 func main() {
 
-	cTermNum := Constant{complex(5, 0)}
+	cTermNum := SVar{complex(5, 0), complex(0, 0)}
 
 	sTermNum1 := SVar{complex(12, 0), complex(2, 0)}
 
 	sTermNum2 := SVar{complex(-1, 0), complex(3, 0)}
 
-	numeratorTerm := Numerator{[]ItemInEquation{cTermNum, sTermNum1, sTermNum2}}
+	numeratorTerm := Numerator{[]Parenthesis{Parenthesis{[]SVar{cTermNum, sTermNum1, sTermNum2}, complex(1, 0)}}}
 
-	sTermDenomP1 := SVar{complex(1, 0), complex(2, 0)}
 
-	pTermDenom1 := Parenthesis{[]ItemInEquation{sTermDenomP1}}
+	//SUBTLE THING TO NOTICE
+	//the way this is input is (s)^2 notice it is s inside the parenthesis squared
+	//NOT (s^2) this is due to the nature of how the program performs partial fraction
+	//decomposition
+	sTermDenomP1 := SVar{complex(1, 0), complex(1, 0)}
+
+	pTermDenom1 := Parenthesis{[]SVar{sTermDenomP1}, complex(2, 0)}
 
 
 	sTermDenomP2 := SVar{complex(1, 0), complex(1, 0)}
 
-	cTermDenomP2 := Constant{complex(-9, 0)}
+	cTermDenomP2 := SVar{complex(-9, 0), complex(0, 0)}
 
-	pTermDenom2 := Parenthesis{[]ItemInEquation{sTermDenomP2, cTermDenomP2}}
+	pTermDenom2 := Parenthesis{[]SVar{sTermDenomP2, cTermDenomP2}, complex(1, 0)}
 	
 	sTermDenomP3 := SVar{complex(1, 0), complex(1, 0)}
 
-	cTermDenomP3 := Constant{complex(-1, 0)}
+	cTermDenomP3 := SVar{complex(-1, 0), complex(0, 0)}
 
-	pTermDenom3 := Parenthesis{[]ItemInEquation{sTermDenomP3, cTermDenomP3}}
+	pTermDenom3 := Parenthesis{[]SVar{sTermDenomP3, cTermDenomP3}, complex(1, 0)}
 
 
-	denominatorTerm := Denominator{[]ItemInEquation{pTermDenom1, pTermDenom2, pTermDenom3}}
+	denominatorTerm := Denominator{[]Parenthesis{pTermDenom1, pTermDenom2, pTermDenom3}}
 
 	fractionTerm := Fraction{numeratorTerm, denominatorTerm}
 
@@ -118,7 +113,9 @@ func CreateSystemOfEquationsForFractionToUndergoPartialFractionDecomposition(fra
 
 	leftSide := fractionInput.NumeratorData
 
-	highestPowerLeftSide := GetHighestPowerOfSInSliceEquationItems(leftSide.Items)
+
+	//assume only one term in numerator for now
+	highestPowerLeftSide := GetHighestPowerOfSInSliceEquationItems(leftSide.ParenthesisTerms[0].Items)
 
 
 	fmt.Println("HIGHEST POWER OF S", highestPowerLeftSide)
@@ -130,55 +127,97 @@ func CreateSystemOfEquationsForFractionToUndergoPartialFractionDecomposition(fra
 		solutionSlice[i] = 0
 	}
 
-	for i := 0; i < len(leftSide.Items); i++ {
+	for i := 0; i < len(leftSide.ParenthesisTerms[0].Items); i++ {
 
-		//TODO PARENTHESIS ARE ALSO A VALID TYPE
-
-		switch leftSide.Items[i].(type){
-			case SVar:
-				sVariable, ok := leftSide.Items[i].(SVar)
-				if(ok){
-					exponentVal := real(sVariable.Exponent)
-					indexToPlugInto := int(float64(highestPowerLeftSide) - exponentVal)
-					solutionSlice[indexToPlugInto] = sVariable.Multiplier
-				}
-			case Constant:
-				constantVal, ok := leftSide.Items[i].(Constant)
-				if(ok){
-					solutionSlice[len(solutionSlice)-1] = constantVal.Value
-				}
-			default:
-				panic("Unknown item type")
+		exponentVal := real(leftSide.ParenthesisTerms[0].Items[i].Exponent)
+		indexToPlugInto := int(float64(highestPowerLeftSide) - exponentVal)
+		solutionSlice[indexToPlugInto] = leftSide.ParenthesisTerms[0].Items[i].Multiplier
 				
-		}
+		
 
 	}
 
+	fmt.Println("left side equation")
 	fmt.Println(solutionSlice)
 
-	denominatorTerms := fractionInput.Denominator 
+	denominatorTerms := fractionInput.DenominatorData
 
-	multiplyingTermCountDenominator := len(denominatorTerms.Items)
+	// multiplyingTermCountDenominator := len(denominatorTerms.Items)
 
 
 	// //these will be the top terms in partial fraction decomposition, IE: as+b, c, ds+e
 	// //the values depend on the denominator beneath them
-	numeratorsForSystem :=  [][]ItemInEquation
+	numeratorsForSystem :=  [][]SVar{}
 
-	for i := 0; i < len(denominatorTerms.Items); i++ {
+	denominatorsForSystem := []Parenthesis{}
 
-		pItem, ok := denominatorTerms.Items[i].(Parenthesis)
+	for i := 0; i <len(denominatorTerms.ParenthesisTerms); i++ {
 
-		if(ok){
-			highestPowerInParenthesis := GetHighestPowerOfSInSliceEquationItems(pItem.Items)
-
-			if(highestPowerInParenthesis < 2){
-				numeratorsForSystem = append(numeratorsForSystem, )
-			}
-
-		}
+		fmt.Printf("%#v\n", denominatorTerms.ParenthesisTerms[i])
 
 	}
+
+	
+
+	for i := 0; i < len(denominatorTerms.ParenthesisTerms); i++ {
+
+		pItem := denominatorTerms.ParenthesisTerms[i]
+
+		highestPowerInParenthesis := GetHighestPowerOfSInSliceEquationItems(pItem.Items)
+
+		fmt.Println("highest s power", highestPowerInParenthesis)
+
+		parenthesisOuterPower := int(real(pItem.Exponent))
+
+		fmt.Println("exponent per cycle", parenthesisOuterPower)
+
+		for i := 0; i < parenthesisOuterPower; i++ {
+			
+			fmt.Println("cycle", i)
+			//if less than 2 power plug in S^0
+			if(highestPowerInParenthesis < 2){
+				numeratorsForSystem = append(numeratorsForSystem, []SVar{SVar{complex(1, 0), complex(0, 0)}})
+				denominatorsForSystem = append(denominatorsForSystem, FoilOutParenthesisToSomePower(pItem, (i+1)))
+			
+				fmt.Println("case 1")
+
+			//if the highest power is 2 but it is a lone term, then same deal S^0
+			}else if(highestPowerInParenthesis == 2 && len(pItem.Items) == 1){
+				numeratorsForSystem = append(numeratorsForSystem, []SVar{SVar{complex(1, 0), complex(0, 0)}})	
+				denominatorsForSystem = append(denominatorsForSystem, FoilOutParenthesisToSomePower(pItem, (i+1)))
+	
+				fmt.Println("case 2")			
+
+			//if quadratic then plug in S^1 + S^0
+			}else if(highestPowerInParenthesis == 2 && len(pItem.Items) == 1){
+				numeratorsForSystem = append(numeratorsForSystem, []SVar{SVar{complex(1, 0), complex(1, 0)}, SVar{complex(1, 0), complex(0, 0)}})		
+				denominatorsForSystem = append(denominatorsForSystem, FoilOutParenthesisToSomePower(pItem, (i+1)))
+			
+				fmt.Println("case 3")
+
+			}
+		}
+
+		
+
+	}
+
+	if(len(numeratorsForSystem) != len(denominatorsForSystem)){
+		panic("mismatch in number of numerators and denominators for partial fraction decomposition CreateSystemOfEquationsForFractionToUndergoPartialFractionDecomposition()")
+	}
+
+	fmt.Println("numerator and denominator")
+	for i := 0; i < len(numeratorsForSystem); i++ {
+		fmt.Println("Numerator")
+		fmt.Printf("%#v\n", numeratorsForSystem[i])
+		fmt.Println("Denominator")
+		fmt.Printf("%#v\n", denominatorsForSystem[i])
+	}
+
+
+
+	
+
 
 	// //IMPORTANT THING TO NOTE... I DID NOT KNOW THIS BEFORE, BUT FOR PARTIAL FRACTION 
 	// //DECOMPOSITION, IF YOU HAVE A LONE S^2 IN THE DENOMINATOR THE TOP VALUE IS A 
@@ -188,8 +227,7 @@ func CreateSystemOfEquationsForFractionToUndergoPartialFractionDecomposition(fra
 
 	
 
-	for i := 0; i < len
-
+	
 
 
 	return Matrix{}
@@ -432,22 +470,229 @@ func CleanCopyMatrix(matrixInput Matrix) Matrix {
 
 
 
-func GetHighestPowerOfSInSliceEquationItems(items []ItemInEquation) int {
+func GetHighestPowerOfSInSliceEquationItems(items []SVar) int {
 
-	highestPower := -1
+	highestPower := 0
 
 	for i := 0; i < len(items); i++ {
-		sVariable, ok := items[i].(SVar)
+		sVariable := items[i]
 
-		if(ok){
-			sVariablePower := int(real(sVariable.Exponent))
-			if(sVariablePower > highestPower){
-				highestPower = sVariablePower
-			}
+		sVariablePower := int(real(sVariable.Exponent))
+		if(sVariablePower > highestPower){
+			highestPower = sVariablePower
 		}
+		
 	}
 
 	return highestPower
 
 }
+
+
+
+
+
+func FoilOutParenthesisToSomePower(parentheisData Parenthesis, timesToFoil int) Parenthesis {
+
+
+	if(timesToFoil == 1){
+		return Parenthesis{parentheisData.Items, complex(1,0)}
+	}
+
+	parentItems := parentheisData.Items
+
+	//for first cycle parent multiplies parent
+	multiplyingItems := parentheisData.Items
+
+	var result []SVar
+
+	for timesToFoil > 1 {
+
+		result = MultiplyTwoParenthesisData(parentItems, multiplyingItems)
+	
+		multiplyingItems = result
+
+		timesToFoil--
+
+	}
+
+	return Parenthesis{result, complex(1, 0)}
+
+}
+
+func MultiplyTwoParenthesisData(items1 []SVar, items2 []SVar) []SVar {
+
+	returnSlice := []SVar{}
+
+	for i := 0; i < len(items1); i++ {
+
+		currentItem := items1[i]
+
+		for j := 0; j < len(items2); j++ {
+
+			newItem := MultiplyTwoSVars(currentItem, items2[j])
+
+			returnSlice = append(returnSlice, newItem)
+
+		}
+
+	}
+
+	returnSlice = SimplifyLikeTermsInParenthesis(returnSlice)
+
+	return returnSlice
+
+}
+
+
+func MultiplyTwoSVars(sVar1 SVar, sVar2 SVar) SVar {
+
+	return SVar{(sVar1.Multiplier*sVar2.Multiplier),  (sVar1.Exponent + sVar2.Exponent)}
+
+}
+
+
+func SimplifyLikeTermsInParenthesis(items []SVar) []SVar {
+
+	powerMap := make(map[complex128][]complex128) 
+
+	for i := 0; i < len(items); i++ {
+		if(powerMap[items[i].Exponent] == nil){
+			powerMap[items[i].Exponent] = []complex128{items[i].Multiplier}
+		}else{
+			powerMap[items[i].Exponent] = append(powerMap[items[i].Exponent], items[i].Multiplier)
+		}
+	}
+
+
+	returnSlice := []SVar{}
+
+	for exponent, multipliers := range powerMap {
+
+		multiplierSum := complex(0, 0)
+
+		for i := 0; i < len(multipliers); i++ {
+			multiplierSum = multiplierSum + multipliers[i]
+		}
+
+
+		returnSlice = append(returnSlice, SVar{multiplierSum, exponent})
+
+	}
+
+	return returnSlice
+
+
+}
+
+
+
+// func PrettyPrintNumerator(num Numerator) {
+
+// 	SVarsString := ""
+
+// 	for i := 0; i < len(num.Items); i++ {
+// 		if(i == 0){
+// 			SVarsString = SVarsString + num.Items[i]
+// 		}else{
+
+// 			SVarsString = SVarsString + " + (" + num.Items[i].Multiplier + ")* S ^ " + num.Items[i].Exponent + " "
+// 		}
+		
+// 	}
+
+
+// 	fmt.Println("Numerator", SVarsString)
+// }
+
+// func PrettyPrintDenominator(denom Denominator){
+
+// 	SVarsString := ""
+
+// 	for i := 0; i < len(denom.ParenthesisTerms); i++ {
+
+// 		SVarsString = SVarsString + "( "
+
+// 		for j := 0; j < len(denom.Items); j++ {
+// 			if(j == 0){
+// 				SVarsString = SVarsString + denom.Items[j].Multiplier + ")* S ^ " + denom.Items[j].Exponent + " "
+// 			}else{
+// 				SVarsString = SVarsString + " + (" + denom.Items[j].Multiplier + ")* S ^ " + denom.Items[j].Exponent + " "
+// 			}
+			
+// 		}
+
+// 		SVarsString = SVarsString + ") "
+// 	}
+
+// 	fmt.Println("Denominator", SVarsString)
+		
+// }
+
+// func PrettyPrintAddedNumerator(sVarSlices [][]SVar) {
+
+// 	SVarsString := ""
+
+// 	for i := 0; i < len(sVarSlices); i++ {
+
+// 		SVarsString = SVarsString + "( "
+
+// 		currentSlice := sVarSlices[i]
+
+// 		for j := 0; j < len(currentSlice); j++ {
+// 			if(j == 0){
+// 				SVarsString = SVarsString + "(" + fmt.Sprintf("%#v", currentSlice[j].Multiplier) + ")* S ^ " + fmt.Sprintf("%#v", currentSlice[j].Exponent) + " "
+// 			}else{
+// 				SVarsString = SVarsString + " + (" + fmt.Sprintf("%#v", currentSlice[j].Multiplier) + ")* S ^ " + fmt.Sprintf("%#v", currentSlice[j].Exponent) + " "
+// 			}
+			
+			
+// 		}
+
+// 		SVarsString = SVarsString + ") "
+// 	}
+
+// 	fmt.Println("Numerator", SVarsString)
+// }
+
+// func PrettyPrintAddedDenominator(denom []Parenthesis) {
+// 	SVarsString := ""
+
+
+// 	for i := 0; i < len(denom); i++ {
+
+// 		SVarsString = SVarsString + "( "
+
+// 		currentSlice := denom[i].Items
+
+// 		for j := 0; j < len(currentSlice); j++ {
+// 			if(j == 0){
+// 				SVarsString = SVarsString + "(" + fmt.Sprintf("%#v", currentSlice[j].Multiplier) + ")* S ^ " + fmt.Sprintf("%#v", currentSlice[j].Exponent) + " "
+// 			}else{
+// 				SVarsString = SVarsString + " + (" + fmt.Sprintf("%#v", currentSlice[j].Multiplier) + ")* S ^ " + fmt.Sprintf("%#v", currentSlice[j].Exponent) + " "
+// 			}
+			
+			
+// 		}
+
+// 		SVarsString = SVarsString + ") "
+// 	}
+
+// 	fmt.Println("Denominator", SVarsString)
+// }
+
+func PrettyPrintParenthesis(p Parenthesis) {
+
+}
+func PrettyPrintSVar(s SVar) {
+
+}
+
+
+
+
+
+
+
+
 
