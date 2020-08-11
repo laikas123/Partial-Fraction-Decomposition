@@ -4,7 +4,7 @@ package main
 import(
 
 	"fmt"
-
+	"sort"
 )
 
 
@@ -13,6 +13,8 @@ type SVar struct {
 	Exponent complex128
 
 }
+
+
 
 func(s SVar) ItemType() string{
 	return "s"
@@ -147,7 +149,7 @@ func CreateSystemOfEquationsForFractionToUndergoPartialFractionDecomposition(fra
 
 	// //these will be the top terms in partial fraction decomposition, IE: as+b, c, ds+e
 	// //the values depend on the denominator beneath them
-	numeratorsForSystem :=  [][]SVar{}
+	numeratorsForSystem :=  []Parenthesis{}
 
 	denominatorsForSystem := []Parenthesis{}
 
@@ -176,21 +178,21 @@ func CreateSystemOfEquationsForFractionToUndergoPartialFractionDecomposition(fra
 			fmt.Println("cycle", i)
 			//if less than 2 power plug in S^0
 			if(highestPowerInParenthesis < 2){
-				numeratorsForSystem = append(numeratorsForSystem, []SVar{SVar{complex(1, 0), complex(0, 0)}})
+				numeratorsForSystem = append(numeratorsForSystem, Parenthesis{[]SVar{SVar{complex(1, 0), complex(0, 0)}}, complex(1, 0)})
 				denominatorsForSystem = append(denominatorsForSystem, FoilOutParenthesisToSomePower(pItem, (i+1)))
 			
 				fmt.Println("case 1")
 
 			//if the highest power is 2 but it is a lone term, then same deal S^0
 			}else if(highestPowerInParenthesis == 2 && len(pItem.Items) == 1){
-				numeratorsForSystem = append(numeratorsForSystem, []SVar{SVar{complex(1, 0), complex(0, 0)}})	
+				numeratorsForSystem = append(numeratorsForSystem, Parenthesis{[]SVar{SVar{complex(1, 0), complex(0, 0)}}, complex(1, 0) })	
 				denominatorsForSystem = append(denominatorsForSystem, FoilOutParenthesisToSomePower(pItem, (i+1)))
 	
 				fmt.Println("case 2")			
 
 			//if quadratic then plug in S^1 + S^0
 			}else if(highestPowerInParenthesis == 2 && len(pItem.Items) == 1){
-				numeratorsForSystem = append(numeratorsForSystem, []SVar{SVar{complex(1, 0), complex(1, 0)}, SVar{complex(1, 0), complex(0, 0)}})		
+				numeratorsForSystem = append(numeratorsForSystem, Parenthesis{[]SVar{SVar{complex(1, 0), complex(1, 0)}, SVar{complex(1, 0), complex(0, 0)}}, complex(1, 0) })		
 				denominatorsForSystem = append(denominatorsForSystem, FoilOutParenthesisToSomePower(pItem, (i+1)))
 			
 				fmt.Println("case 3")
@@ -215,8 +217,32 @@ func CreateSystemOfEquationsForFractionToUndergoPartialFractionDecomposition(fra
 	}
 
 
+	allNewParenthesis := [][]Parenthesis{}
 
-	
+	for i := 0; i < len(numeratorsForSystem); i++ {
+
+		specificVarsParenthesis := []Parenthesis{}
+
+		for j := 0; j < len(denominatorsForSystem); j++ {
+			if(j != i){
+				newParenthesis := FoilTwoDifferentParenthesisOnce(numeratorsForSystem[i], denominatorsForSystem[j])
+				newParenthesis.Items = SimplifyLikeTermsInParenthesis(newParenthesis.Items)
+				newParenthesis.Items = SortSVarSliceByExponentLeftToRightGreatestToLeast(newParenthesis.Items)
+				specificVarsParenthesis = append(specificVarsParenthesis, newParenthesis)
+			}
+		}
+
+		allNewParenthesis = append(allNewParenthesis, specificVarsParenthesis)
+
+	}
+	fmt.Println("new parenthesis for system")
+	for i := 0; i < len(allNewParenthesis); i++ {
+		fmt.Println("Group ", i+1)
+		for j := 0; j < len(allNewParenthesis[i]); j++ {
+			fmt.Printf("%#v\n", allNewParenthesis[i][j])
+		}
+		
+	}
 
 
 	// //IMPORTANT THING TO NOTE... I DID NOT KNOW THIS BEFORE, BUT FOR PARTIAL FRACTION 
@@ -488,7 +514,30 @@ func GetHighestPowerOfSInSliceEquationItems(items []SVar) int {
 
 }
 
+func FoilTwoDifferentParenthesisOnce(parenthesisData1 Parenthesis, parenthesisData2 Parenthesis) Parenthesis {
 
+	resultParenthesis := Parenthesis{[]SVar{}, complex(1, 0)}
+
+	for i := 0; i < len(parenthesisData1.Items); i++ {
+
+		currentItem := parenthesisData1.Items[i]
+
+		for j := 0; j < len(parenthesisData2.Items); j++ {
+
+			newItem := MultiplyTwoSVars(currentItem, parenthesisData2.Items[j])
+
+			resultParenthesis.Items = append(resultParenthesis.Items, newItem)
+
+		}
+
+	}
+
+	resultParenthesis.Items = SimplifyLikeTermsInParenthesis(resultParenthesis.Items)
+
+	return resultParenthesis
+
+
+}
 
 
 
@@ -681,6 +730,51 @@ func SimplifyLikeTermsInParenthesis(items []SVar) []SVar {
 // 	fmt.Println("Denominator", SVarsString)
 // }
 
+
+func SortSVarSliceByExponentLeftToRightGreatestToLeast(sVarSlice []SVar) []SVar {
+
+	
+
+	
+
+	exponentsSlice := []int{}
+
+	for i := 0; i < len(sVarSlice); i++ {
+		exponentsSlice = append(exponentsSlice, int(real(sVarSlice[i].Exponent)))
+	}
+
+	copyExponentSlice := make([]int, len(exponentsSlice))
+
+	itemsCopied := copy(copyExponentSlice, exponentsSlice)
+
+	if(itemsCopied != len(exponentsSlice)){
+		panic("invalid copy SortSVarSliceByExponentLeftToRightGreatestToLeast()")
+	}
+
+	copyExponentSliceAsIntSlice := sort.IntSlice(copyExponentSlice)
+
+	copyExponentSliceAsIntSlice.Sort()
+
+	for i := 0; i < len(copyExponentSliceAsIntSlice); i++ {
+
+		value := copyExponentSliceAsIntSlice[i]
+
+		for j := 0; j < len(exponentsSlice); j++ {
+			if(exponentsSlice[j] == value){
+				sVarSlice = SwapSVarIndices(sVarSlice, i, j)
+				break
+			}
+		}
+
+	}
+
+	return sVarSlice
+
+
+
+}
+
+
 func PrettyPrintParenthesis(p Parenthesis) {
 
 }
@@ -690,7 +784,15 @@ func PrettyPrintSVar(s SVar) {
 
 
 
+func SwapSVarIndices(sVarSlice []SVar, i int, j int) []SVar{
+	iCopy := sVarSlice[i]
+	jCopy := sVarSlice[j]
 
+	sVarSlice[i] = jCopy
+	sVarSlice[j] = iCopy
+
+	return sVarSlice
+}
 
 
 
