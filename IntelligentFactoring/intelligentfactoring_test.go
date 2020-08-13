@@ -123,4 +123,64 @@ func TestFoilingNeighborStyle(t *testing.T){
 	}
 }
 
+func TestQuadraticFactoringABCPresent(t *testing.T){
+
+
+	equation := [][]complex128{gOP(), gNum(2, 2, -3, 1, 5, 0), gCP(1), gOP(), gCP(1), gOP(), gCP(1), gOP(), gCP(1), gOP(), gCP(1), gOP(), gCP(1), gOP(), gNum(2, 2, -3, 1, 5, 0), gCP(1), gOP(), gOP(), gCP(1), gCP(1)}       
+
+	fmt.Println("initial", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+	
+	equation = FactorQuadraticsWithABCAllPresent(equation)
+
+	equation = RemoveParenthesisWith0DirectChildren(equation)
+
+	fmt.Println(" after", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+
+
+
+	if(false){
+		t.Errorf("failure")
+	}
+}
+
+
+func TestQuadraticFactoringABOnlyPresent(t *testing.T){
+
+
+	equation := [][]complex128{gOP(), gNum(3, 2, 9, 1), gCP(1)}       
+
+	fmt.Println("initial", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+	
+	equation = FactorQuadraticsWithABOnlyPresent(equation)
+
+	// equation = RemoveParenthesisWith0DirectChildren(equation)
+
+	fmt.Println(" after", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+
+
+
+	if(false){
+		t.Errorf("failure")
+	}
+}
+
+func TestQuadraticFactoringACOnlyPresent(t *testing.T){
+
+
+	equation := [][]complex128{gOP(), gNum(3, 2, 9, 0), gCP(1)}       
+
+	fmt.Println("initial", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+	
+	equation = FactorQuadraticsWithACOnlyPresent(equation)
+
+	// equation = RemoveParenthesisWith0DirectChildren(equation)
+
+	fmt.Println(" after", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+
+
+
+	if(false){
+		t.Errorf("failure")
+	}
+}
 

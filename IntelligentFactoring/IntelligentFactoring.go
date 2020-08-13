@@ -23,40 +23,17 @@ import (
 func main() {
 	
 
-	equation := [][]complex128{gOP(), gNum(2, 3, 3, 0), gCP(3),  gOP(), gOP(), gNum(3, 2, 1, 1, 3, 0), gCP(1), gOP(), gNum(2, 1, 1, 0), gCP(2), gCP(1)}       
+	// equation := [][]complex128{gOP(), gNum(2, 3, 3, 0), gCP(3) }
 
+	equation := [][]complex128{gOP(), gOP(), gNum(3,0), gCP(1), gOP(), gNum(1, 1, 2, 0), gCP(2), gNum(3, 0), gCP(1)}       
 
-	equation = DetectAndFactorQuadratics(equation)
+	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
 
-	equation = RemoveUnusedParenthesis(equation)
-
-	CheckEquationForSyntaxErrors(equation, "main()")
-
-
-
-	foiledEquation := FoilAllNeighboringParenthesis(equation)
+	panic("test")
 
 
 
-	CheckEquationForSyntaxErrors(foiledEquation, "main()")
-	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
-	foiledEquation = FoilAllNeighboringParenthesis(equation)
-	
-	CheckEquationForSyntaxErrors(foiledEquation, "main()")
 
-	
-	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
-	
-	
-
-	CheckEquationForSyntaxErrors(foiledEquation, "main()")
-
-	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
-	foiledEquation = FoilAllNeighboringParenthesis(equation)
-	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
-	
-	
-	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
 	// foiledEquation = FoilAllNeighboringParenthesis(foiledEquation)
 
 	// fmt.Println(DecodeFloatSliceToEquation(foiledEquation))
@@ -651,14 +628,6 @@ func FoilNeighborParenthesis(equationInput [][]complex128) [][]complex128 {
 }
 
 
-func FactorQuadraticsWithABCAllPresent(equation [][]complex128)[][]complex128 {
-
-	
-
-	
-}
-
-
 
 
 func MultiplyNeighboringParenthesis(numbers1 []complex128, numbers2 []complex128) []complex128{
@@ -795,447 +764,470 @@ func MultiplyNeighboringParenthesis(numbers1 []complex128, numbers2 []complex128
 
 
 
+func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex128 {
 
+	
+	CheckEquationForSyntaxErrors(equationInput, "FactorQuadraticsWithABCAllPresent()")
 
+	equation := CleanCopyEntire2DComplex128Slice(equationInput)
 
-// // //for two parenthesis to be eligible to foil..
-// // //they need to be at the same depth level
-// // //and the operator between them needs to be multiplication '*'
+	numbersHolder := []complex128{}
 
-func FoilAllNeighboringParenthesis(equation [][]complex128) [][]complex128 {
+	indexOpener := -1
 
-	fmt.Println(equation)
-	// fmt.Println(DecodeFloatSliceToEquation(equation))
+	indexCloser := -1
 
-	equation = RemoveUnusedParenthesis(equation)
+	foundValid := false
 
-	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+	aTerm := complex(0, 0)
 
-	CheckEquationForSyntaxErrors(equation, "FoilAllNeighboringParenthesis()")
+	bTerm := complex(0, 0)
 
-	fmt.Println("makes it here 3")
+	cTerm := complex(0, 0)
 
-	equation = RemoveUnusedParenthesis(equation)
+	for i := 0; i < len(equation); i ++ {
 
-	fmt.Println("makes it here 4")
-
-	CheckEquationForSyntaxErrors(equation, "FoilAllNeighboringParenthesis()")
-
-	fmt.Println("makes it here 5")
-
-
-	depthLevel := 0
-
-	foilStateMachine := 0
-
-	foilStateMachinePrevious := 0
-
-	numbersToFoilFirstTerm := []complex128{}
-
-	numbersToFoilSecondTerm := []complex128{}
-
-	previousTerm := []complex128{0, -1}
-
-	foilStart := -1
-
-	foilEnd := -1
-
-	foundFoil := false
-
-	indexOfLastOpeningParenthesis := -1
-
-	timesToFoil := 1
-
-	for i := 0; i < len(equation); i++ {
-
-		if(foundFoil){
+		if(foundValid){
 			break
 		}
 
-		currentItem := equation[i]
+		if(IsOP(equation[i][0], equation[i][1])){
 
-		for j := 0; j < len(currentItem); j = (j+2) {
-			
-			firstIndex := currentItem[j]
-			secondIndex := currentItem[j+1]
+			indexOpener = i
 
+			checkingIfValid := true
 
-			previousFirstIndex := previousTerm[0]
-			previousSecondIndex := previousTerm[1]
+			sawOneIntAndIsValidQuadratic := false
 
-			// fmt.Println("current item", currentItem)
-			// fmt.Println("previous item", previousTerm)
+			cursor := i
 
-			if(IsOP(firstIndex, secondIndex)){
-				
-				indexOfLastOpeningParenthesis = i
+			numbersHolder = []complex128{}
+		
 
-				// fmt.Println("is OP")
-				depthLevel++ 
-				if(foilStateMachine == 0){
-					foilStateMachine = 1
-					foilStart = i					
+			for checkingIfValid {
+
+				cursor++
+
+				//cursor is out of bounds, nothing to check
+				if(cursor >= len(equation)){
+					return equation
 				}
-				
-				
-				if(IsOP(previousFirstIndex, previousSecondIndex)){
-					// fmt.Println("previous is OP")
-					if(foilStateMachine == 4){
-						foilStateMachine = 1
-						numbersToFoilFirstTerm = []complex128{}
-						numbersToFoilSecondTerm = []complex128{}
-						foilStart = i
-					}
-				}else if(IsCP(previousTerm)){
-					// fmt.Println("previous is CP")
-					if(foilStateMachine == 3){
-						foilStateMachine = 4
-					}
-					
-				}else if(IsNumber(previousFirstIndex)){
-					// fmt.Println("previous is Numbers")
-				}else{
-					
-					//-1 is given for the previous term second index of the first
-					//cycle since there is no previous term 
-					//this is the only place in all if else needed to check
-					//since first term is always opening parenthesis
-					if(previousFirstIndex == 0 && previousSecondIndex != -1){
-						panic("unknown equation item FoilAllNeighboringParenthesis()")	
-					}	
-					
-				}
-			}else if(IsCP(currentItem)){
 
-				// fmt.Println("is CP")
+				if(!sawOneIntAndIsValidQuadratic){
+					if(IsNumber(equation[cursor][0]) && len(equation[cursor]) == 6){
+						numbersHolder = append(numbersHolder, equation[cursor]...)
+						secondDegreeExponentPresent := false
+						firstDegreeExponentPresent := false
+						zeroDegreeExponentPresent := false
 
+						for k := 0; k < len(equation[cursor]); k = (k+2) {
 
+							if(real(equation[cursor][k+1]) == 2){
+								secondDegreeExponentPresent = true
+								aTerm = equation[cursor][k]
+							}else if(real(equation[cursor][k+1]) == 1){
+								firstDegreeExponentPresent = true
+								bTerm = equation[cursor][k]
+							}else if(real(equation[cursor][k+1]) == 0){
+								zeroDegreeExponentPresent = true
+								cTerm = equation[cursor][k]
+							}
 
-				depthLevel--
+						}						
 
-				if(real(currentItem[2]) > 1){
-					foilStart = indexOfLastOpeningParenthesis
-					foilEnd = i	
-					//TODO: when fractional exponents are added this needs a better method
-					timesToFoil = int(real(currentItem[2]) - 1)
-					foundFoil = true
-					if(foilStateMachine == 2){
-						numbersToFoilSecondTerm = numbersToFoilFirstTerm
-					}else if(foilStateMachine == 5){
-						numbersToFoilFirstTerm = numbersToFoilSecondTerm
+						if(secondDegreeExponentPresent && firstDegreeExponentPresent && zeroDegreeExponentPresent){
+							sawOneIntAndIsValidQuadratic = true
+						}else{
+							break
+						}
+
+						
 					}else{
-						panic("should have been in state 2 or 5 FoilAllNeighboringParenthesis()")
+						//there was no integer after the opening parenthesis, not valid
+						checkingIfValid = false
+						break
+					}
+				}else if(sawOneIntAndIsValidQuadratic){
+					if(IsNumber(equation[cursor][0])){
+						//there should only be one set of numbers inside parenthesis this should not be possible
+						panic("interesting case, should not get here FactorQuadraticsWithABCAllPresent()")
+						continue
+					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
+						checkingIfValid = false
+						break
+					}else if IsCP(equation[cursor]){
+						indexCloser = cursor
+						//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
+						checkingIfValid = false
+						foundValid = true
+						break
 					}
 				}
-				if(IsOP(previousFirstIndex, previousSecondIndex)){
-					// fmt.Println("previous is OP")
-				}else if(IsCP(previousTerm)){
-					// fmt.Println("previous is CP")
-				}else if(IsNumber(previousFirstIndex)){
-					// fmt.Println("previous is Numbers")
-					if(foilStateMachine == 2){
-						foilStateMachine = 3
-					}
-					if(foilStateMachine == 5){
-						foilStateMachine = 6
-						foilEnd = i
-						foundFoil = true
-					}
-				}else{
-					fmt.Println(currentItem)
-					panic("unknown equation item FoilAllNeighboringParenthesis()")	
-				}						
-			}else if(IsNumber(firstIndex)){
 
-				// fmt.Println("is Numbers")
-
-
-				if(IsOP(previousFirstIndex, previousSecondIndex)){
-					// fmt.Println("previous is OP")
-					if(foilStateMachine == 1){
-						foilStateMachine = 2
-						numbersToFoilFirstTerm = append(numbersToFoilFirstTerm, gNum(firstIndex, secondIndex)...)
-					}
-					if(foilStateMachine == 4){
-						foilStateMachine = 5
-						numbersToFoilSecondTerm = append(numbersToFoilSecondTerm, gNum(firstIndex, secondIndex)...)
-					}
-				}else if(IsCP(previousTerm)){
-					// fmt.Println("previous is CP")
-				}else if(IsNumber(previousFirstIndex)){
-					// fmt.Println("previous is Numbers")
-					if(foilStateMachine == 2){
-						foilStateMachine = 2
-						numbersToFoilFirstTerm = append(numbersToFoilFirstTerm, gNum(firstIndex, secondIndex)...)
-					}
-					if(foilStateMachine == 5){
-						foilStateMachine = 5
-						numbersToFoilSecondTerm = append(numbersToFoilSecondTerm, gNum(firstIndex, secondIndex)...)
-					}
-				}else{
-					fmt.Println(currentItem)
-					panic("unknown equation item FoilAllNeighboringParenthesis()")	
-				}												
-			}else{
-				fmt.Println(currentItem)
-				panic("unknown equation item FoilAllNeighboringParenthesis()")	
-			}						
-
-
-			// fmt.Println("previous foil state machine", foilStateMachinePrevious)
-			// fmt.Println("current foil state machine", foilStateMachine)
-
-			if( (foilStateMachinePrevious == foilStateMachine) && foilStateMachine != 1 && foilStateMachine != 2 && foilStateMachine != 5 && foilStateMachine != 0 && foilStateMachine != 4){
-				foilStateMachine = 0
-				foilStateMachinePrevious = 0
-				numbersToFoilFirstTerm = []complex128{}
-				numbersToFoilSecondTerm = []complex128{}
-			}else if(foilStateMachine == 7){
-				foundFoil = true
-				break
-
-			}else{
-				foilStateMachinePrevious = foilStateMachine
-			}
-
-			previousTerm = currentItem
-
-			if(IsCP(currentItem)){
-				break
 			}
 
 		}
 
-		
-		
-
 
 	}
 
+	if(foundValid){
 
-	if(foundFoil){
-
-		// fmt.Println(foilStart, foilEnd)
-
-		newSlice := []complex128{}
-
-
-
-		for timesToFoil > 0 {
-
-			// fmt.Println("first terms and second terms")
-			// fmt.Println(numbersToFoilFirstTerm)
-			// fmt.Println(numbersToFoilSecondTerm)
-
-			newSlice = []complex128{}
-
-			for i := 0; i < len(numbersToFoilFirstTerm); i = (i + 2) {
-
-				firstNumMultiplier := numbersToFoilFirstTerm[i]
-
-				firstNumExponent := numbersToFoilFirstTerm[i+1]
-
-
-				for j := 0; j < len(numbersToFoilSecondTerm); j = (j + 2) {
-
-					secondNumMultiplier := numbersToFoilSecondTerm[j]
-
-					secondNumExponent := numbersToFoilSecondTerm[j+1]
-
-					newNum := []complex128{firstNumMultiplier*secondNumMultiplier, firstNumExponent+secondNumExponent}
-
-
-					// fmt.Print("new num", newNum)
-
-					newSlice = append(newSlice, newNum...)
-
-
-
-				}
-
-			}
-			newSlice = SimplifyLikeTermsEquationSectionAndSortByDescendningExponent(newSlice)
-			// fmt.Println("newSlice iteration", newSlice)
-			numbersToFoilFirstTerm = make([]complex128, len(newSlice))
-			itemsCopied := copy(numbersToFoilFirstTerm, newSlice)
-
-			if(itemsCopied != len(newSlice)){
-				panic("invalid copy FoilAllNeighboringParenthesis()")
-			}
-			timesToFoil--
-		}
-
-		// fmt.Println("first terms and second terms")
-		// fmt.Println(numbersToFoilFirstTerm)
-		// fmt.Println(numbersToFoilSecondTerm)
-
-		// fmt.Println(newSlice)
-		newSlice = SimplifyLikeTermsEquationSectionAndSortByDescendningExponent(newSlice)
-		
-
-		return Substitute1DSliceInto2DSliceStartAndEnd(foilStart, foilEnd, newSlice, equation)
-
-
-	}else{
-		return equation
-	}
-
-
-}
-
-
-func SimplifyLikeTermsEquationSectionAndSortByDescendningExponent(equationSection []complex128) []complex128 {
-
-	termsMap := make(map[complex128][]complex128)
-
-
-
-	for i := 0; i < len(equationSection); i = (i + 2) {
-		if(termsMap[equationSection[i+1]] == nil){
-			termsMap[equationSection[i+1]] = []complex128{equationSection[i]}
+		if(aTerm == 0 || bTerm == 0 || cTerm == 0 ){
+			panic("too many or too few values for a value for quadratic formula")
 		}else{
-			termsMap[equationSection[i+1]] = append(termsMap[equationSection[i+1]], equationSection[i])
+
+			root1, root2 := QuadraticFormula(aTerm, bTerm, cTerm)
+
+			fmt.Println("root1", root1, "root2", root2)
+
+			root1Slice := []complex128{complex(1, 0), complex(1,0), -1*root1, complex(0,0)}
+
+			root2Slice := []complex128{complex(1, 0), complex(1,0), -1*root2, complex(0,0)}
+
+			slicesToInsert :=  [][]complex128{gOP(), root1Slice, gCP(1), gOP(), root2Slice, gCP(1)}			
+
+			returnEquation := [][]complex128{}
+
+			returnEquation = append(returnEquation, equation[0:indexOpener]...)
+			
+			returnEquation = append(returnEquation, slicesToInsert...)
+			
+			returnEquation = append(returnEquation, equation[indexCloser+1:len(equation)]...)
+		
+			returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
+
+			fmt.Println("RETURN EQUATION", strings.ReplaceAll(DecodeFloatSliceToEquation(returnEquation), " ", ""))		
+
+			//recursive call if there was a change will check if more foils possible
+			return FactorQuadraticsWithABCAllPresent(returnEquation)
 		}
-	}
+	}else{
 
-	exponentsSliceComplex := []complex128{}
-
-	exponentsSliceFloat := []float64{}
-
-	for exponents, _ := range termsMap {
-		exponentsSliceFloat = append(exponentsSliceFloat, real(exponents) )
-		exponentsSliceComplex = append(exponentsSliceComplex, exponents) 
-	}
+		//if no foils quadratic factors return input
+		return equation
+	}	
 
 
 
-	// sort.complex128s(exponentsSlice)
+}
 
-	// sort.Reverse(sort.complex128Slice(exponentsSlice))
 
-	copyToMatch := make([]float64, len(exponentsSliceFloat))
 
-	itemsCopied := copy(copyToMatch, exponentsSliceFloat)
+func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex128 {
 
-	if(itemsCopied != len(exponentsSliceFloat)){
-		panic("invalid number of items copied SimplifyLikeTermsEquationSectionAndSortByDescendningExponent()")
-	}
+	
+	CheckEquationForSyntaxErrors(equationInput, "FactorQuadraticsWithABOnlyPresent()")
 
-	sort.Sort(sort.Reverse(sort.Float64Slice((exponentsSliceFloat))))
+	equation := CleanCopyEntire2DComplex128Slice(equationInput)
 
-	newIndices := []int{}
+	numbersHolder := []complex128{}
 
-	for i := 0; i < len(copyToMatch); i++ {
+	indexOpener := -1
 
-		currentVal := copyToMatch[i]
+	indexCloser := -1
 
-		for j := 0; j < len(exponentsSliceFloat); j++ {
-			currentValInner := exponentsSliceFloat[j]
+	foundValid := false
 
-			if(currentVal == currentValInner){
-				newIndices = append(newIndices, j)
-				break
+	aTerm := complex(0, 0)
+
+	bTerm := complex(0, 0)
+
+
+	for i := 0; i < len(equation); i ++ {
+
+		if(foundValid){
+			break
+		}
+
+		if(IsOP(equation[i][0], equation[i][1])){
+
+			indexOpener = i
+
+			checkingIfValid := true
+
+			sawOneIntAndIsValidQuadratic := false
+
+			cursor := i
+
+			numbersHolder = []complex128{}
+		
+
+			for checkingIfValid {
+
+				cursor++
+
+				//cursor is out of bounds, nothing to check
+				if(cursor >= len(equation)){
+					return equation
+				}
+
+				if(!sawOneIntAndIsValidQuadratic){
+					if(IsNumber(equation[cursor][0]) && len(equation[cursor]) == 4){
+						numbersHolder = append(numbersHolder, equation[cursor]...)
+						secondDegreeExponentPresent := false
+						firstDegreeExponentPresent := false
+						
+						for k := 0; k < len(equation[cursor]); k = (k+2) {
+
+							if(real(equation[cursor][k+1]) == 2){
+								secondDegreeExponentPresent = true
+								aTerm = equation[cursor][k]
+							}else if(real(equation[cursor][k+1]) == 1){
+								firstDegreeExponentPresent = true
+								bTerm = equation[cursor][k]
+							}
+
+						}						
+
+						if(secondDegreeExponentPresent && firstDegreeExponentPresent){
+							sawOneIntAndIsValidQuadratic = true
+						}else{
+							break
+						}
+
+						
+					}else{
+						//there was no integer after the opening parenthesis, not valid
+						checkingIfValid = false
+						break
+					}
+				}else if(sawOneIntAndIsValidQuadratic){
+					if(IsNumber(equation[cursor][0])){
+						//there should only be one set of numbers inside parenthesis this should not be possible
+						panic("interesting case, should not get here FactorQuadraticsWithABOnlyPresent()")
+						continue
+					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
+						checkingIfValid = false
+						break
+					}else if IsCP(equation[cursor]){
+						indexCloser = cursor
+						//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
+						checkingIfValid = false
+						foundValid = true
+						break
+					}
+				}
+
 			}
+
 		}
 
 
 	}
 
-	sortedExponentsSliceComplex := make([]complex128, len(exponentsSliceComplex))
+	if(foundValid){
 
-	for i := 0; i < len(exponentsSliceComplex); i++ {
+		if(aTerm == 0 || bTerm == 0 ){
+			panic("too many or too few values for a value for quadratic formula")
+		}else{
 
-		sortedExponentsSliceComplex[newIndices[i]] = exponentsSliceComplex[i]
+			//scale so A is 1
 
-	}
+			aTermBeforeScale := aTerm
+
+			aTerm := aTerm/aTermBeforeScale
+
+			bTerm := bTerm/aTermBeforeScale
+
+			completingTheSquareTerm := cmplx.Pow((bTerm/2), 2)
+
+			cTerm := completingTheSquareTerm
+
+			root1, root2 := QuadraticFormula(aTerm, bTerm, cTerm)
+
+			fmt.Println("root1", root1, "root2", root2)
+
+			scaleDownASlice := []complex128{aTermBeforeScale, complex(0,0)}
+
+			root1Slice := []complex128{complex(1, 0), complex(1,0), -1*root1, complex(0,0)}
+
+			root2Slice := []complex128{complex(1, 0), complex(1,0), -1*root2, complex(0,0)}
+
+			completingTheSquareTermSlice := []complex128{(-1*cTerm*aTermBeforeScale), complex(0, 0)}
+
+			slicesToInsert :=  [][]complex128{gOP(), gOP(), scaleDownASlice, gCP(1), gOP(), root1Slice, gCP(1), gOP(), root2Slice, gCP(1), completingTheSquareTermSlice, gCP(1)}			
+
+			returnEquation := [][]complex128{}
+
+			returnEquation = append(returnEquation, equation[0:indexOpener]...)
+			
+			returnEquation = append(returnEquation, slicesToInsert...)
+			
+			returnEquation = append(returnEquation, equation[indexCloser+1:len(equation)]...)
+		
+			returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
+
+			fmt.Println("RETURN EQUATION", strings.ReplaceAll(DecodeFloatSliceToEquation(returnEquation), " ", ""))		
+
+			//recursive call if there was a change will check if more foils possible
+			return FactorQuadraticsWithABOnlyPresent(returnEquation)
+		}
+	}else{
+
+		//if no foils quadratic factors return input
+		return equation
+	}	
 
 
-	returnSlice := []complex128{}
+
+}
 
 
-	for i := 0; i < len(sortedExponentsSliceComplex); i++ {
 
-		currentMultipliers := termsMap[sortedExponentsSliceComplex[i]]
 
-		// fmt.Println("exponent", exponentsSlice[i])
-		// fmt.Println("multipliers", currentMultipliers)
+func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex128 {
 
-		mutlipliersAdded := complex128(0)
+	
+	CheckEquationForSyntaxErrors(equationInput, "FactorQuadraticsWithACOnlyPresent()")
 
-		for j := 0; j < len(currentMultipliers); j++ {
-			mutlipliersAdded += currentMultipliers[j]
+	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+
+	numbersHolder := []complex128{}
+
+	indexOpener := -1
+
+	indexCloser := -1
+
+	foundValid := false
+
+	aTerm := complex(0, 0)
+
+	cTerm := complex(0, 0)
+
+
+	for i := 0; i < len(equation); i ++ {
+
+		if(foundValid){
+			break
 		}
 
-		returnSlice = append(returnSlice, mutlipliersAdded)
-		returnSlice = append(returnSlice, sortedExponentsSliceComplex[i])
+		if(IsOP(equation[i][0], equation[i][1])){
+
+			indexOpener = i
+
+			checkingIfValid := true
+
+			sawOneIntAndIsValidQuadratic := false
+
+			cursor := i
+
+			numbersHolder = []complex128{}
+		
+
+			for checkingIfValid {
+
+				cursor++
+
+				//cursor is out of bounds, nothing to check
+				if(cursor >= len(equation)){
+					return equation
+				}
+
+				if(!sawOneIntAndIsValidQuadratic){
+					if(IsNumber(equation[cursor][0]) && len(equation[cursor]) == 4){
+						numbersHolder = append(numbersHolder, equation[cursor]...)
+						secondDegreeExponentPresent := false
+						zeroDegreeExponentPresent := false
+						
+
+						for k := 0; k < len(equation[cursor]); k = (k+2) {
+
+							if(real(equation[cursor][k+1]) == 2){
+								secondDegreeExponentPresent = true
+								aTerm = equation[cursor][k]
+							}else if(real(equation[cursor][k+1]) == 0){
+								zeroDegreeExponentPresent = true
+								cTerm = equation[cursor][k]
+							}
+
+						}						
+
+						if(secondDegreeExponentPresent && zeroDegreeExponentPresent){
+							sawOneIntAndIsValidQuadratic = true
+						}else{
+							break
+						}
+
+						
+					}else{
+						//there was no integer after the opening parenthesis, not valid
+						checkingIfValid = false
+						break
+					}
+				}else if(sawOneIntAndIsValidQuadratic){
+					if(IsNumber(equation[cursor][0])){
+						//there should only be one set of numbers inside parenthesis this should not be possible
+						panic("interesting case, should not get here FactorQuadraticsWithACOnlyPresent()")
+						continue
+					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
+						checkingIfValid = false
+						break
+					}else if IsCP(equation[cursor]){
+						indexCloser = cursor
+						//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
+						checkingIfValid = false
+						foundValid = true
+						break
+					}
+				}
+
+			}
+
+		}
 
 
 	}
 
-	return returnSlice
+	if(foundValid){
+
+		if(aTerm == 0 || cTerm == 0 ){
+			panic("too many or too few values for a value for quadratic formula")
+		}else{
+
+			//scale so A is 1
+
+			aTermBeforeScale := aTerm
+
+			aTerm = aTerm/aTermBeforeScale
+
+			cTerm = cTerm/aTermBeforeScale
+
+			fmt.Println("c term", cTerm)
+
+			scaleDownASlice := []complex128{aTermBeforeScale, complex(0,0)}
+
+			root1Slice := []complex128{complex(1, 0), complex(1,0), cmplx.Pow(cTerm, complex(0.5, 0)), complex(0, 0)}
+
+			root2Slice := []complex128{complex(1, 0), complex(1,0), (-1* cmplx.Pow(cTerm, complex(0.5, 0))), complex(0, 0)}
+
+			slicesToInsert :=  [][]complex128{gOP(), scaleDownASlice, gCP(1), gOP(), root1Slice, gCP(1), gOP(), root2Slice, gCP(1)}			
+
+			returnEquation := [][]complex128{}
+
+			returnEquation = append(returnEquation, equation[0:indexOpener]...)
+			
+			returnEquation = append(returnEquation, slicesToInsert...)
+			
+			returnEquation = append(returnEquation, equation[indexCloser+1:len(equation)]...)
+		
+			returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
+
+			//recursive call if there was a change will check if more foils possible
+			return FactorQuadraticsWithACOnlyPresent(returnEquation)
+		}
+	}else{
+
+		//if no foils quadratic factors return input
+		return equation
+	}	
+
 
 
 }
 
 
-func Substitute1DSliceInto2DSliceStartAndEnd(start int, end int, new1DSlice []complex128, equation [][]complex128) [][]complex128{
 
-	// fmt.Println("presub ", equation)
-
-
-
-	CheckEquationForSyntaxErrors(equation, "Substitute1DSliceInto2DSliceStartAndEnd()")
-	
-	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
-
-	fmt.Println("new 1D", new1DSlice)
-
-
-	fmt.Println("return slice 0 ", strings.ReplaceAll(DecodeFloatSliceToEquation(equation[0:start]), " ", ""))	
-
-	fmt.Println("return slice 0.5", strings.ReplaceAll(DecodeFloatSliceToEquation(equation[(end + 1): len(equation)]), " ", ""))	
-
-	
-
-	returnSlice := append(equation[0:start], []complex128{complex(0, 0,), complex(0, 0)})	
-
-	fmt.Println("return slice 1 ", strings.ReplaceAll(DecodeFloatSliceToEquation(returnSlice), " ", ""))	
-
-
-
-	returnSlice = append(returnSlice, new1DSlice)
-
-	fmt.Println("return slice 2 ", strings.ReplaceAll(DecodeFloatSliceToEquation(returnSlice), " ", ""))	
-
-	returnSlice = append(returnSlice, []complex128{complex(0, 0), complex(1, 0), complex(1, 0)})	
-
-	fmt.Println("return slice 3 ", strings.ReplaceAll(DecodeFloatSliceToEquation(returnSlice), " ", ""))	
-
-	returnSlice = append(returnSlice, equation[(end + 1): len(equation)]...)
-
-
-
-	fmt.Println("return slice 4 ", strings.ReplaceAll(DecodeFloatSliceToEquation(returnSlice), " ", ""))	
-
-	equation = RemoveUnusedParenthesis(equation)
-
-	fmt.Println("RESULT", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
-
-	fmt.Println("RAW DATA", equation)
-
-
-
-	// equation = RemoveUnusedParenthesis(equation)
-
-
-	CheckEquationForSyntaxErrors(equation, "Substitute1DSliceInto2DSliceStartAndEnd()")
-	
-
-	// fmt.Println("post sub", returnSlice)
-
-	return returnSlice
-
-}
 
 func IsOP(num1 complex128, num2 complex128) bool {
 	if(real(num1) == 0 && real(num2) == 0){
@@ -1337,167 +1329,6 @@ func RemoveUnusedParenthesis(equationInput [][]complex128) [][]complex128 {
 }
 
 
-
-
-func DetectAndFactorQuadratics(equation [][]complex128) [][]complex128 {
-
-	CheckEquationForSyntaxErrors(equation, "DetectAndFactorQuadratics")
-
-
-	for i := 0; i < len(equation); i++ {
-
-		currentItem := equation[i]
-
-		for j := 0; j < len(currentItem); j = (j+2) {
-
-			firstIndex := currentItem[j]
-			secondIndex := currentItem[j+1]
-
-			if(IsOP(firstIndex, secondIndex)){
-				
-				startIndexQuadratic := i
-
-				stopIndexQuadratic := i+2
-
-				if(IsNumber(equation[i+1][0]) && IsCP(equation[i+2])){
-					fmt.Println(i, j)
-					
-					numbers := equation[i+1]
-
-					//which really means 2 or 3 terms
-					if(len(numbers) == 4 || len(numbers) == 6){
-
-
-						aTerm := complex(0, 0)
-						bTerm := complex(0, 0)
-						cTerm := complex(0, 0)
-
-						
-
-						for k := 0; k < len(numbers); k = (k+2){
-							if(real(numbers[k + 1]) == 2){
-								aTerm = numbers[k]
-							}else if(real(numbers[k + 1]) == 1){
-								bTerm = numbers[k]
-							}else if(real(numbers[k + 1]) == 0){
-								cTerm = numbers[k]
-							}
-						}
-						//make sure the a term and at least one other number are there if 2 items
-						if( (IsNumber(aTerm) && IsNumber(bTerm) || IsNumber(aTerm) && IsNumber(cTerm)) && len(numbers) == 4){
-
-							//TODO MAKE THIS MATCH THE LOWER PORTION SO THAT IT WORKS LIKE THAT
-
-							fmt.Println(numbers)
-							leftTerm, rightTerm := QuadraticFormula(aTerm, bTerm, cTerm)
-
-							leftTermSlice := []complex128{complex(1, 0), complex(0, 0), leftTerm}
-							rightTermSlice := []complex128{complex(1, 0), complex(0, 0), rightTerm}
-
-
-							bothTerms := [][]complex128{leftTermSlice, rightTermSlice}
-
-							fmt.Println("first half", equation[0:startIndexQuadratic+1])
-							fmt.Println("second half", equation[stopIndexQuadratic:len(equation)])
-
-							returnEquation := append(equation[0:startIndexQuadratic+1], bothTerms...)
-							returnEquation = append(returnEquation, equation[stopIndexQuadratic:len(equation)]...)
-							fmt.Println("return equation", returnEquation)
-							fmt.Println("return equation", DecodeFloatSliceToEquation(returnEquation))
-							return DetectAndFactorQuadratics(returnEquation)
-
-						//make sure all terms are there if length 3
-						}else if(IsNumber(aTerm) && IsNumber(bTerm) && IsNumber(cTerm)){
-
-							fmt.Println("original equation", DecodeFloatSliceToEquation(equation))
-
-							fmt.Println(numbers)
-							leftTerm, rightTerm := QuadraticFormula(aTerm, bTerm, cTerm)
-
-							fmt.Println("left term ", leftTerm)
-							fmt.Println("right term", rightTerm)
-
-							leftTermSlice := []complex128{complex(1, 0), complex(1, 0), leftTerm, complex(0, 0),}
-							rightTermSlice := []complex128{complex(1, 0), complex(1, 0), rightTerm, complex(0, 0),}
-
-							fmt.Println("left term slice ", leftTermSlice)
-							fmt.Println("right term slice", rightTermSlice)
-
-							bothTerms := [][]complex128{leftTermSlice, rightTermSlice}
-
-							fmt.Println("first half", equation[0:startIndexQuadratic+1])
-							fmt.Println("middle", bothTerms)
-							fmt.Println("second half", equation[stopIndexQuadratic:len(equation)])
-
-							cleanCopyMainEquation := CleanCopyEntire2DComplex128Slice(equation)
-
-							returnEquation := append(cleanCopyMainEquation[0:startIndexQuadratic+1], []complex128{complex(0, 0), complex(0, 0)})
-							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
-							fmt.Println("return equation 1", DecodeFloatSliceToEquation(returnEquation))
-
-							returnEquation = append(returnEquation, leftTermSlice)
-							fmt.Println("return equation 2", DecodeFloatSliceToEquation(returnEquation))
-							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
-							returnEquation = append(returnEquation, []complex128{complex(0, 0), complex(1, 0), complex(1, 0)})
-							fmt.Println("return equation 3", DecodeFloatSliceToEquation(returnEquation))
-							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
-							returnEquation = append(returnEquation, []complex128{complex(0, 0), complex(0, 0)})
-							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
-							returnEquation = append(returnEquation, rightTermSlice)
-							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
-							returnEquation = append(returnEquation, []complex128{complex(0, 0), complex(1, 0), complex(1, 0)})
-							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
-							returnEquation = append(returnEquation, cleanCopyMainEquation[stopIndexQuadratic:len(cleanCopyMainEquation)]...)
-
-							fmt.Println("return equation 4", DecodeFloatSliceToEquation(returnEquation))
-							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
-
-							returnEquation = append(returnEquation, cleanCopyMainEquation[0])
-							
-
-							fmt.Println("return equation2", returnEquation)
-
-							returnEquation = RemoveUnusedParenthesis(returnEquation)
-
-							fmt.Println("return equation remove", returnEquation)
-
-							
-							fmt.Println("return equation", DecodeFloatSliceToEquation(returnEquation))
-
-
-							return DetectAndFactorQuadratics(returnEquation)
-						}
-
-					}
-
-
-
-				}
-
-
-				
-
-			}else if(IsCP(currentItem)){
-				
-			}else if(IsNumber(firstIndex)){
-
-			}else{
-				panic("unknown item type RemoveUnusedParenthesis()")
-			}
-
-			if(len(currentItem) == 3){
-				break	
-			}
-		}
-	}
-
-
-	return equation
-	
-
-
-
-}
 
 
 
@@ -1725,7 +1556,63 @@ func TwoEquationsAreExactlyIdentical(equation1 [][]complex128, equation2 [][]com
 }
 
 
+func RemoveParenthesisWith0DirectChildren(equationInput [][]complex128) [][]complex128 {
 
+	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+
+	breakAll := false
+
+	for i := 0; i < len(equation); i++ {
+
+		if(breakAll){
+			break
+		}
+
+		currentItem := equation[i]
+
+		for j := 0; j < len(currentItem); j = (j+2) {
+
+			firstIndex := currentItem[j]
+			secondIndex := currentItem[j+1]
+
+
+
+			if(i == 0 && !IsOP(firstIndex, secondIndex)){
+				panic("Syntax Error first item must be ( RemoveParenthesisWith0DirectChildren()")
+			}
+
+			if(IsOP(firstIndex, secondIndex)){
+				if(i+1 >= len(equation)){
+					return equation
+				}else if(IsCP(equation[i+1])){
+					//this is if the last 2 items are "( )"
+					if((i + 2) >= len(equation)){
+						equation = equation[0:i]
+					}else{
+						equation = append(equation[0:i], equation[(i+2):len(equation)]...)
+						breakAll = true
+						break
+					}
+				}	
+			}
+
+			if(IsCP(currentItem)){
+				break
+			}
+		
+		}
+	
+	}	
+
+	if(!TwoEquationsAreExactlyIdentical(equation, equationInput)){
+		return  RemoveParenthesisWith0DirectChildren(equation)
+	}else{
+		return equation
+	}
+	
+
+
+}
 
 
 
