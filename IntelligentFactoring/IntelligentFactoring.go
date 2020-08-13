@@ -16,6 +16,10 @@ import (
 //assumed to be 's'	
 
 
+
+//BIG TODO, OBVIOUSLY AT SOME POINT A NUMBER WILL GET ZEROED OUT, IT'S IMPORTANT THAT IT DOESN'T GET TREATED AS A PARENTHESIS
+//OTHERWISE THAT COULD MESS UP THE FLOW OF THINGS, BEGIN ADDING CHECKS FOR SUMMATIONS THAT RESULT IN 0
+
 func main() {
 	
 
@@ -26,34 +30,32 @@ func main() {
 
 	equation = RemoveUnusedParenthesis(equation)
 
-	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+	CheckEquationForSyntaxErrors(equation, "main()")
 
 
 
 	foiledEquation := FoilAllNeighboringParenthesis(equation)
-	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
+
+
+
+	CheckEquationForSyntaxErrors(foiledEquation, "main()")
 	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
 	foiledEquation = FoilAllNeighboringParenthesis(equation)
-	fmt.Println(foiledEquation)
-	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
-	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
-	fmt.Println(foiledEquation)
-	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
 	
-	fmt.Println("makes it here")
+	CheckEquationForSyntaxErrors(foiledEquation, "main()")
 
-fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
+	
 	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
-	fmt.Println("makes it here 1.5")
-	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
-	fmt.Println()
+	
+	
+
+	CheckEquationForSyntaxErrors(foiledEquation, "main()")
+
+	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
 	foiledEquation = FoilAllNeighboringParenthesis(equation)
-	fmt.Println("makes it here 2")
-	fmt.Println(foiledEquation)
 	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
 	
-	fmt.Println(foiledEquation)
-
+	
 	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
 	// foiledEquation = FoilAllNeighboringParenthesis(foiledEquation)
 
@@ -81,10 +83,12 @@ fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", 
 
 
 
-func DecodeFloatSliceToEquation(equation [][]complex128 ) string {
+func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
 
 //	CheckEquationForSyntaxErrors(equation)
 
+	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	
 	equationString := ""
 
 	depthLevel := 0
@@ -97,9 +101,9 @@ func DecodeFloatSliceToEquation(equation [][]complex128 ) string {
 			firstIndex := currentItem[j]
 			secondIndex := currentItem[j+1]
 
-			firstIndexString := strconv.FormatComplex(firstIndex, 'f', -1, 64)
+			firstIndexString := strconv.FormatFloat(real(firstIndex), 'f', -1, 64)
 
-			secondIndexString := strconv.FormatComplex(secondIndex, 'f', -1, 64)
+			secondIndexString := strconv.FormatFloat(real(secondIndex), 'f', -1, 64)
 			
 
 
@@ -109,7 +113,7 @@ func DecodeFloatSliceToEquation(equation [][]complex128 ) string {
 			}else if(IsCP(currentItem)){
 				equationString += " )"
 				if(currentItem[j+2] != 0 && currentItem[j+2] != 1){
-					equationString += "^" + strconv.FormatComplex(currentItem[2], 'f', -1, 64) + " "
+					equationString += "^" + strconv.FormatFloat(real(currentItem[2]), 'f', -1, 64) + " "
 				}
 				depthLevel--
 			}else if(IsNumber(firstIndex)){
@@ -173,10 +177,17 @@ func DecodeFloatSliceToEquation(equation [][]complex128 ) string {
 
 	for i := 0; i < len(plusIndicesToRemove); i++ {
 
-		equationString = equationString[0:plusIndicesToRemove[i]] + equationString[(plusIndicesToRemove[i] + 1):len(equationString)]
+		if(plusIndicesToRemove[i] < len(equationString) && plusIndicesToRemove[i] > 0 ){
 
-		for j := 0; j < len(plusIndicesToRemove); j++ {
-			plusIndicesToRemove[j]--
+
+
+			equationString = equationString[0:plusIndicesToRemove[i]] + equationString[(plusIndicesToRemove[i] + 1):len(equationString)]
+
+			for j := 0; j < len(plusIndicesToRemove); j++ {
+				plusIndicesToRemove[j]--
+			}
+
+
 		}
 	}
 
@@ -220,6 +231,101 @@ func gCP(exponent complex128) []complex128 {
 }
 
 
+
+
+// finds "(" followed by numbers followed by ")^x" where x is some power greater than 1
+
+func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]complex128 {
+
+	CheckEquationForSyntaxErrors(equationInput, "FoilOutParenthesisRaisedToExponent()")
+
+	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+
+	numbersHolder := []complex128{}
+
+	indexOpener := -1
+
+	indexCloser := -1
+
+	foundValid := false
+
+	for i := 0; i < len(equation); i ++ {
+
+		if(foundValid){
+			break
+		}
+
+		if(IsOP(equation[i][0], equation[i][1])){
+
+			indexOpener := i
+
+			checkingIfValid := true
+
+			sawOneInt := false
+
+			cursor := i
+		
+
+			for checkingIfValid {
+
+				cursor++
+
+				//cursor is out of bounds, nothing to check
+				if(cursor >= len(equation)){
+					return equation
+				}
+
+				if(!sawOneInt){
+					if(IsNumber(equation[cursor][0])){
+						numbersHolder = append(numbersHolder, equation[cursor])
+						sawOneInt = true
+					}else{
+						//there was no integer after the opening parenthesis, not valid
+						checkingIfValid = false
+						break
+					}
+				}else if(sawOneInt){
+					if(IsNumber(equation[cursor][0])){
+						//there should only be one set of numbers inside parenthesis this should not be possible
+						panic("interesting case, should not get here FoilOutParenthesisRaisedToExponent()")
+						continue
+					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
+						checkingIfValid = false
+						break
+					}else if IsCP(equation[cursor]){
+						indexCloser = cursor
+						checkingIfValid = false
+						foundValid = true
+						break
+					}
+				}
+
+			}
+
+		}
+
+
+	}
+
+
+
+
+
+
+
+
+}
+
+
+
+func MultiplyParenthesisGivenExponent(){
+	
+} 
+
+
+
+
+
 // // //for two parenthesis to be eligible to foil..
 // // //they need to be at the same depth level
 // // //and the operator between them needs to be multiplication '*'
@@ -233,11 +339,18 @@ func FoilAllNeighboringParenthesis(equation [][]complex128) [][]complex128 {
 
 	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
 
-	CheckEquationForSyntaxErrors(equation)
+	CheckEquationForSyntaxErrors(equation, "FoilAllNeighboringParenthesis()")
 
 	fmt.Println("makes it here 3")
 
 	equation = RemoveUnusedParenthesis(equation)
+
+	fmt.Println("makes it here 4")
+
+	CheckEquationForSyntaxErrors(equation, "FoilAllNeighboringParenthesis()")
+
+	fmt.Println("makes it here 5")
+
 
 	depthLevel := 0
 
@@ -597,15 +710,53 @@ func Substitute1DSliceInto2DSliceStartAndEnd(start int, end int, new1DSlice []co
 
 	// fmt.Println("presub ", equation)
 
+
+
+	CheckEquationForSyntaxErrors(equation, "Substitute1DSliceInto2DSliceStartAndEnd()")
 	
-	returnSlice := append(equation[0:start], []complex128{0, 0})	
+	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+
+	fmt.Println("new 1D", new1DSlice)
+
+
+	fmt.Println("return slice 0 ", strings.ReplaceAll(DecodeFloatSliceToEquation(equation[0:start]), " ", ""))	
+
+	fmt.Println("return slice 0.5", strings.ReplaceAll(DecodeFloatSliceToEquation(equation[(end + 1): len(equation)]), " ", ""))	
+
+	
+
+	returnSlice := append(equation[0:start], []complex128{complex(0, 0,), complex(0, 0)})	
+
+	fmt.Println("return slice 1 ", strings.ReplaceAll(DecodeFloatSliceToEquation(returnSlice), " ", ""))	
+
+
 
 	returnSlice = append(returnSlice, new1DSlice)
 
-	returnSlice = append(returnSlice, []complex128{0, 1, 1})	
+	fmt.Println("return slice 2 ", strings.ReplaceAll(DecodeFloatSliceToEquation(returnSlice), " ", ""))	
+
+	returnSlice = append(returnSlice, []complex128{complex(0, 0), complex(1, 0), complex(1, 0)})	
+
+	fmt.Println("return slice 3 ", strings.ReplaceAll(DecodeFloatSliceToEquation(returnSlice), " ", ""))	
 
 	returnSlice = append(returnSlice, equation[(end + 1): len(equation)]...)
 
+
+
+	fmt.Println("return slice 4 ", strings.ReplaceAll(DecodeFloatSliceToEquation(returnSlice), " ", ""))	
+
+	equation = RemoveUnusedParenthesis(equation)
+
+	fmt.Println("RESULT", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+
+	fmt.Println("RAW DATA", equation)
+
+
+
+	// equation = RemoveUnusedParenthesis(equation)
+
+
+	CheckEquationForSyntaxErrors(equation, "Substitute1DSliceInto2DSliceStartAndEnd()")
 	
 
 	// fmt.Println("post sub", returnSlice)
@@ -637,7 +788,9 @@ func IsNumber(num1 complex128) bool {
 }
 
 
-func CheckEquationForSyntaxErrors(equation [][]complex128) {
+func CheckEquationForSyntaxErrors(equation [][]complex128, parentFunction string) {
+
+	fmt.Println("Parent Function", parentFunction)
 
 	depthLevel := 0
 
@@ -687,217 +840,23 @@ func CheckEquationForSyntaxErrors(equation [][]complex128) {
 }
 
 
-func RemoveUnusedParenthesis(equation [][]complex128) [][]complex128 {
-
-	for (IsOP(equation[len(equation)-1][0], equation[len(equation)-1][1])) {
-		equation = equation[0:(len(equation)-1)]
-	} 
-	
-	// fmt.Println("initial parentheis remove check", equation)
-	// fmt.Println(DecodeFloatSliceToEquation(equation))	
-
-	tooManyClosingParenthesis := true
-
-	last3Counts := [][]int{}
-
-	for tooManyClosingParenthesis {
-
-		openingParenthesisCount := 0
-		closingParenthesisCount := 0
+func RemoveUnusedParenthesis(equationInput [][]complex128) [][]complex128 {
 
 
-		for i := 0; i < len(equation); i++ {
-			if(IsOP(equation[i][0], equation[i][1])){
-				openingParenthesisCount++
-			}else if(IsCP(equation[i])){
-				closingParenthesisCount++
-			}
-
-		}
-
-		fmt.Println("parenthesis count ", openingParenthesisCount, closingParenthesisCount)
-
-		if(closingParenthesisCount > openingParenthesisCount){
-			if(IsCP(equation[len(equation) - 1])){
-				equation = equation[0:len(equation)-1]				
+	equation := CleanCopyEntire2DComplex128Slice(equationInput)
 
 
-			}
-			last3Counts = append(last3Counts, []int{openingParenthesisCount, closingParenthesisCount})
-				for len(last3Counts) > 3 {
-					last3Counts = append(last3Counts[1:4])
-				}
+	equation = RemoveLastItemIfItIsOpeningParenthesis(equation)
 
-				fmt.Println(len(last3Counts))
-				if(len(last3Counts) == 3){
-					if(last3Counts[0][0] == last3Counts[1][0] && last3Counts[0][1] == last3Counts[1][1] && last3Counts[1][0] == last3Counts[2][0] && last3Counts[1][1] == last3Counts[2][1]){
-						tooManyClosingParenthesis = false
-					}
-				}
-		}else{
-			tooManyClosingParenthesis = false
-		}
+	equation = RemoveExcessParenthesisViaDepthCheck(equation)
 
-
+	if(!(TwoEquationsAreExactlyIdentical(equationInput, equation))){
+		return RemoveUnusedParenthesis(equation)
+	}else{
+		return equation
 	}
-
-
-
-	depthLevel := 0
-
-	//fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))	
-
-	restart := false
-
-	doneCheckingDepth := false
-
-	for !doneCheckingDepth {
-
-		restart = false
-
-		for i := 0; i < len(equation); i++ {
-
-			if(restart){
-				break
-			}
-
-			currentItem := equation[i]
-
-			for j := 0; j < len(currentItem); j = (j+2) {
-
-				firstIndex := currentItem[j]
-				secondIndex := currentItem[j+1]
-
-
-
-				if(i == 0 && !IsOP(firstIndex, secondIndex)){
-					panic("Syntax Error first item must be ( RemoveUnusedParenthesis()")
-				}
-
-				if(IsOP(firstIndex, secondIndex)){
-					depthLevel++ 
-				}else if(IsCP(currentItem)){
-					depthLevel--
-				}else if(IsNumber(firstIndex)){
-
-				}else{
-					fmt.Println(currentItem)
-					panic("Syntax Error unknown item type RemoveUnusedParenthesis()")
-				}
-
-				//TODO FIGURE OUT HOW TO GET RID OF THE UNUSED PARENTHESIS
-
-				//this would occur if there's more closing parenthesis than opening
-				if(depthLevel == -1 && IsCP(currentItem)) {
-					// panic("got here")
-					fmt.Println("first half", strings.ReplaceAll(DecodeFloatSliceToEquation(equation[0:i]), " ", ""))	
-					fmt.Println("second half", strings.ReplaceAll(DecodeFloatSliceToEquation(equation[(i+1):len(equation)]), " ", ""))
-					fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))	
-					equation = append(equation[0:i], equation[(i+1):len(equation)]...) 
-					fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))	
-					panic("got here")
-					restart = true
-					break
-				}
-
-				if(len(currentItem) == 3){
-					break	
-				}
-			}
-		}
-
-		doneCheckingDepth = true
-	}
-
-
-
-	CheckEquationForSyntaxErrors(equation)
 
 	
-
-	for i := 0; i < len(equation); i++ {
-
-		currentItem := equation[i]
-
-		for j := 0; j < len(currentItem); j = (j+2) {
-
-			firstIndex := currentItem[j]
-			secondIndex := currentItem[j+1]
-
-			if(IsOP(firstIndex, secondIndex)){
-				
-				startIndexOpenParentParenthesis := i
-
-				endIndexClosedParentParenthesis := -1
-
-				cursor := i+1
-
-				depthLevel := 1
-
-				maxDepth := 1
-
-				uniqueNumbers := true
-
-				uniqueNumbersFound := 0
-
-				for depthLevel > 0 {
-
-					nextItem := equation[cursor] 
-
-					firstIndexInner := nextItem[0]
-					secondIndexInner := nextItem[1]
-
-					if(IsOP(firstIndexInner, secondIndexInner)){
-						depthLevel++ 
-					}else if(IsCP(nextItem)){
-						if(depthLevel - 1 == 0){
-							endIndexClosedParentParenthesis = cursor
-						}
-						depthLevel--
-						uniqueNumbers = true
-					}else if(IsNumber(firstIndexInner)){
-						if(uniqueNumbers){
-							uniqueNumbersFound++
-							uniqueNumbers = false
-						}
-					}else{
-						panic("unknown item type RemoveUnusedParenthesis()")
-					}
-
-					if(depthLevel > maxDepth){
-						maxDepth = depthLevel
-					}
-
-					cursor++
-
-				}
-
-				if(maxDepth > 1 || (maxDepth == 1 )){
-					if(uniqueNumbersFound < maxDepth){
-						returnEquation := append(equation[0:startIndexOpenParentParenthesis], equation[startIndexOpenParentParenthesis+1: endIndexClosedParentParenthesis]...)
-						returnEquation = append(returnEquation, equation[endIndexClosedParentParenthesis+1:len(equation)]...)
-
-						return RemoveUnusedParenthesis(returnEquation)
-					}
-				}
-
-
-			}else if(IsCP(currentItem)){
-				
-			}else if(IsNumber(firstIndex)){
-
-			}else{
-				panic("unknown item type RemoveUnusedParenthesis()")
-			}
-
-			if(len(currentItem) == 3){
-				break	
-			}
-		}
-	}
-
-
-	return equation
 	
 
 
@@ -910,7 +869,7 @@ func RemoveUnusedParenthesis(equation [][]complex128) [][]complex128 {
 
 func DetectAndFactorQuadratics(equation [][]complex128) [][]complex128 {
 
-	CheckEquationForSyntaxErrors(equation)
+	CheckEquationForSyntaxErrors(equation, "DetectAndFactorQuadratics")
 
 
 	for i := 0; i < len(equation); i++ {
@@ -1110,6 +1069,193 @@ func CleanCopyEntire2DComplex128Slice(equationToCopy [][]complex128) [][]complex
 	return returnEquation
 
 }
+
+
+//returns the number of direct children for the opening parenthesis, 
+//where a direct child is a set of closing parenthesis where the parenthesis are 
+//one level of depth deeper...
+//for instance... ( ( (3S+2)(3S + 5)(20S) ) )
+//the outermost parenthesis have one child only since there's only one set of closing parenthesis
+//the second level in however has 3 direct children...
+//this function focuses on places where there is a double set of parenthesis that can be removed
+//
+//the other int returned is the index of the closing parenthesis for this opening parent parenthesis
+func GetDirectChildCountOfParenthesisCurrentOpeningParenthesis(startIndex int, equation [][]complex128) (int, int) {
+
+	depth := 0
+
+	canCountOpener := true
+	canCountCloser := false
+
+	openerCount := 0
+	closerCount := 0
+
+	indexOfCloserToParent := -1
+
+	//start query at 1 past the start index since the start index is the parent
+	for i := 1; i < len(equation); i++ {
+
+		firstIndex := equation[i][0]
+		secondIndex := equation[i][1]
+
+		if(IsOP(firstIndex, secondIndex)){
+			depth++
+			if(depth == 1 && canCountOpener){
+				openerCount++ 
+				canCountOpener = false
+				canCountCloser = true
+			}
+		}else if(IsCP(equation[i])){
+			depth--
+			if(depth == 0 && canCountCloser){
+				closerCount++ 
+				canCountOpener = true
+				canCountCloser = false
+			}else if(depth == -1){
+				indexOfCloserToParent = i
+			}
+		}
+
+	}
+
+
+	if(openerCount != closerCount){
+		fmt.Println("opener count", openerCount, "closer count ", closerCount)
+		panic("syntax error not all parenthesis closed GetDirectChildCountOfParenthesisCurrentOpeningParenthesis")
+	}else{
+		return openerCount, indexOfCloserToParent
+	}
+
+
+
+
+}
+
+
+
+func RemoveLastItemIfItIsOpeningParenthesis(equation [][]complex128) [][]complex128{
+
+	cleanCopyToReturn := CleanCopyEntire2DComplex128Slice(equation)
+
+
+	for (IsOP(cleanCopyToReturn[len(cleanCopyToReturn)-1][0], cleanCopyToReturn[len(cleanCopyToReturn)-1][1])) {
+		cleanCopyToReturn = cleanCopyToReturn[0:(len(cleanCopyToReturn)-1)]
+		
+	}
+
+	return cleanCopyToReturn
+
+
+}
+
+
+
+func RemoveExcessParenthesisViaDepthCheck(equationInput [][]complex128) [][]complex128 {
+
+	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+
+	depthLevel := 0
+
+
+	for i := 0; i < len(equation); i++ {
+
+		currentItem := equation[i]
+
+		for j := 0; j < len(currentItem); j = (j+2) {
+
+			firstIndex := currentItem[j]
+			secondIndex := currentItem[j+1]
+
+
+
+			if(i == 0 && !IsOP(firstIndex, secondIndex)){
+				panic("Syntax Error first item must be ( RemoveUnusedParenthesis()")
+			}
+
+			if(IsOP(firstIndex, secondIndex)){
+				depthLevel++ 
+			}else if(IsCP(currentItem)){
+				depthLevel--
+
+				if(depthLevel == -1){
+					equation = append(equation[0:i], equation[(i+1):len(equation)]...) 
+					return equation
+				}
+				break	
+			}else if(IsNumber(firstIndex)){
+
+			}else{
+				fmt.Println(currentItem)
+				panic("Syntax Error unknown item type RemoveUnusedParenthesis()")
+			}
+
+		}
+	
+	}
+
+		
+
+	return equation
+
+}
+
+
+
+func TwoEquationsAreExactlyIdentical(equation1 [][]complex128, equation2 [][]complex128) bool {
+
+	if(len(equation1) != len(equation2)){
+		return false
+	}
+
+	
+
+	for i := 0; i < len(equation1); i++ {
+		currentItemEquation1 := equation1[i]
+		currentItemEquation2 := equation2[i]
+
+		if(len(currentItemEquation1) != len(currentItemEquation2)){
+			return false
+		}
+
+		for j := 0; j < len(currentItemEquation1); j = j+2  {
+
+
+			firstIndexEquation1 := currentItemEquation1[j]
+			firstIndexEquation2 := currentItemEquation2[j]
+
+			if(firstIndexEquation1 != firstIndexEquation2){
+				return false
+			}
+
+			secondIndexEquation1 := currentItemEquation1[j+1]
+			secondIndexEquation2 := currentItemEquation2[j+1]
+
+			if(secondIndexEquation1 != secondIndexEquation2){
+				return false
+			}
+
+			if(len(currentItemEquation1) == 3){
+				
+				if(currentItemEquation1[j+2] != currentItemEquation2[j+2]){
+					return false
+				}else{
+					break
+				}
+			}
+
+		}
+
+
+	}
+
+	return true
+
+}
+
+
+
+
+
 
 
 
