@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/cmplx"
 	"sort"
+	"strings"
 	"strconv"
 )
 
@@ -23,13 +24,37 @@ func main() {
 
 	equation = DetectAndFactorQuadratics(equation)
 
-	// equation = RemoveUnusedParenthesis(equation)
+	equation = RemoveUnusedParenthesis(equation)
 
-	fmt.Println(DecodeFloatSliceToEquation(equation))
+	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
 
-	// foiledEquation := FoilAllNeighboringParenthesis(equation)
 
-	// fmt.Println(DecodeFloatSliceToEquation(foiledEquation))
+
+	foiledEquation := FoilAllNeighboringParenthesis(equation)
+	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
+	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
+	foiledEquation = FoilAllNeighboringParenthesis(equation)
+	fmt.Println(foiledEquation)
+	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
+	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
+	fmt.Println(foiledEquation)
+	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
+	
+	fmt.Println("makes it here")
+
+fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
+	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
+	fmt.Println("makes it here 1.5")
+	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
+	fmt.Println()
+	foiledEquation = FoilAllNeighboringParenthesis(equation)
+	fmt.Println("makes it here 2")
+	fmt.Println(foiledEquation)
+	foiledEquation = RemoveUnusedParenthesis(foiledEquation)
+	
+	fmt.Println(foiledEquation)
+
+	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(foiledEquation), " ", ""))
 	// foiledEquation = FoilAllNeighboringParenthesis(foiledEquation)
 
 	// fmt.Println(DecodeFloatSliceToEquation(foiledEquation))
@@ -83,7 +108,7 @@ func DecodeFloatSliceToEquation(equation [][]complex128 ) string {
 				depthLevel++ 
 			}else if(IsCP(currentItem)){
 				equationString += " )"
-				if(currentItem[j+2] != 0 ){
+				if(currentItem[j+2] != 0 && currentItem[j+2] != 1){
 					equationString += "^" + strconv.FormatComplex(currentItem[2], 'f', -1, 64) + " "
 				}
 				depthLevel--
@@ -119,6 +144,44 @@ func DecodeFloatSliceToEquation(equation [][]complex128 ) string {
 		}
 
 	}
+
+	okToRemovePlus := false
+
+	plusIndicesToRemove := []int{}
+
+	trackCurrent := -1
+
+	for i := 0; i < len(equationString); i++ {
+		if(rune(equationString[i]) == ' '){
+			continue
+		}else if(rune(equationString[i]) == ')' && !okToRemovePlus){
+			okToRemovePlus= true
+		}else if(rune(equationString[i]) == '+'){
+			if(okToRemovePlus){
+				trackCurrent = i
+			}
+		}else if(rune(equationString[i]) == ')' && okToRemovePlus){
+			if(okToRemovePlus){
+				plusIndicesToRemove = append(plusIndicesToRemove, trackCurrent)
+			}
+			okToRemovePlus = false
+		}else{
+			okToRemovePlus = false
+		}
+
+	}
+
+	for i := 0; i < len(plusIndicesToRemove); i++ {
+
+		equationString = equationString[0:plusIndicesToRemove[i]] + equationString[(plusIndicesToRemove[i] + 1):len(equationString)]
+
+		for j := 0; j < len(plusIndicesToRemove); j++ {
+			plusIndicesToRemove[j]--
+		}
+	}
+
+	//strings.TrimSpace(equationString)
+
 
 	return equationString
 
@@ -163,7 +226,18 @@ func gCP(exponent complex128) []complex128 {
 
 func FoilAllNeighboringParenthesis(equation [][]complex128) [][]complex128 {
 
+	fmt.Println(equation)
+	// fmt.Println(DecodeFloatSliceToEquation(equation))
+
+	equation = RemoveUnusedParenthesis(equation)
+
+	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+
 	CheckEquationForSyntaxErrors(equation)
+
+	fmt.Println("makes it here 3")
+
+	equation = RemoveUnusedParenthesis(equation)
 
 	depthLevel := 0
 
@@ -567,6 +641,8 @@ func CheckEquationForSyntaxErrors(equation [][]complex128) {
 
 	depthLevel := 0
 
+	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))	
+
 	for i := 0; i < len(equation); i++ {
 
 		currentItem := equation[i]
@@ -613,7 +689,129 @@ func CheckEquationForSyntaxErrors(equation [][]complex128) {
 
 func RemoveUnusedParenthesis(equation [][]complex128) [][]complex128 {
 
-	// CheckEquationForSyntaxErrors(equation)
+	for (IsOP(equation[len(equation)-1][0], equation[len(equation)-1][1])) {
+		equation = equation[0:(len(equation)-1)]
+	} 
+	
+	// fmt.Println("initial parentheis remove check", equation)
+	// fmt.Println(DecodeFloatSliceToEquation(equation))	
+
+	tooManyClosingParenthesis := true
+
+	last3Counts := [][]int{}
+
+	for tooManyClosingParenthesis {
+
+		openingParenthesisCount := 0
+		closingParenthesisCount := 0
+
+
+		for i := 0; i < len(equation); i++ {
+			if(IsOP(equation[i][0], equation[i][1])){
+				openingParenthesisCount++
+			}else if(IsCP(equation[i])){
+				closingParenthesisCount++
+			}
+
+		}
+
+		fmt.Println("parenthesis count ", openingParenthesisCount, closingParenthesisCount)
+
+		if(closingParenthesisCount > openingParenthesisCount){
+			if(IsCP(equation[len(equation) - 1])){
+				equation = equation[0:len(equation)-1]				
+
+
+			}
+			last3Counts = append(last3Counts, []int{openingParenthesisCount, closingParenthesisCount})
+				for len(last3Counts) > 3 {
+					last3Counts = append(last3Counts[1:4])
+				}
+
+				fmt.Println(len(last3Counts))
+				if(len(last3Counts) == 3){
+					if(last3Counts[0][0] == last3Counts[1][0] && last3Counts[0][1] == last3Counts[1][1] && last3Counts[1][0] == last3Counts[2][0] && last3Counts[1][1] == last3Counts[2][1]){
+						tooManyClosingParenthesis = false
+					}
+				}
+		}else{
+			tooManyClosingParenthesis = false
+		}
+
+
+	}
+
+
+
+	depthLevel := 0
+
+	//fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))	
+
+	restart := false
+
+	doneCheckingDepth := false
+
+	for !doneCheckingDepth {
+
+		restart = false
+
+		for i := 0; i < len(equation); i++ {
+
+			if(restart){
+				break
+			}
+
+			currentItem := equation[i]
+
+			for j := 0; j < len(currentItem); j = (j+2) {
+
+				firstIndex := currentItem[j]
+				secondIndex := currentItem[j+1]
+
+
+
+				if(i == 0 && !IsOP(firstIndex, secondIndex)){
+					panic("Syntax Error first item must be ( RemoveUnusedParenthesis()")
+				}
+
+				if(IsOP(firstIndex, secondIndex)){
+					depthLevel++ 
+				}else if(IsCP(currentItem)){
+					depthLevel--
+				}else if(IsNumber(firstIndex)){
+
+				}else{
+					fmt.Println(currentItem)
+					panic("Syntax Error unknown item type RemoveUnusedParenthesis()")
+				}
+
+				//TODO FIGURE OUT HOW TO GET RID OF THE UNUSED PARENTHESIS
+
+				//this would occur if there's more closing parenthesis than opening
+				if(depthLevel == -1 && IsCP(currentItem)) {
+					// panic("got here")
+					fmt.Println("first half", strings.ReplaceAll(DecodeFloatSliceToEquation(equation[0:i]), " ", ""))	
+					fmt.Println("second half", strings.ReplaceAll(DecodeFloatSliceToEquation(equation[(i+1):len(equation)]), " ", ""))
+					fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))	
+					equation = append(equation[0:i], equation[(i+1):len(equation)]...) 
+					fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))	
+					panic("got here")
+					restart = true
+					break
+				}
+
+				if(len(currentItem) == 3){
+					break	
+				}
+			}
+		}
+
+		doneCheckingDepth = true
+	}
+
+
+
+	CheckEquationForSyntaxErrors(equation)
 
 	
 
@@ -712,7 +910,7 @@ func RemoveUnusedParenthesis(equation [][]complex128) [][]complex128 {
 
 func DetectAndFactorQuadratics(equation [][]complex128) [][]complex128 {
 
-//	CheckEquationForSyntaxErrors(equation)
+	CheckEquationForSyntaxErrors(equation)
 
 
 	for i := 0; i < len(equation); i++ {
@@ -757,6 +955,8 @@ func DetectAndFactorQuadratics(equation [][]complex128) [][]complex128 {
 						//make sure the a term and at least one other number are there if 2 items
 						if( (IsNumber(aTerm) && IsNumber(bTerm) || IsNumber(aTerm) && IsNumber(cTerm)) && len(numbers) == 4){
 
+							//TODO MAKE THIS MATCH THE LOWER PORTION SO THAT IT WORKS LIKE THAT
+
 							fmt.Println(numbers)
 							leftTerm, rightTerm := QuadraticFormula(aTerm, bTerm, cTerm)
 
@@ -778,22 +978,62 @@ func DetectAndFactorQuadratics(equation [][]complex128) [][]complex128 {
 						//make sure all terms are there if length 3
 						}else if(IsNumber(aTerm) && IsNumber(bTerm) && IsNumber(cTerm)){
 
+							fmt.Println("original equation", DecodeFloatSliceToEquation(equation))
+
 							fmt.Println(numbers)
 							leftTerm, rightTerm := QuadraticFormula(aTerm, bTerm, cTerm)
 
-							leftTermSlice := []complex128{complex(1, 0), complex(0, 0), leftTerm}
-							rightTermSlice := []complex128{complex(1, 0), complex(0, 0), rightTerm}
+							fmt.Println("left term ", leftTerm)
+							fmt.Println("right term", rightTerm)
+
+							leftTermSlice := []complex128{complex(1, 0), complex(1, 0), leftTerm, complex(0, 0),}
+							rightTermSlice := []complex128{complex(1, 0), complex(1, 0), rightTerm, complex(0, 0),}
+
+							fmt.Println("left term slice ", leftTermSlice)
+							fmt.Println("right term slice", rightTermSlice)
 
 							bothTerms := [][]complex128{leftTermSlice, rightTermSlice}
 
 							fmt.Println("first half", equation[0:startIndexQuadratic+1])
+							fmt.Println("middle", bothTerms)
 							fmt.Println("second half", equation[stopIndexQuadratic:len(equation)])
 
+							cleanCopyMainEquation := CleanCopyEntire2DComplex128Slice(equation)
 
-							returnEquation := append(equation[0:startIndexQuadratic+1], bothTerms...)
-							returnEquation = append(returnEquation, equation[stopIndexQuadratic:len(equation)]...)
-							fmt.Println("return equation", returnEquation)
+							returnEquation := append(cleanCopyMainEquation[0:startIndexQuadratic+1], []complex128{complex(0, 0), complex(0, 0)})
+							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
+							fmt.Println("return equation 1", DecodeFloatSliceToEquation(returnEquation))
+
+							returnEquation = append(returnEquation, leftTermSlice)
+							fmt.Println("return equation 2", DecodeFloatSliceToEquation(returnEquation))
+							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
+							returnEquation = append(returnEquation, []complex128{complex(0, 0), complex(1, 0), complex(1, 0)})
+							fmt.Println("return equation 3", DecodeFloatSliceToEquation(returnEquation))
+							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
+							returnEquation = append(returnEquation, []complex128{complex(0, 0), complex(0, 0)})
+							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
+							returnEquation = append(returnEquation, rightTermSlice)
+							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
+							returnEquation = append(returnEquation, []complex128{complex(0, 0), complex(1, 0), complex(1, 0)})
+							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
+							returnEquation = append(returnEquation, cleanCopyMainEquation[stopIndexQuadratic:len(cleanCopyMainEquation)]...)
+
+							fmt.Println("return equation 4", DecodeFloatSliceToEquation(returnEquation))
+							cleanCopyMainEquation = CleanCopyEntire2DComplex128Slice(equation)
+
+							returnEquation = append(returnEquation, cleanCopyMainEquation[0])
+							
+
+							fmt.Println("return equation2", returnEquation)
+
+							returnEquation = RemoveUnusedParenthesis(returnEquation)
+
+							fmt.Println("return equation remove", returnEquation)
+
+							
 							fmt.Println("return equation", DecodeFloatSliceToEquation(returnEquation))
+
+
 							return DetectAndFactorQuadratics(returnEquation)
 						}
 
@@ -848,7 +1088,28 @@ func QuadraticFormula(a complex128, b complex128, c complex128) (complex128, com
 }
 
 
+func CleanCopyEntire2DComplex128Slice(equationToCopy [][]complex128) [][]complex128 {
 
+	returnEquation := [][]complex128{}
+
+	for i := 0; i < len(equationToCopy); i++ {
+
+		cleanCopyToAppend := make([]complex128, len(equationToCopy[i]))
+
+		itemsCopied := copy(cleanCopyToAppend, equationToCopy[i])
+
+		if(itemsCopied != len(equationToCopy[i])){
+			panic("invalid copy CleanCopyEntire2DComplex128Slice()")
+		}else{
+			returnEquation = append(returnEquation, cleanCopyToAppend)
+		}
+
+
+	}
+
+	return returnEquation
+
+}
 
 
 
