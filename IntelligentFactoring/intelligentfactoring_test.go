@@ -86,3 +86,41 @@ func TestDepthCheckRemove(t *testing.T){
 }
 
 
+
+func TestFoilingExponentStyle(t *testing.T){
+
+
+	equation := [][]complex128{gOP(), gNum(2, 3, 3, 0), gCP(3), gOP(), gNum(2, 3, 3, 0), gCP(3), gOP(), gNum(2, 3, 3, 0), gCP(2)}       
+
+	fmt.Println("initial", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+	
+	equation = FoilOutParenthesisRaisedToExponent(equation)
+
+	fmt.Println(" after", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+
+	
+
+	if(false){
+		t.Errorf("failure")
+	}
+}
+
+func TestFoilingNeighborStyle(t *testing.T){
+
+
+	equation := [][]complex128{gOP(), gNum(2, 3, 3, 0), gCP(1), gOP(), gNum(2, 3, 3, 0), gCP(1), gOP(), gNum(2, 3, 3, 0), gCP(1), gOP(), gNum(2, 3, 3, 0), gCP(1)}       
+
+	fmt.Println("initial", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+	
+	equation = FoilNeighborParenthesis(equation)
+
+	fmt.Println(" after", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+
+	
+
+	if(false){
+		t.Errorf("failure")
+	}
+}
+
+

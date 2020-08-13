@@ -247,6 +247,8 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 
 	indexCloser := -1
 
+	exponentCloser := -1
+
 	foundValid := false
 
 	for i := 0; i < len(equation); i ++ {
@@ -257,13 +259,17 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 
 		if(IsOP(equation[i][0], equation[i][1])){
 
-			indexOpener := i
+			indexOpener = i
+
+			fmt.Println("character")
 
 			checkingIfValid := true
 
 			sawOneInt := false
 
 			cursor := i
+
+			numbersHolder = []complex128{}
 		
 
 			for checkingIfValid {
@@ -277,7 +283,7 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 
 				if(!sawOneInt){
 					if(IsNumber(equation[cursor][0])){
-						numbersHolder = append(numbersHolder, equation[cursor])
+						numbersHolder = append(numbersHolder, equation[cursor]...)
 						sawOneInt = true
 					}else{
 						//there was no integer after the opening parenthesis, not valid
@@ -293,9 +299,15 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 						checkingIfValid = false
 						break
 					}else if IsCP(equation[cursor]){
-						indexCloser = cursor
-						checkingIfValid = false
-						foundValid = true
+						if(real(equation[cursor][2]) > 1){
+							fmt.Println(equation[cursor:len(equation)])
+							fmt.Println("getting here")
+							indexCloser = cursor
+							//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
+							exponentCloser = int(real(equation[cursor][2]))
+							checkingIfValid = false
+							foundValid = true
+						}
 						break
 					}
 				}
@@ -307,9 +319,37 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 
 	}
 
+	if(foundValid){
+
+		fmt.Println("NUMBERS FOUND", numbersHolder)
+		
+		sliceToInsert := MultiplyParenthesisGivenExponent(numbersHolder, exponentCloser)
+
+		slicesToInsert :=  [][]complex128{gOP(), sliceToInsert, gCP(1)}
+
+		returnEquation := [][]complex128{}
+
+		returnEquation = append(returnEquation, equation[0:indexOpener]...)
+		
+		returnEquation = append(returnEquation, slicesToInsert...)
+		
+		returnEquation = append(returnEquation, equation[indexCloser+1:len(equation)]...)
+	
+		returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
+
+		fmt.Println("RETURN EQUATION", strings.ReplaceAll(DecodeFloatSliceToEquation(returnEquation), " ", ""))		
+
+		//recursive call if there was a change will check if more foils possible
+		return FoilOutParenthesisRaisedToExponent(returnEquation)
+
+	}else{
+
+		//if no foils possible return input
+		return equation
+	}	
 
 
-
+	
 
 
 
@@ -318,9 +358,441 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 
 
 
-func MultiplyParenthesisGivenExponent(){
+func MultiplyParenthesisGivenExponent(numbers []complex128, exponent int) []complex128{
+
+	leftTerm := numbers
+	rightTerm := numbers
+
+	timesToFoil := exponent -1
+
+	allNumbersFromFoil := []complex128{}
+
 	
+	for timesToFoil > 0 {
+
+		fmt.Println("left term", leftTerm)
+		fmt.Println("right term", rightTerm)
+		fmt.Println("allNumbersFromFoil", allNumbersFromFoil)
+
+		resultCurrentLoop := []complex128{}
+
+
+
+		for i := 0; i < len(leftTerm); i = (i+2) {
+
+			currentNumberMultiplier := leftTerm[i]
+
+			currentNumberExponent := leftTerm[i+1]
+
+			for j := 0; j < len(rightTerm); j = (j+2) {
+
+				foilNumberMultiplier := rightTerm[j]
+				foilNumberExponent := rightTerm[j+1]
+
+				
+				resultCurrentLoop = append(resultCurrentLoop, currentNumberMultiplier*foilNumberMultiplier)
+				resultCurrentLoop = append(resultCurrentLoop, currentNumberExponent+foilNumberExponent)
+			}
+		}
+
+		fmt.Println("result from current loop", resultCurrentLoop)
+
+		fmt.Println("allNumbersFromFoil", allNumbersFromFoil)
+
+		allNumbersFromFoil = resultCurrentLoop
+		
+		//this sets the left term equal to the result from the previous cycle
+		leftTerm = resultCurrentLoop
+		timesToFoil--
+		
+
+	}
+
+
+	mapOfExponents := make(map[complex128][]complex128)
+
+	for i := 0; i < len(allNumbersFromFoil); i = (i+2) {
+
+		if(mapOfExponents[allNumbersFromFoil[i+1]] == nil){
+			mapOfExponents[allNumbersFromFoil[i+1]] = []complex128{allNumbersFromFoil[i]} 
+		}else{
+			mapOfExponents[allNumbersFromFoil[i+1]] = append(mapOfExponents[allNumbersFromFoil[i+1]], allNumbersFromFoil[i])
+		}
+
+	}
+
+	mapOfSimpliefiedMultipliersForExponents := make(map[complex128]complex128)
+
+	for exponent, multipliers := range mapOfExponents {
+
+		summationMultipliers := complex(0, 0)
+
+		for i := 0; i < len(multipliers); i++ {
+			summationMultipliers += multipliers[i]
+		}
+
+		mapOfSimpliefiedMultipliersForExponents[exponent] = summationMultipliers
+
+	}
+
+
+	sliceOfExponentsFloat := []float64{}
+	sliceOfExponentsComplex := []complex128{}
+
+	for exponent, _ := range mapOfSimpliefiedMultipliersForExponents {
+		sliceOfExponentsFloat = append(sliceOfExponentsFloat, real(exponent))
+		sliceOfExponentsComplex = append(sliceOfExponentsComplex, exponent)
+	}
+
+
+	copyOfExponentsFloat := make([]float64, len(sliceOfExponentsFloat))
+
+	itemsCopied := copy(copyOfExponentsFloat, sliceOfExponentsFloat)
+
+	if(itemsCopied != len(sliceOfExponentsFloat)){
+		panic("invalid copy MultiplyParenthesisGivenExponent()")
+	}else{
+
+		sort.Sort(sort.Reverse(sort.Float64Slice((sliceOfExponentsFloat))))
+
+		if(len(copyOfExponentsFloat) != len(sliceOfExponentsFloat)){
+			panic("reverse changed the length of one of the float slices MultiplyParenthesisGivenExponent()")
+		}
+
+		newIndices := []int{}
+
+		for i := 0; i < len(copyOfExponentsFloat); i++ {
+
+			currentValue := copyOfExponentsFloat[i]
+
+			for j := 0; j < len(sliceOfExponentsFloat); j++ {
+
+				if(sliceOfExponentsFloat[j] == currentValue){
+					newIndices = append(newIndices, j)
+				}
+
+
+			}
+
+		}
+
+		copyOfExponentsComplex := make([]complex128, len(sliceOfExponentsComplex))
+
+
+		for i := 0; i < len(newIndices); i++ {
+			copyOfExponentsComplex[newIndices[i]] = sliceOfExponentsComplex[i]
+		}
+
+		returnNumbers := []complex128{}
+
+		for i := 0; i < len(copyOfExponentsComplex); i++ {
+			returnNumbers = append(returnNumbers, mapOfSimpliefiedMultipliersForExponents[copyOfExponentsComplex[i]])
+			returnNumbers = append(returnNumbers, copyOfExponentsComplex[i])
+		}
+
+
+		return returnNumbers
+
+	}
+
+
+
+
 } 
+
+
+
+func FoilNeighborParenthesis(equationInput [][]complex128) [][]complex128 {
+
+	CheckEquationForSyntaxErrors(equationInput, "FoilNeighborParenthesis()")
+
+	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+
+	numbersHolderFirstNeighbor := []complex128{}
+	numbersHolderSecondNeighbor := []complex128{}
+
+	indexOpener := -1
+
+	indexCloser := -1
+
+	foundValid := false
+
+	secondTerm := false
+
+	for i := 0; i < len(equation); i ++ {
+
+		if(foundValid){
+			break
+		}
+
+		if(IsOP(equation[i][0], equation[i][1])){
+
+			indexOpener = i
+
+			checkingIfValid := true
+
+			sawOneInt := false
+
+			cursor := i
+
+			numbersHolderFirstNeighbor = []complex128{}
+		
+			numbersHolderSecondNeighbor = []complex128{}
+
+
+			for checkingIfValid {
+
+				cursor++
+
+				//cursor is out of bounds, nothing to check
+				if(cursor >= len(equation)){
+					return equation
+				}
+
+				if(!sawOneInt && !secondTerm){
+					if(IsNumber(equation[cursor][0])){
+						numbersHolderFirstNeighbor = append(numbersHolderFirstNeighbor, equation[cursor]...)
+						sawOneInt = true
+					}else{
+						//there was no integer after the opening parenthesis, not valid
+						checkingIfValid = false
+						break
+					}
+				}else if(sawOneInt && !secondTerm){
+					if(IsNumber(equation[cursor][0])){
+						//there should only be one set of numbers inside parenthesis this should not be possible
+						panic("interesting case, should not get here FoilNeighborParenthesis()")
+						continue
+					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
+						checkingIfValid = false
+						break
+					}else if IsCP(equation[cursor]){
+						if(real(equation[cursor][2]) == 1){
+
+							//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
+							// checkingIfValid = false
+							if((cursor+1) >= len(equation)){
+								break
+							}else if(IsOP(equation[cursor+1][0], equation[cursor+1][1])){
+								cursor++
+								secondTerm = true
+								sawOneInt = false
+							}else{
+								break
+							}
+							
+							
+						}
+					}
+				}else if(!sawOneInt && secondTerm){
+					if(IsNumber(equation[cursor][0])){
+						numbersHolderSecondNeighbor = append(numbersHolderSecondNeighbor, equation[cursor]...)
+						sawOneInt = true
+					}else{
+						//there was no integer after the opening parenthesis, not valid
+						checkingIfValid = false
+						break
+					}
+				}else if(sawOneInt && secondTerm){
+					if(IsNumber(equation[cursor][0])){
+						//there should only be one set of numbers inside parenthesis this should not be possible
+						panic("interesting case, should not get here FoilNeighborParenthesis()")
+						continue
+					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
+						checkingIfValid = false
+						break
+					}else if IsCP(equation[cursor]){
+						if(real(equation[cursor][2]) == 1){
+							indexCloser = cursor
+							//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
+							checkingIfValid = false
+							foundValid = true
+						}
+						break
+					}
+				}
+
+			}
+
+		}
+
+
+	}
+
+	if(foundValid){
+
+		sliceToInsert := MultiplyNeighboringParenthesis(numbersHolderFirstNeighbor, numbersHolderSecondNeighbor)
+
+		slicesToInsert :=  [][]complex128{gOP(), sliceToInsert, gCP(1)}
+
+		returnEquation := [][]complex128{}
+
+		returnEquation = append(returnEquation, equation[0:indexOpener]...)
+		
+		returnEquation = append(returnEquation, slicesToInsert...)
+		
+		returnEquation = append(returnEquation, equation[indexCloser+1:len(equation)]...)
+
+		returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
+
+		fmt.Println("RETURN EQUATION", strings.ReplaceAll(DecodeFloatSliceToEquation(returnEquation), " ", ""))		
+
+		//recursive call if there was a change will check if more foils possible
+		return FoilNeighborParenthesis(returnEquation)
+
+	}else{
+
+		//if no foils possible return input
+		return equation
+	}	
+
+
+
+}
+
+
+func FactorQuadraticsWithABCAllPresent(equation [][]complex128)[][]complex128 {
+
+	
+
+	
+}
+
+
+
+
+func MultiplyNeighboringParenthesis(numbers1 []complex128, numbers2 []complex128) []complex128{
+
+	leftTerm := numbers1
+	rightTerm := numbers2
+
+
+	allNumbersFromFoil := []complex128{}
+
+
+	fmt.Println("left term", leftTerm)
+	fmt.Println("right term", rightTerm)
+	fmt.Println("allNumbersFromFoil", allNumbersFromFoil)
+
+	resultCurrentLoop := []complex128{}
+
+
+
+	for i := 0; i < len(leftTerm); i = (i+2) {
+
+		currentNumberMultiplier := leftTerm[i]
+
+		currentNumberExponent := leftTerm[i+1]
+
+		for j := 0; j < len(rightTerm); j = (j+2) {
+
+			foilNumberMultiplier := rightTerm[j]
+			foilNumberExponent := rightTerm[j+1]
+
+			
+			resultCurrentLoop = append(resultCurrentLoop, currentNumberMultiplier*foilNumberMultiplier)
+			resultCurrentLoop = append(resultCurrentLoop, currentNumberExponent+foilNumberExponent)
+		}
+	}
+
+	fmt.Println("result from current loop", resultCurrentLoop)
+
+	fmt.Println("allNumbersFromFoil", allNumbersFromFoil)
+
+	allNumbersFromFoil = resultCurrentLoop
+	
+	
+	mapOfExponents := make(map[complex128][]complex128)
+
+	for i := 0; i < len(allNumbersFromFoil); i = (i+2) {
+
+		if(mapOfExponents[allNumbersFromFoil[i+1]] == nil){
+			mapOfExponents[allNumbersFromFoil[i+1]] = []complex128{allNumbersFromFoil[i]} 
+		}else{
+			mapOfExponents[allNumbersFromFoil[i+1]] = append(mapOfExponents[allNumbersFromFoil[i+1]], allNumbersFromFoil[i])
+		}
+
+	}
+
+	mapOfSimpliefiedMultipliersForExponents := make(map[complex128]complex128)
+
+	for exponent, multipliers := range mapOfExponents {
+
+		summationMultipliers := complex(0, 0)
+
+		for i := 0; i < len(multipliers); i++ {
+			summationMultipliers += multipliers[i]
+		}
+
+		mapOfSimpliefiedMultipliersForExponents[exponent] = summationMultipliers
+
+	}
+
+
+	sliceOfExponentsFloat := []float64{}
+	sliceOfExponentsComplex := []complex128{}
+
+	for exponent, _ := range mapOfSimpliefiedMultipliersForExponents {
+		sliceOfExponentsFloat = append(sliceOfExponentsFloat, real(exponent))
+		sliceOfExponentsComplex = append(sliceOfExponentsComplex, exponent)
+	}
+
+
+	copyOfExponentsFloat := make([]float64, len(sliceOfExponentsFloat))
+
+	itemsCopied := copy(copyOfExponentsFloat, sliceOfExponentsFloat)
+
+	if(itemsCopied != len(sliceOfExponentsFloat)){
+		panic("invalid copy MultiplyParenthesisGivenExponent()")
+	}else{
+
+		sort.Sort(sort.Reverse(sort.Float64Slice((sliceOfExponentsFloat))))
+
+		if(len(copyOfExponentsFloat) != len(sliceOfExponentsFloat)){
+			panic("reverse changed the length of one of the float slices MultiplyParenthesisGivenExponent()")
+		}
+
+		newIndices := []int{}
+
+		for i := 0; i < len(copyOfExponentsFloat); i++ {
+
+			currentValue := copyOfExponentsFloat[i]
+
+			for j := 0; j < len(sliceOfExponentsFloat); j++ {
+
+				if(sliceOfExponentsFloat[j] == currentValue){
+					newIndices = append(newIndices, j)
+				}
+
+
+			}
+
+		}
+
+		copyOfExponentsComplex := make([]complex128, len(sliceOfExponentsComplex))
+
+
+		for i := 0; i < len(newIndices); i++ {
+			copyOfExponentsComplex[newIndices[i]] = sliceOfExponentsComplex[i]
+		}
+
+		returnNumbers := []complex128{}
+
+		for i := 0; i < len(copyOfExponentsComplex); i++ {
+			returnNumbers = append(returnNumbers, mapOfSimpliefiedMultipliersForExponents[copyOfExponentsComplex[i]])
+			returnNumbers = append(returnNumbers, copyOfExponentsComplex[i])
+		}
+
+
+		return returnNumbers
+
+	}
+
+
+
+
+} 
+
 
 
 
