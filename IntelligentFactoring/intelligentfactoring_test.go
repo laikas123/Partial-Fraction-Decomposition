@@ -184,3 +184,22 @@ func TestQuadraticFactoringACOnlyPresent(t *testing.T){
 	}
 }
 
+
+func TestCreatingATreeMap(t *testing.T){
+
+
+	equation := [][]complex128{gOP(), gOP(), gNum(3, 2), gCP(1), gOP(), gNum(1, 1, 2, 0), gCP(1), gOP(), gNum(7, 2), gCP(1), gCP(1), gOP(), gOP(), gNum(4, 3, 3, 2, 9, 1), gCP(1), gOP(), gNum(4, 1), gCP(1), gCP(1)}       
+
+	fmt.Println("initial", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+	
+	treeSlice := CreateEntireTreeForEquation(equation)
+
+	fmt.Println(treeSlice)
+	
+
+	if(false){
+		t.Errorf("failure")
+	}
+
+	
+}

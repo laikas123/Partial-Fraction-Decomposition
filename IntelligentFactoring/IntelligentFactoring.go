@@ -9,6 +9,11 @@ import (
 	"strconv"
 )
 
+type EquationContainerForTree struct {
+	Equation [][]complex128
+	ChildrenEquations []EquationContainerForTree
+}
+
 
 //TODO, when multiple variables get involved a third index needs to be added to the float slice
 //which will allow the third index to essentially span the alphabet 0-25 A-Z for variable names
@@ -68,112 +73,180 @@ func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
 	
 	equationString := ""
 
-	depthLevel := 0
+	previousTerm := []complex128{}
 
 	for i := 0; i < len(equation); i++ {
 		
 		currentItem := equation[i]
 
-		for j := 0; j < len(currentItem); j = (j+2) {
-			firstIndex := currentItem[j]
-			secondIndex := currentItem[j+1]
+		firstIndex := currentItem[0]
+		secondIndex := currentItem[1]
 
-			firstIndexString := strconv.FormatFloat(real(firstIndex), 'f', -1, 64)
 
-			secondIndexString := strconv.FormatFloat(real(secondIndex), 'f', -1, 64)
+		if(IsOP(firstIndex, secondIndex)){
+			equationString += "( "
 			
+		}else if(IsCP(currentItem)){
+			equationString += " )"
+			if(currentItem[2] != 0 && currentItem[2] != 1) {
+				equationString += "^" + strconv.FormatFloat(real(currentItem[2]), 'f', -1, 64) + " "
+			}
+			
+		}else if(IsNumber(firstIndex)){
 
+			if(IsCP(previousTerm)){
+				equationString += "+"
+			}
 
-			if(IsOP(firstIndex, secondIndex)){
-				equationString += "( "
-				depthLevel++ 
-			}else if(IsCP(currentItem)){
-				equationString += " )"
-				if(currentItem[j+2] != 0 && currentItem[j+2] != 1){
-					equationString += "^" + strconv.FormatFloat(real(currentItem[2]), 'f', -1, 64) + " "
+			for i := 0; i < len(currentItem); i = i+2{
+				multiplier := currentItem[i]
+				exponent := currentItem[i+1]
+
+				if((i < len(currentItem) - 2) && exponent == 1){
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64)  + "s " + " + "
+				}else if((i < len(currentItem) - 2) && exponent == 0){
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + " + "
+				}else if((i < len(currentItem) - 2) && exponent != 0 && exponent != 1){
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s^" + strconv.FormatFloat(real(exponent),'f', -1, 64) + " + "
+				}else if((i == len(currentItem) - 2) && exponent == 1){
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s " 
+				}else if((i == len(currentItem) - 2) && exponent == 0){
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) 
+				}else if((i ==  len(currentItem) - 2) && exponent != 0 && exponent != 1){
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s^" + strconv.FormatFloat(real(exponent),'f', -1, 64) 
 				}
-				depthLevel--
-			}else if(IsNumber(firstIndex)){
-				if(real(firstIndex) != 1){
-					if(real(secondIndex) == 0){
-						equationString += firstIndexString + " + "
-					}else if(real(secondIndex) == 1){
-						equationString += firstIndexString + "S + "
-					}else{
-						equationString += firstIndexString + "S^" + secondIndexString + " + "
-					}
-				}else{
-					if(real(secondIndex) == 0){
-						equationString += firstIndexString + " + "
-					}else if(real(secondIndex) == 1){
-						equationString += "S + "
-					}else{
-						equationString += "S^" + secondIndexString + " +"
-					}
-				}
-				
-			}else{
-				panic("unknown equation item DecodeFloatSliceToEquation()")	
 			}
-			// fmt.Println(equationString)
-			// fmt.Println(depthLevel)
-
-			if(IsCP(currentItem)){
-				break	
-			}
-
-		}
-
-	}
-
-	okToRemovePlus := false
-
-	plusIndicesToRemove := []int{}
-
-	trackCurrent := -1
-
-	for i := 0; i < len(equationString); i++ {
-		if(rune(equationString[i]) == ' '){
-			continue
-		}else if(rune(equationString[i]) == ')' && !okToRemovePlus){
-			okToRemovePlus= true
-		}else if(rune(equationString[i]) == '+'){
-			if(okToRemovePlus){
-				trackCurrent = i
-			}
-		}else if(rune(equationString[i]) == ')' && okToRemovePlus){
-			if(okToRemovePlus){
-				plusIndicesToRemove = append(plusIndicesToRemove, trackCurrent)
-			}
-			okToRemovePlus = false
+			
 		}else{
-			okToRemovePlus = false
+			panic("unknown equation item DecodeFloatSliceToEquation()")	
 		}
+	
+		previousTerm = currentItem
 
 	}
 
-	for i := 0; i < len(plusIndicesToRemove); i++ {
-
-		if(plusIndicesToRemove[i] < len(equationString) && plusIndicesToRemove[i] > 0 ){
-
-
-
-			equationString = equationString[0:plusIndicesToRemove[i]] + equationString[(plusIndicesToRemove[i] + 1):len(equationString)]
-
-			for j := 0; j < len(plusIndicesToRemove); j++ {
-				plusIndicesToRemove[j]--
-			}
-
-
-		}
-	}
-
-	//strings.TrimSpace(equationString)
-
+	
 
 	return equationString
 
 }
+
+
+
+// func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
+
+// //	CheckEquationForSyntaxErrors(equation)
+
+// 	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	
+// 	equationString := ""
+
+// 	depthLevel := 0
+
+// 	for i := 0; i < len(equation); i++ {
+		
+// 		currentItem := equation[i]
+
+// 		for j := 0; j < len(currentItem); j = (j+2) {
+// 			firstIndex := currentItem[j]
+// 			secondIndex := currentItem[j+1]
+
+// 			firstIndexString := strconv.FormatFloat(real(firstIndex), 'f', -1, 64)
+
+// 			secondIndexString := strconv.FormatFloat(real(secondIndex), 'f', -1, 64)
+			
+
+
+// 			if(IsOP(firstIndex, secondIndex)){
+// 				equationString += "( "
+// 				depthLevel++ 
+// 			}else if(IsCP(currentItem)){
+// 				equationString += " )"
+// 				if(currentItem[j+2] != 0 && currentItem[j+2] != 1){
+// 					equationString += "^" + strconv.FormatFloat(real(currentItem[2]), 'f', -1, 64) + " "
+// 				}
+// 				depthLevel--
+// 			}else if(IsNumber(firstIndex)){
+// 				if(real(firstIndex) != 1){
+// 					if(real(secondIndex) == 0){
+// 						equationString += firstIndexString + " + "
+// 					}else if(real(secondIndex) == 1){
+// 						equationString += firstIndexString + "S + "
+// 					}else{
+// 						equationString += firstIndexString + "S^" + secondIndexString + " + "
+// 					}
+// 				}else{
+// 					if(real(secondIndex) == 0){
+// 						equationString += firstIndexString + " + "
+// 					}else if(real(secondIndex) == 1){
+// 						equationString += "S + "
+// 					}else{
+// 						equationString += "S^" + secondIndexString + " +"
+// 					}
+// 				}
+				
+// 			}else{
+// 				panic("unknown equation item DecodeFloatSliceToEquation()")	
+// 			}
+// 			// fmt.Println(equationString)
+// 			// fmt.Println(depthLevel)
+
+// 			if(IsCP(currentItem)){
+// 				break	
+// 			}
+
+// 		}
+
+// 	}
+
+// 	okToRemovePlus := false
+
+// 	plusIndicesToRemove := []int{}
+
+// 	trackCurrent := -1
+
+// 	for i := 0; i < len(equationString); i++ {
+// 		if(rune(equationString[i]) == ' '){
+// 			continue
+// 		}else if(rune(equationString[i]) == ')' && !okToRemovePlus){
+// 			okToRemovePlus= true
+// 		}else if(rune(equationString[i]) == '+'){
+// 			if(okToRemovePlus){
+// 				trackCurrent = i
+// 			}
+// 		}else if(rune(equationString[i]) == ')' && okToRemovePlus){
+// 			if(okToRemovePlus){
+// 				plusIndicesToRemove = append(plusIndicesToRemove, trackCurrent)
+// 			}
+// 			okToRemovePlus = false
+// 		}else{
+// 			okToRemovePlus = false
+// 		}
+
+// 	}
+
+// 	for i := 0; i < len(plusIndicesToRemove); i++ {
+
+// 		if(plusIndicesToRemove[i] < len(equationString) && plusIndicesToRemove[i] > 0 ){
+
+
+
+// 			equationString = equationString[0:plusIndicesToRemove[i]] + equationString[(plusIndicesToRemove[i] + 1):len(equationString)]
+
+// 			for j := 0; j < len(plusIndicesToRemove); j++ {
+// 				plusIndicesToRemove[j]--
+// 			}
+
+
+// 		}
+// 	}
+
+// 	//strings.TrimSpace(equationString)
+
+
+// 	return equationString
+
+// }
 
 //g stands for generate
 
@@ -1613,6 +1686,165 @@ func RemoveParenthesisWith0DirectChildren(equationInput [][]complex128) [][]comp
 
 
 }
+
+
+func CreateATreeFromCurrentEquation(equation [][]complex128) ([]EquationContainerForTree, bool) {
+
+	CheckEquationForSyntaxErrors(equation, "CreateATreeFromCurrentEquation()")
+
+
+
+	breakAll := false
+	
+
+	additionsMade := false
+
+	equations := []EquationContainerForTree{}
+
+	for i := 0; i < len(equation); i ++ {
+
+
+
+		if(breakAll){
+			break
+		}
+
+		currentItem := equation[i]
+
+		if(IsOP(currentItem[0], currentItem[1])){
+
+			depth := 1
+
+			foundCP := false
+
+			cursor := i
+
+			openerIndex := i
+
+			for !foundCP {
+
+				cursor++
+
+
+				if(IsCP(equation[cursor])){
+					depth--
+				}else if(IsOP(equation[cursor][0], equation[cursor][1])){
+					depth++
+				}
+
+				if(depth == 0){
+					i = cursor
+					cleanCopyToAppend := CleanCopyEntire2DComplex128Slice(equation)
+					dataToAddToTree := cleanCopyToAppend[openerIndex+1:cursor]
+					sliceForChildren := []EquationContainerForTree{}
+					equations = append(equations, EquationContainerForTree{dataToAddToTree, sliceForChildren})
+					additionsMade = true
+					break
+				}
+
+				if((cursor + 1) >= len(equation)){
+					breakAll = true
+					break
+				}
+
+
+			}
+
+		}
+		
+
+	}
+
+	
+
+	return equations, additionsMade 
+
+
+
+}
+
+
+
+
+
+
+
+func CreateEntireTreeForEquation(equation [][]complex128) []EquationContainerForTree {
+
+	treeSlice := []EquationContainerForTree{EquationContainerForTree{}}
+
+	treeSliceData, _ := CreateATreeFromCurrentEquation(equation)
+
+	treeSlice[0] =  EquationContainerForTree{[][]complex128{}, treeSliceData}
+
+	xPosAtLayer := []int{0}
+
+	layer := 0
+
+	currentContainer := treeSlice[xPosAtLayer[layer]]
+
+	for layer > -1 {
+
+		fmt.Println(treeSlice)
+
+		// containerCursor := xPosAtLayer[layer]
+
+		currentContainer = currentContainer.ChildrenEquations[xPosAtLayer[layer]]
+
+		newToAppend, dataAdded := CreateATreeFromCurrentEquation(currentContainer.Equation)
+
+		fmt.Println(newToAppend)
+
+		if(dataAdded){
+			currentContainer.ChildrenEquations[xPosAtLayer[layer]].ChildrenEquations = newToAppend
+		}
+
+		if(len(currentContainer.ChildrenEquations[xPosAtLayer[layer]].ChildrenEquations) != 0){
+
+			currentContainer = currentContainer.ChildrenEquations[xPosAtLayer[layer]].ChildrenEquations[0]
+
+			// currentContainer = currentContainer.ChildrenEquations[0]
+
+			xPosAtLayer = append(xPosAtLayer, 0)
+
+			layer++
+		}else{
+			xPosAtLayer[layer]++
+			if(xPosAtLayer[layer] == len(currentContainer.ChildrenEquations)){
+				xPosAtLayer[layer] = 0
+				layer--
+			}
+		}
+
+	}
+
+	return treeSlice
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
