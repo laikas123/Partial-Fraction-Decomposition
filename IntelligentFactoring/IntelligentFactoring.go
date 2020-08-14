@@ -10,9 +10,11 @@ import (
 )
 
 type Container struct {
-	Parent [][]complex128
-	Children []Container
+	Parent *[][]complex128
+	Children []*Container
 }
+
+
 
 
 //TODO, when multiple variables get involved a third index needs to be added to the float slice
@@ -1688,7 +1690,7 @@ func RemoveParenthesisWith0DirectChildren(equationInput [][]complex128) [][]comp
 }
 
 
-func CreateATreeFromCurrentEquation(equation [][]complex128) []Container {
+func CreateATreeFromCurrentEquation(equation [][]complex128) []*Container {
 
 	// CheckEquationForSyntaxErrors(equation, "CreateATreeFromCurrentEquation()")
 
@@ -1699,7 +1701,7 @@ func CreateATreeFromCurrentEquation(equation [][]complex128) []Container {
 
 	
 
-	equations := []Container{}
+	equations := []*Container{}
 
 	for i := 0; i < len(equation); i ++ {
 
@@ -1736,8 +1738,9 @@ func CreateATreeFromCurrentEquation(equation [][]complex128) []Container {
 					i = cursor
 					cleanCopyToAppend := CleanCopyEntire2DComplex128Slice(equation)
 					dataToAddToTree := cleanCopyToAppend[openerIndex+1:cursor]
-					sliceForChildren := []Container{}
-					equations = append(equations, Container{dataToAddToTree, sliceForChildren})
+					sliceForChildren := []*Container{}
+					//creates a new struct with the parent equation and an empty slice for its children
+					equations = append(equations, &Container{&dataToAddToTree, sliceForChildren})
 					
 					break
 				}
@@ -1764,142 +1767,240 @@ func CreateATreeFromCurrentEquation(equation [][]complex128) []Container {
 }
 
 
+func CreateEntireTreeForEquation(equation [][]complex128) []*Container {
 
 
-func CreateEntireTreeForEquation(equation [][]complex128) []Container{
 
-	currentContainer := CreateATreeFromCurrentEquation(equation)
+	topLevelContainer := []*Container{}
 
-	previousParentContainers := [][]Container{}
+	topLevelContainerChild := &Container{&equation, []*Container{}}
 
-	layer := 0
+	topLevelContainer = append(topLevelContainer, topLevelContainerChild)
 
-	xPosForLayer := []int{0}
+	//start at 0, append a new number for each new depth
+	//remove the last number when coming back from a previous depth
+	xPosForCurrentDepthChildren := []int{0} 
 
+	depth := 0
+
+	previousChildren := [][]*Container{}
+
+	currentChildren := topLevelContainer
+
+	currentChild := currentChildren[xPosForCurrentDepthChildren[depth]]
+
+	for depth > -1 {
+
+
+
+
+		//this gets the child container 
+		currentChild = currentChildren[xPosForCurrentDepthChildren[depth]]		
+
+		fmt.Println("depth", depth, "xpos", xPosForCurrentDepthChildren[depth])
+
+		fmt.Println("current child", strings.ReplaceAll(DecodeFloatSliceToEquation(*currentChild.Parent), " ", ""))
+
+		//this generates new children from the child containers equation
+		newChildren := CreateATreeFromCurrentEquation(*currentChild.Parent)
+
+		for i := 0; i < len(newChildren); i++ {
+			fmt.Println("new children", strings.ReplaceAll(DecodeFloatSliceToEquation(*newChildren[i].Parent), " ", ""))
+		}
+
+		
 	
+		//if there was children to add immediately add them and move to the new depth
+		if(len(newChildren) > 0){
 
-	for layer > -1 {
+		//	fmt.Println("hello 1")
+		//	fmt.Println(topLevelContainer)
 
-		fmt.Println("layer", layer)
-		fmt.Println("xpos for layer", xPosForLayer[layer])
-		fmt.Println("previousParentContainers", previousParentContainers)
-		fmt.Println("lengthpreviousParentContainers", len(previousParentContainers))
+			currentChild.Children = newChildren
+		//	fmt.Println("hello 2")
 
-		for(xPosForLayer[layer] >= len(currentContainer)){
-			xPosForLayer[layer] = 0
-			layer--
-			if(layer == -1){
-				break
+		//	fmt.Println(topLevelContainer)
+
+			for i := 0; i < len(currentChild.Children); i++ {
+				fmt.Println("new children copied", strings.ReplaceAll(DecodeFloatSliceToEquation(*currentChild.Children[i].Parent), " ", ""))
 			}
-			if(len(previousParentContainers) != 1){
-				currentContainer = previousParentContainers[len(previousParentContainers)-2]
-			}
-			previousParentContainers = previousParentContainers[0:len(previousParentContainers)-1]
-			xPosForLayer = xPosForLayer[0:len(xPosForLayer)-1]
-			
-			
-			fmt.Println("was here1")
-		}
 
-		fmt.Println("was here2")
-		newContainers := CreateATreeFromCurrentEquation(currentContainer[xPosForLayer[layer]].Parent)
 
-		if(len(newContainers) != 0){
-			currentContainer[xPosForLayer[layer]].Children = newContainers
-			xPosForLayer[layer]++
-			previousParentContainers = append(previousParentContainers, currentContainer)
-			xPosForLayer = append(xPosForLayer, 0)
-			layer++
-			currentContainer = currentContainer[xPosForLayer[layer]].Children
+
+			// PrintTopLevelContainer(topLevelContainer)
+
+			//increment the current depth horizontally before moving one deeper
+			xPosForCurrentDepthChildren[depth]++
+			//start at index 0 for the next depth
+			xPosForCurrentDepthChildren = append(xPosForCurrentDepthChildren, 0)
+			//move to the next depth for horizontal cursor
+			depth++
+
+			//keep track of the children to move back into 
+			previousChildren = append(previousChildren, currentChildren)
+
+			//move to the next depth of children
+			currentChildren = currentChild.Children
+
+			fmt.Println(topLevelContainer)
+
+		//if there was no children to add remain at the current depth
 		}else{
-			xPosForLayer[layer]++
+
+			//move horizontally at the current depth
+			xPosForCurrentDepthChildren[depth]++
+
+			//if the horizontal cursor is out of bounds for the current children
+			//do this in a loop as its possible the previous depth was out of 
+			//bounds as well
+			for(xPosForCurrentDepthChildren[depth] >= len(currentChildren)){
+
+				//reset the cursor for this depth
+				xPosForCurrentDepthChildren[depth] = 0
+
+				//remove the horizontal cursor for this depth as it no longer exists 
+				xPosForCurrentDepthChildren = xPosForCurrentDepthChildren[0:(len(xPosForCurrentDepthChildren) - 1)]
+
+				//decrement layers
+				depth--
+
+				//if the horizontal cursor was out of bounds at depth 0
+				//then the task has ended
+				if(depth == -1){
+					break
+				}
+
+				//get the previous children at the previous depth
+				currentChildren = previousChildren[len(previousChildren) - 1]
+
+				//remove this depth of previous children as it is now the current children
+				previousChildren = previousChildren[0:(len(previousChildren)-1)]
+
+				if(xPosForCurrentDepthChildren[depth] < len(currentChildren)){
+					currentChild = currentChildren[xPosForCurrentDepthChildren[depth]]
+				}
+				
+				
+			}
+
+
+
 		}
+
 
 	}
 
+	fmt.Println(topLevelContainer[0].Children)
 
-	return currentContainer	
+	return topLevelContainer
+
 
 }
 
 
-// func CreateEntireTreeForEquation(equation [][]complex128) []Container {
 
-// 	treeSlice := []Container{Container{}}
+func IntelligentlyPrintTree(tree []*Container) {
 
-// 	treeSliceData, _ := CreateATreeFromCurrentEquation(equation)
-
-// 	treeSlice[0] =  Container{[][]complex128{}, treeSliceData}
-
-// 	xPosAtLayer := []int{0}
-
-// 	layer := 0
-
-// 	currentContainer := treeSlice[xPosAtLayer[layer]]
-
-// 	for layer > -1 {
-
-// 		fmt.Println(treeSlice)
-
-// 		// containerCursor := xPosAtLayer[layer]
-
-// 		currentContainer = currentContainer.ChildrenEquations[xPosAtLayer[layer]]
-
-// 		newToAppend, dataAdded := CreateATreeFromCurrentEquation(currentContainer.Equation)
-
-// 		fmt.Println(newToAppend)
-
-// 		if(dataAdded){
-// 			currentContainer.ChildrenEquations[xPosAtLayer[layer]].ChildrenEquations = newToAppend
-// 		}
-
-// 		if(len(currentContainer.ChildrenEquations[xPosAtLayer[layer]].ChildrenEquations) != 0){
-
-// 			currentContainer = currentContainer.ChildrenEquations[xPosAtLayer[layer]].ChildrenEquations[0]
-
-// 			// currentContainer = currentContainer.ChildrenEquations[0]
-
-// 			xPosAtLayer = append(xPosAtLayer, 0)
-
-// 			layer++
-// 		}else{
-// 			xPosAtLayer[layer]++
-// 			if(xPosAtLayer[layer] == len(currentContainer.ChildrenEquations)){
-// 				xPosAtLayer[layer] = 0
-// 				layer--
-// 			}
-// 		}
-
-// 	}
-
-// 	return treeSlice
-
-// }
+	fmt.Println("PRINTING TREE")
 
 
+	topLevelContainer := tree
+
+	//start at 0, append a new number for each new depth
+	//remove the last number when coming back from a previous depth
+	xPosForCurrentDepthChildren := []int{0} 
+
+	depth := 0
+
+	previousChildren := [][]*Container{}
+
+	currentChildren := topLevelContainer
+
+	currentChild := currentChildren[xPosForCurrentDepthChildren[depth]]
+
+	for depth > -1 {
+
+
+		fmt.Println("depth", depth)
+		fmt.Println("equation at depth", depth, "x pos", xPosForCurrentDepthChildren[depth],  "equation", strings.ReplaceAll(DecodeFloatSliceToEquation(*currentChildren[xPosForCurrentDepthChildren[depth]].Parent), " ", ""))
+		// for i := 0; i < len(currentChildren); i++ {
+		// 	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(*currentChildren[i].Parent), " ", ""))
+		// }
+
+		//this gets the child container 
+		currentChild = currentChildren[xPosForCurrentDepthChildren[depth]]		
+
+		//this generates new children from the child containers equation
+		newChildren := currentChild.Children
+
+	
+		//if there was children to add immediately add them and move to the new depth
+		if(len(newChildren) > 0){
+
+
+			xPosForCurrentDepthChildren[depth]++
+			//start at index 0 for the next depth
+			xPosForCurrentDepthChildren = append(xPosForCurrentDepthChildren, 0)
+			//move to the next depth for horizontal cursor
+			depth++
+
+			//keep track of the children to move back into 
+			previousChildren = append(previousChildren, currentChildren)
+
+			//move to the next depth of children
+			currentChildren = currentChild.Children
+
+			
+
+		//if there was no children to add remain at the current depth
+		}else{
+
+			//move horizontally at the current depth
+			xPosForCurrentDepthChildren[depth]++
+
+			//if the horizontal cursor is out of bounds for the current children
+			//do this in a loop as its possible the previous depth was out of 
+			//bounds as well
+			for(xPosForCurrentDepthChildren[depth] >= len(currentChildren)){
+
+				//reset the cursor for this depth
+				xPosForCurrentDepthChildren[depth] = 0
+
+				//remove the horizontal cursor for this depth as it no longer exists 
+				xPosForCurrentDepthChildren = xPosForCurrentDepthChildren[0:(len(xPosForCurrentDepthChildren) - 1)]
+
+				//decrement layers
+				depth--
+
+				//if the horizontal cursor was out of bounds at depth 0
+				//then the task has ended
+				if(depth == -1){
+					break
+				}
+
+				//get the previous children at the previous depth
+				currentChildren = previousChildren[len(previousChildren) - 1]
+
+				//remove this depth of previous children as it is now the current children
+				previousChildren = previousChildren[0:(len(previousChildren)-1)]
+
+				if(xPosForCurrentDepthChildren[depth] < len(currentChildren)){
+					currentChild = currentChildren[xPosForCurrentDepthChildren[depth]]
+				}
+				
+				
+			}
 
 
 
+		}
+
+
+	}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 
 
 
