@@ -20,9 +20,12 @@ func TestGenerateNumbersSlice(t *testing.T){
 	fmt.Println(DecodeFloatSliceToEquation(numberSlice))
 
 
-	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(3,3))
+	equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
 
 	fmt.Println(DecodeFloatSliceToEquation(equation))
+
+	fmt.Println(DecodeFloatSliceToEquation(SimplifyInnerParenthesis(equation)))
+
 	
 	
 
