@@ -4,6 +4,7 @@ import (
 
 	"fmt"
 	"math/cmplx"
+	"reflect"
 	"sort"
 	"strings"
 	"strconv"
@@ -32,35 +33,11 @@ func main() {
 
 	// equation := [][]complex128{gOP(), gNum(2, 3, 3, 0), gCP(3) }
 
-	equation := [][]complex128{gOP(), gOP(), gNum(3,0), gCP(1), gOP(), gNum(1, 1, 2, 0), gCP(2), gNum(3, 0), gCP(1)}       
+	// equation := [][]complex128{gOP(), gOP(), gNum(3,0, 3), gCP(1, 3), gOP(), gNum(1, 1, 2, 0, 3), gCP(2, 3), gNum(3, 0, 3), gCP(1, 3)}       
 
-	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
+	// fmt.Println(DecodeFloatSliceToEquation(equation))
 
 	panic("test")
-
-
-
-
-	// foiledEquation = FoilAllNeighboringParenthesis(foiledEquation)
-
-	// fmt.Println(DecodeFloatSliceToEquation(foiledEquation))
-
-	// foiledEquation = FoilAllNeighboringParenthesis(foiledEquation)
-
-	// fmt.Println(DecodeFloatSliceToEquation(foiledEquation))
-
-	// foiledEquation = FoilAllNeighboringParenthesis(foiledEquation)
-
-	// fmt.Println(DecodeFloatSliceToEquation(foiledEquation))
-
-	// foiledEquation = RemoveUnusedParenthesis(foiledEquation)
-
-	// fmt.Println(DecodeFloatSliceToEquation(foiledEquation))
-
-
-	// foiledEquation = FoilAllNeighboringParenthesis(foiledEquation)
-
-	// fmt.Println(DecodeFloatSliceToEquation(foiledEquation))
 	
 
 }
@@ -75,7 +52,7 @@ func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
 	
 	equationString := ""
 
-	previousTerm := []complex128{}
+	
 
 	for i := 0; i < len(equation); i++ {
 		
@@ -91,14 +68,15 @@ func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
 		}else if(IsCP(currentItem)){
 			equationString += " )"
 			if(currentItem[2] != 0 && currentItem[2] != 1) {
-				equationString += "^" + strconv.FormatFloat(real(currentItem[2]), 'f', -1, 64) + " "
+
+				equationString += "^" + strconv.FormatFloat(real(currentItem[2]), 'f', -1, 64) + " " + GetStringForCodeOfCP(real(currentItem[4])) + " "
+			}else{
+
+				equationString += GetStringForCodeOfCP(real(currentItem[4])) + " "
 			}
 			
 		}else if(IsNumber(firstIndex)){
 
-			if(IsCP(previousTerm)){
-				equationString += "+"
-			}
 
 			for i := 0; i < len(currentItem); i = i+2{
 				multiplier := currentItem[i]
@@ -123,11 +101,12 @@ func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
 			panic("unknown equation item DecodeFloatSliceToEquation()")	
 		}
 	
-		previousTerm = currentItem
+		
 
 	}
 
 	
+	equationString = RemoveOperatorsBetweenTwoClosingParenthesisAndRemoveSpaces(equationString)
 
 	return equationString
 
@@ -135,140 +114,37 @@ func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
 
 
 
-// func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
+func gNum(nums ...complex128) [][]complex128 {
 
-// //	CheckEquationForSyntaxErrors(equation)
-
-// 	equation := CleanCopyEntire2DComplex128Slice(equationInput)
-	
-// 	equationString := ""
-
-// 	depthLevel := 0
-
-// 	for i := 0; i < len(equation); i++ {
-		
-// 		currentItem := equation[i]
-
-// 		for j := 0; j < len(currentItem); j = (j+2) {
-// 			firstIndex := currentItem[j]
-// 			secondIndex := currentItem[j+1]
-
-// 			firstIndexString := strconv.FormatFloat(real(firstIndex), 'f', -1, 64)
-
-// 			secondIndexString := strconv.FormatFloat(real(secondIndex), 'f', -1, 64)
-			
-
-
-// 			if(IsOP(firstIndex, secondIndex)){
-// 				equationString += "( "
-// 				depthLevel++ 
-// 			}else if(IsCP(currentItem)){
-// 				equationString += " )"
-// 				if(currentItem[j+2] != 0 && currentItem[j+2] != 1){
-// 					equationString += "^" + strconv.FormatFloat(real(currentItem[2]), 'f', -1, 64) + " "
-// 				}
-// 				depthLevel--
-// 			}else if(IsNumber(firstIndex)){
-// 				if(real(firstIndex) != 1){
-// 					if(real(secondIndex) == 0){
-// 						equationString += firstIndexString + " + "
-// 					}else if(real(secondIndex) == 1){
-// 						equationString += firstIndexString + "S + "
-// 					}else{
-// 						equationString += firstIndexString + "S^" + secondIndexString + " + "
-// 					}
-// 				}else{
-// 					if(real(secondIndex) == 0){
-// 						equationString += firstIndexString + " + "
-// 					}else if(real(secondIndex) == 1){
-// 						equationString += "S + "
-// 					}else{
-// 						equationString += "S^" + secondIndexString + " +"
-// 					}
-// 				}
-				
-// 			}else{
-// 				panic("unknown equation item DecodeFloatSliceToEquation()")	
-// 			}
-// 			// fmt.Println(equationString)
-// 			// fmt.Println(depthLevel)
-
-// 			if(IsCP(currentItem)){
-// 				break	
-// 			}
-
-// 		}
-
-// 	}
-
-// 	okToRemovePlus := false
-
-// 	plusIndicesToRemove := []int{}
-
-// 	trackCurrent := -1
-
-// 	for i := 0; i < len(equationString); i++ {
-// 		if(rune(equationString[i]) == ' '){
-// 			continue
-// 		}else if(rune(equationString[i]) == ')' && !okToRemovePlus){
-// 			okToRemovePlus= true
-// 		}else if(rune(equationString[i]) == '+'){
-// 			if(okToRemovePlus){
-// 				trackCurrent = i
-// 			}
-// 		}else if(rune(equationString[i]) == ')' && okToRemovePlus){
-// 			if(okToRemovePlus){
-// 				plusIndicesToRemove = append(plusIndicesToRemove, trackCurrent)
-// 			}
-// 			okToRemovePlus = false
-// 		}else{
-// 			okToRemovePlus = false
-// 		}
-
-// 	}
-
-// 	for i := 0; i < len(plusIndicesToRemove); i++ {
-
-// 		if(plusIndicesToRemove[i] < len(equationString) && plusIndicesToRemove[i] > 0 ){
-
-
-
-// 			equationString = equationString[0:plusIndicesToRemove[i]] + equationString[(plusIndicesToRemove[i] + 1):len(equationString)]
-
-// 			for j := 0; j < len(plusIndicesToRemove); j++ {
-// 				plusIndicesToRemove[j]--
-// 			}
-
-
-// 		}
-// 	}
-
-// 	//strings.TrimSpace(equationString)
-
-
-// 	return equationString
-
-// }
-
-//g stands for generate
-
-func gNum(nums ...complex128) []complex128 {
-
-	if( (len(nums)%2) != 0){
-		panic("error, invalid amount of numbers")
+	if( (len(nums)%2) != 1 || len(nums) < 3){
+		panic("error, invalid amount of numbers gNum()")
 	}
 
-	returnSlice := []complex128{}
+	if(nums[len(nums) - 1] != 1 && nums[len(nums) - 1] != 2 && nums[len(nums) - 1] != 3 && nums[len(nums) - 1] != 4 ){
+		panic("error invalid int code gNum()")
+	}
+
+	returnSlice := [][]complex128{}
+
+	returnSlice = append(returnSlice, []complex128{complex(0, 0), complex(0, 0)})
+
+	returnSliceNums := []complex128{}
 
 	for i := 0; i < len(nums); i = (i + 2) {
 
+		if(i == (len(nums) - 1)){
+			break
+		}
 
-
-		returnSlice = append(returnSlice, nums[i])
-		returnSlice = append(returnSlice, nums[i+1])
+		returnSliceNums = append(returnSliceNums, nums[i])
+		returnSliceNums = append(returnSliceNums, nums[i+1])
 
 
 	}
+
+	returnSlice = append(returnSlice, returnSliceNums)
+
+	returnSlice = append(returnSlice, []complex128{complex(0, 0), complex(1, 0), complex(1, 0), complex(0,0), complex(real(nums[len(nums)-1]), 0)})
 
 	return returnSlice
 
@@ -278,15 +154,135 @@ func gOP() []complex128 {
 	return []complex128{0, 0}
 }
 
-func gCP(exponent complex128) []complex128 {
-	return []complex128{0, 1, exponent}
+//Operators are how the items within the parenthesis should interact with
+//the next neighbor...
+//codes are
+//1 = add
+//2 = subtract
+//3 = multiply
+//4 = divide
+func gCP(exponent complex128, operator complex128) []complex128 {
+	return []complex128{0, 1, exponent, 0, operator}
 }
 
 
 
+func SimplifyInnerParenthesis(equationInput [][]complex128) [][]complex128 {
+	CheckEquationForSyntaxErrors(equationInput, "SimplifyInnerParenthesis()")
+
+	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+
+	numbersHolder := []complex128{}
+
+	indexOpener := -1
+
+	indexCloser := -1
+
+	exponentCloser := -1
+
+	foundValid := false
+
+	for i := 0; i < len(equation); i ++ {
+
+		if(foundValid){
+			break
+		}
+
+		if(IsOP(equation[i][0], equation[i][1])){
+
+			indexOpener = i
+
+			
+
+			checkingIfValid := true
+
+			sawOneInt := false
+
+			cursor := i
+
+			numbersHolder = []complex128{}
+		
+
+			for checkingIfValid {
+
+				cursor++
+
+				//cursor is out of bounds, nothing to check
+				if(cursor >= len(equation)){
+					return equation
+				}
+
+				if(!sawOneInt){
+					if(IsNumber(equation[cursor][0])){
+						numbersHolder = append(numbersHolder, equation[cursor]...)
+						sawOneInt = true
+					}else{
+						//there was no integer after the opening parenthesis, not valid
+						checkingIfValid = false
+						break
+					}
+				}else if(sawOneInt){
+					if(IsNumber(equation[cursor][0])){
+						//there should only be one set of numbers inside parenthesis this should not be possible
+						panic("interesting case, should not get here SimplifyInnerParenthesis()")
+						continue
+					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
+						checkingIfValid = false
+						break
+					}else if IsCP(equation[cursor]){
+						if(real(equation[cursor][2]) > 1){
+							fmt.Println(equation[cursor:len(equation)])
+							fmt.Println("getting here")
+							indexCloser = cursor
+							//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
+							exponentCloser = int(real(equation[cursor][2]))
+							checkingIfValid = false
+							foundValid = true
+						}
+						break
+					}
+				}
+
+			}
+
+		}
+
+
+	}
+
+	if(foundValid){
+
+		fmt.Println("NUMBERS FOUND", numbersHolder)
+		
+		sliceToInsert := MultiplyParenthesisGivenExponent(numbersHolder, exponentCloser)
+
+		slicesToInsert :=  [][]complex128{gOP(), sliceToInsert, gCP(1, 3)}
+
+		returnEquation := [][]complex128{}
+
+		returnEquation = append(returnEquation, equation[0:indexOpener]...)
+		
+		returnEquation = append(returnEquation, slicesToInsert...)
+		
+		returnEquation = append(returnEquation, equation[indexCloser+1:len(equation)]...)
+	
+		returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
+
+		fmt.Println("RETURN EQUATION", DecodeFloatSliceToEquation(returnEquation))		
+
+		//recursive call if there was a change will check if more foils possible
+		return SimplifyInnerParenthesis(returnEquation)
+
+	}else{
+
+		//if no foils possible return input
+		return equation
+	}	
+
+}
+
 
 // finds "(" followed by numbers followed by ")^x" where x is some power greater than 1
-
 func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]complex128 {
 
 	CheckEquationForSyntaxErrors(equationInput, "FoilOutParenthesisRaisedToExponent()")
@@ -377,7 +373,7 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 		
 		sliceToInsert := MultiplyParenthesisGivenExponent(numbersHolder, exponentCloser)
 
-		slicesToInsert :=  [][]complex128{gOP(), sliceToInsert, gCP(1)}
+		slicesToInsert :=  [][]complex128{gOP(), sliceToInsert, gCP(1, 3)}
 
 		returnEquation := [][]complex128{}
 
@@ -389,7 +385,7 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 	
 		returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
 
-		fmt.Println("RETURN EQUATION", strings.ReplaceAll(DecodeFloatSliceToEquation(returnEquation), " ", ""))		
+		fmt.Println("RETURN EQUATION", DecodeFloatSliceToEquation(returnEquation))		
 
 		//recursive call if there was a change will check if more foils possible
 		return FoilOutParenthesisRaisedToExponent(returnEquation)
@@ -675,7 +671,7 @@ func FoilNeighborParenthesis(equationInput [][]complex128) [][]complex128 {
 
 		sliceToInsert := MultiplyNeighboringParenthesis(numbersHolderFirstNeighbor, numbersHolderSecondNeighbor)
 
-		slicesToInsert :=  [][]complex128{gOP(), sliceToInsert, gCP(1)}
+		slicesToInsert :=  [][]complex128{gOP(), sliceToInsert, gCP(1, 3)}
 
 		returnEquation := [][]complex128{}
 
@@ -687,7 +683,7 @@ func FoilNeighborParenthesis(equationInput [][]complex128) [][]complex128 {
 
 		returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
 
-		fmt.Println("RETURN EQUATION", strings.ReplaceAll(DecodeFloatSliceToEquation(returnEquation), " ", ""))		
+		fmt.Println("RETURN EQUATION", DecodeFloatSliceToEquation(returnEquation))		
 
 		//recursive call if there was a change will check if more foils possible
 		return FoilNeighborParenthesis(returnEquation)
@@ -960,7 +956,7 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 
 			root2Slice := []complex128{complex(1, 0), complex(1,0), -1*root2, complex(0,0)}
 
-			slicesToInsert :=  [][]complex128{gOP(), root1Slice, gCP(1), gOP(), root2Slice, gCP(1)}			
+			slicesToInsert :=  [][]complex128{gOP(), root1Slice, gCP(1, 3), gOP(), root2Slice, gCP(1, 3)}			
 
 			returnEquation := [][]complex128{}
 
@@ -972,7 +968,7 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 		
 			returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
 
-			fmt.Println("RETURN EQUATION", strings.ReplaceAll(DecodeFloatSliceToEquation(returnEquation), " ", ""))		
+			fmt.Println("RETURN EQUATION", DecodeFloatSliceToEquation(returnEquation))		
 
 			//recursive call if there was a change will check if more foils possible
 			return FactorQuadraticsWithABCAllPresent(returnEquation)
@@ -1121,7 +1117,7 @@ func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex1
 
 			completingTheSquareTermSlice := []complex128{(-1*cTerm*aTermBeforeScale), complex(0, 0)}
 
-			slicesToInsert :=  [][]complex128{gOP(), gOP(), scaleDownASlice, gCP(1), gOP(), root1Slice, gCP(1), gOP(), root2Slice, gCP(1), completingTheSquareTermSlice, gCP(1)}			
+			slicesToInsert :=  [][]complex128{gOP(), gOP(), scaleDownASlice, gCP(1, 3), gOP(), root1Slice, gCP(1, 3), gOP(), root2Slice, gCP(1, 3), completingTheSquareTermSlice, gCP(1, 3)}			
 
 			returnEquation := [][]complex128{}
 
@@ -1133,7 +1129,7 @@ func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex1
 		
 			returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
 
-			fmt.Println("RETURN EQUATION", strings.ReplaceAll(DecodeFloatSliceToEquation(returnEquation), " ", ""))		
+			fmt.Println("RETURN EQUATION", DecodeFloatSliceToEquation(returnEquation))		
 
 			//recursive call if there was a change will check if more foils possible
 			return FactorQuadraticsWithABOnlyPresent(returnEquation)
@@ -1276,7 +1272,7 @@ func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex1
 
 			root2Slice := []complex128{complex(1, 0), complex(1,0), (-1* cmplx.Pow(cTerm, complex(0.5, 0))), complex(0, 0)}
 
-			slicesToInsert :=  [][]complex128{gOP(), scaleDownASlice, gCP(1), gOP(), root1Slice, gCP(1), gOP(), root2Slice, gCP(1)}			
+			slicesToInsert :=  [][]complex128{gOP(), scaleDownASlice, gCP(1, 3), gOP(), root1Slice, gCP(1, 3), gOP(), root2Slice, gCP(1, 3)}			
 
 			returnEquation := [][]complex128{}
 
@@ -1312,7 +1308,15 @@ func IsOP(num1 complex128, num2 complex128) bool {
 	}
 }
 func IsCP(nums []complex128) bool {
-	if(len(nums) == 3){
+	if(len(nums) == 5){
+		return true
+	}else{
+		return false
+	}
+}
+
+func IsOperator(num1 complex128, num2 complex128) bool {
+	if(num1 == 0 && num2 != 0){
 		return true
 	}else{
 		return false
@@ -1333,7 +1337,7 @@ func CheckEquationForSyntaxErrors(equation [][]complex128, parentFunction string
 
 	depthLevel := 0
 
-	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))	
+	fmt.Println(DecodeFloatSliceToEquation(equation))	
 
 	for i := 0; i < len(equation); i++ {
 
@@ -1366,7 +1370,7 @@ func CheckEquationForSyntaxErrors(equation [][]complex128, parentFunction string
 				panic("Syntax Error too many ) for the number of ( CheckEquationForSyntaxErrors()")
 			}
 
-			if(len(currentItem) == 3){
+			if(IsCP(currentItem)){
 				break	
 			}
 		}
@@ -1612,7 +1616,7 @@ func TwoEquationsAreExactlyIdentical(equation1 [][]complex128, equation2 [][]com
 				return false
 			}
 
-			if(len(currentItemEquation1) == 3){
+			if(IsCP(currentItemEquation1)){
 				
 				if(currentItemEquation1[j+2] != currentItemEquation2[j+2]){
 					return false
@@ -1799,13 +1803,13 @@ func CreateEntireTreeForEquation(equation [][]complex128) []*Container {
 
 		fmt.Println("depth", depth, "xpos", xPosForCurrentDepthChildren[depth])
 
-		fmt.Println("current child", strings.ReplaceAll(DecodeFloatSliceToEquation(*currentChild.Parent), " ", ""))
+		fmt.Println("current child", DecodeFloatSliceToEquation(*currentChild.Parent))
 
 		//this generates new children from the child containers equation
 		newChildren := CreateATreeFromCurrentEquation(*currentChild.Parent)
 
 		for i := 0; i < len(newChildren); i++ {
-			fmt.Println("new children", strings.ReplaceAll(DecodeFloatSliceToEquation(*newChildren[i].Parent), " ", ""))
+			fmt.Println("new children", DecodeFloatSliceToEquation(*newChildren[i].Parent))
 		}
 
 		
@@ -1822,7 +1826,7 @@ func CreateEntireTreeForEquation(equation [][]complex128) []*Container {
 		//	fmt.Println(topLevelContainer)
 
 			for i := 0; i < len(currentChild.Children); i++ {
-				fmt.Println("new children copied", strings.ReplaceAll(DecodeFloatSliceToEquation(*currentChild.Children[i].Parent), " ", ""))
+				fmt.Println("new children copied", DecodeFloatSliceToEquation(*currentChild.Children[i].Parent))
 			}
 
 
@@ -1922,9 +1926,9 @@ func IntelligentlyPrintTree(tree []*Container) {
 
 
 		fmt.Println("depth", depth)
-		fmt.Println("equation at depth", depth, "x pos", xPosForCurrentDepthChildren[depth],  "equation", strings.ReplaceAll(DecodeFloatSliceToEquation(*currentChildren[xPosForCurrentDepthChildren[depth]].Parent), " ", ""))
+		fmt.Println("equation at depth", depth, "x pos", xPosForCurrentDepthChildren[depth],  "equation", DecodeFloatSliceToEquation(*currentChildren[xPosForCurrentDepthChildren[depth]].Parent))
 		// for i := 0; i < len(currentChildren); i++ {
-		// 	fmt.Println(strings.ReplaceAll(DecodeFloatSliceToEquation(*currentChildren[i].Parent), " ", ""))
+		// 	fmt.Println(DecodeFloatSliceToEquation(*currentChildren[i].Parent))
 		// }
 
 		//this gets the child container 
@@ -2001,6 +2005,163 @@ func IntelligentlyPrintTree(tree []*Container) {
 
 
 }
+
+
+
+func GetStringForCodeOfCP(code float64) string {
+
+	switch code{
+		case float64(1):
+			return "+"
+		case float64(2):
+			return "-"
+		case float64(3):
+			return "*"
+		case float64(4):
+			return "/"
+		default:
+			panic("unkown operator code GetStringForCodeOfCP()")
+	}
+
+	return "error"
+
+}
+
+
+func RemoveOperatorsBetweenTwoClosingParenthesisAndRemoveSpaces(equationStringInput string) string {
+
+	doneWorking := false
+
+	cursor := 0
+
+	equationString := equationStringInput
+
+	equationString = strings.ReplaceAll(equationString, " ", "")
+
+	threeAtATime := []rune{}
+
+	for !doneWorking {
+
+		if(cursor + 2 >= len(equationString)){
+			doneWorking = true
+			break
+		}
+
+		threeAtATime = []rune{rune(equationString[cursor]), rune(equationString[cursor+1]), rune(equationString[cursor+2])}
+
+		if(threeAtATime[0] == ')' && (threeAtATime[1] == '+' || threeAtATime[1] == '-' || threeAtATime[1] == '*' || threeAtATime[1] == '/') && threeAtATime[2] == ')'){
+			equationString = equationString[0:cursor+1] + equationString[cursor+2:len(equationString)]
+		}else{
+			cursor++
+		}
+
+
+
+
+	}
+
+	if(rune(equationString[len(equationString)-1]) == '*' || rune(equationString[len(equationString)-1]) == '+' || rune(equationString[len(equationString)-1]) == '-' || rune(equationString[len(equationString)-1]) == '/'   ){
+		equationString = equationString[0:len(equationString)-1]
+	}
+
+	return equationString
+
+}
+
+
+
+
+func Create2DEquationFromSliceInputs(inputSlices ...interface{}) [][]complex128 {
+
+	returnEquation := [][]complex128{}
+
+
+	for i := 0; i < len(inputSlices); i++ {
+
+		currentInputSlice := inputSlices[i]
+
+		reflectType := reflect.TypeOf(currentInputSlice)
+
+
+
+		switch reflectType.Kind() {
+			case reflect.Slice:
+				elementType := reflectType.Elem()
+				switch elementType.Kind(){
+					case reflect.Slice:
+					
+						valueOf2DSlice := reflect.ValueOf(currentInputSlice)
+
+						//REPLACETYPECASE
+						typeComplex128 := reflect.TypeOf([][]complex128{})
+
+						firstConversion2DSlice := valueOf2DSlice.Convert(typeComplex128)
+
+						//REPLACETYPECASE
+						finalConversion2DSlice := firstConversion2DSlice.Interface().([][]complex128)
+
+						returnEquation = append(returnEquation, finalConversion2DSlice...)
+
+						// for i := 0; i < len(finalConversion2DSlice); i++ {
+
+						// 	firstElementInner := finalConversion2DSlice[i]
+
+						// 	interfaceSliceInner := []interface{}{}
+
+						// 	for j := 0; j < len(firstElementInner); j++ {
+						// 		interfaceSliceInner = append(interfaceSliceInner, firstElementInner[j])
+						// 	}
+
+						// 	inputOptions = append(inputOptions, interfaceSliceInner)
+						// }
+
+					case reflect.Complex128:
+						
+						valueOf2DSlice := reflect.ValueOf(currentInputSlice)
+
+						//REPLACETYPECASE
+						typeComplex128 := reflect.TypeOf([]complex128{})
+
+						firstConversion2DSlice := valueOf2DSlice.Convert(typeComplex128)
+
+						//REPLACETYPECASE
+						finalConversion2DSlice := firstConversion2DSlice.Interface().([]complex128)
+
+
+						returnEquation = append(returnEquation, finalConversion2DSlice)						
+
+					default:
+						panic("error, not a valid 2D slice, outer type is a slice, but inner type is not")	
+			}
+		default:
+			panic("error, not a valid 2D slice, outermost type is not of any slice")	
+			
+	}
+
+	}
+
+	return returnEquation
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
