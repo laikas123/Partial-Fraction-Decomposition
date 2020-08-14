@@ -193,6 +193,7 @@ func TestCreatingATreeMap(t *testing.T){
 	fmt.Println("initial", strings.ReplaceAll(DecodeFloatSliceToEquation(equation), " ", ""))
 	
 	treeSlice := CreateEntireTreeForEquation(equation)
+	
 
 	fmt.Println(treeSlice)
 	

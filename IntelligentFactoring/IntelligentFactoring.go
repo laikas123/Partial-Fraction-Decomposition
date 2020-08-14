@@ -9,9 +9,9 @@ import (
 	"strconv"
 )
 
-type EquationContainerForTree struct {
-	Equation [][]complex128
-	ChildrenEquations []EquationContainerForTree
+type Container struct {
+	Parent [][]complex128
+	Children []Container
 }
 
 
@@ -1688,18 +1688,18 @@ func RemoveParenthesisWith0DirectChildren(equationInput [][]complex128) [][]comp
 }
 
 
-func CreateATreeFromCurrentEquation(equation [][]complex128) ([]EquationContainerForTree, bool) {
+func CreateATreeFromCurrentEquation(equation [][]complex128) []Container {
 
-	CheckEquationForSyntaxErrors(equation, "CreateATreeFromCurrentEquation()")
+	// CheckEquationForSyntaxErrors(equation, "CreateATreeFromCurrentEquation()")
 
 
 
 	breakAll := false
 	
 
-	additionsMade := false
+	
 
-	equations := []EquationContainerForTree{}
+	equations := []Container{}
 
 	for i := 0; i < len(equation); i ++ {
 
@@ -1736,9 +1736,9 @@ func CreateATreeFromCurrentEquation(equation [][]complex128) ([]EquationContaine
 					i = cursor
 					cleanCopyToAppend := CleanCopyEntire2DComplex128Slice(equation)
 					dataToAddToTree := cleanCopyToAppend[openerIndex+1:cursor]
-					sliceForChildren := []EquationContainerForTree{}
-					equations = append(equations, EquationContainerForTree{dataToAddToTree, sliceForChildren})
-					additionsMade = true
+					sliceForChildren := []Container{}
+					equations = append(equations, Container{dataToAddToTree, sliceForChildren})
+					
 					break
 				}
 
@@ -1757,7 +1757,7 @@ func CreateATreeFromCurrentEquation(equation [][]complex128) ([]EquationContaine
 
 	
 
-	return equations, additionsMade 
+	return equations
 
 
 
@@ -1766,61 +1766,115 @@ func CreateATreeFromCurrentEquation(equation [][]complex128) ([]EquationContaine
 
 
 
+func CreateEntireTreeForEquation(equation [][]complex128) []Container{
 
+	currentContainer := CreateATreeFromCurrentEquation(equation)
 
-
-func CreateEntireTreeForEquation(equation [][]complex128) []EquationContainerForTree {
-
-	treeSlice := []EquationContainerForTree{EquationContainerForTree{}}
-
-	treeSliceData, _ := CreateATreeFromCurrentEquation(equation)
-
-	treeSlice[0] =  EquationContainerForTree{[][]complex128{}, treeSliceData}
-
-	xPosAtLayer := []int{0}
+	previousParentContainers := [][]Container{}
 
 	layer := 0
 
-	currentContainer := treeSlice[xPosAtLayer[layer]]
+	xPosForLayer := []int{0}
+
+	
 
 	for layer > -1 {
 
-		fmt.Println(treeSlice)
+		fmt.Println("layer", layer)
+		fmt.Println("xpos for layer", xPosForLayer[layer])
+		fmt.Println("previousParentContainers", previousParentContainers)
+		fmt.Println("lengthpreviousParentContainers", len(previousParentContainers))
 
-		// containerCursor := xPosAtLayer[layer]
-
-		currentContainer = currentContainer.ChildrenEquations[xPosAtLayer[layer]]
-
-		newToAppend, dataAdded := CreateATreeFromCurrentEquation(currentContainer.Equation)
-
-		fmt.Println(newToAppend)
-
-		if(dataAdded){
-			currentContainer.ChildrenEquations[xPosAtLayer[layer]].ChildrenEquations = newToAppend
+		for(xPosForLayer[layer] >= len(currentContainer)){
+			xPosForLayer[layer] = 0
+			layer--
+			if(layer == -1){
+				break
+			}
+			if(len(previousParentContainers) != 1){
+				currentContainer = previousParentContainers[len(previousParentContainers)-2]
+			}
+			previousParentContainers = previousParentContainers[0:len(previousParentContainers)-1]
+			xPosForLayer = xPosForLayer[0:len(xPosForLayer)-1]
+			
+			
+			fmt.Println("was here1")
 		}
 
-		if(len(currentContainer.ChildrenEquations[xPosAtLayer[layer]].ChildrenEquations) != 0){
+		fmt.Println("was here2")
+		newContainers := CreateATreeFromCurrentEquation(currentContainer[xPosForLayer[layer]].Parent)
 
-			currentContainer = currentContainer.ChildrenEquations[xPosAtLayer[layer]].ChildrenEquations[0]
-
-			// currentContainer = currentContainer.ChildrenEquations[0]
-
-			xPosAtLayer = append(xPosAtLayer, 0)
-
+		if(len(newContainers) != 0){
+			currentContainer[xPosForLayer[layer]].Children = newContainers
+			xPosForLayer[layer]++
+			previousParentContainers = append(previousParentContainers, currentContainer)
+			xPosForLayer = append(xPosForLayer, 0)
 			layer++
+			currentContainer = currentContainer[xPosForLayer[layer]].Children
 		}else{
-			xPosAtLayer[layer]++
-			if(xPosAtLayer[layer] == len(currentContainer.ChildrenEquations)){
-				xPosAtLayer[layer] = 0
-				layer--
-			}
+			xPosForLayer[layer]++
 		}
 
 	}
 
-	return treeSlice
+
+	return currentContainer	
 
 }
+
+
+// func CreateEntireTreeForEquation(equation [][]complex128) []Container {
+
+// 	treeSlice := []Container{Container{}}
+
+// 	treeSliceData, _ := CreateATreeFromCurrentEquation(equation)
+
+// 	treeSlice[0] =  Container{[][]complex128{}, treeSliceData}
+
+// 	xPosAtLayer := []int{0}
+
+// 	layer := 0
+
+// 	currentContainer := treeSlice[xPosAtLayer[layer]]
+
+// 	for layer > -1 {
+
+// 		fmt.Println(treeSlice)
+
+// 		// containerCursor := xPosAtLayer[layer]
+
+// 		currentContainer = currentContainer.ChildrenEquations[xPosAtLayer[layer]]
+
+// 		newToAppend, dataAdded := CreateATreeFromCurrentEquation(currentContainer.Equation)
+
+// 		fmt.Println(newToAppend)
+
+// 		if(dataAdded){
+// 			currentContainer.ChildrenEquations[xPosAtLayer[layer]].ChildrenEquations = newToAppend
+// 		}
+
+// 		if(len(currentContainer.ChildrenEquations[xPosAtLayer[layer]].ChildrenEquations) != 0){
+
+// 			currentContainer = currentContainer.ChildrenEquations[xPosAtLayer[layer]].ChildrenEquations[0]
+
+// 			// currentContainer = currentContainer.ChildrenEquations[0]
+
+// 			xPosAtLayer = append(xPosAtLayer, 0)
+
+// 			layer++
+// 		}else{
+// 			xPosAtLayer[layer]++
+// 			if(xPosAtLayer[layer] == len(currentContainer.ChildrenEquations)){
+// 				xPosAtLayer[layer] = 0
+// 				layer--
+// 			}
+// 		}
+
+// 	}
+
+// 	return treeSlice
+
+// }
 
 
 
