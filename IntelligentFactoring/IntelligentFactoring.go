@@ -2535,9 +2535,61 @@ func DivideTwoAdjacentNumbers(number1 []complex128, number2 []complex128) []comp
 
 }
 
-func FactorNumeratorAndDenonminatorRemoveLikeFactors(numerator [][]complex128, denominator [][]complex128) {
+
+//returns the new and improved or returns exactly the same as input depending if anything was removed
+//this function so far only works for formats such as (s^2 + s + 2) nothing complicated like ((s+1)^2 - (3s^2))
+func FactorNumeratorAndDenonminatorRemoveLikeFactors(numeratorInput [][]complex128, denominatorInput [][]complex128) {
 
 	
+	numerator := TryAllABCAndABOnlyFactorMethodsOnEquation(numeratorInput)
+
+	denominator := TryAllABCAndABOnlyFactorMethodsOnEquation(denominatorInput)
+
+	firstFactorNumerator, endIndexFactorNumerator := GetFirstFactorFromEquation(numerator)
+	secondFactorNumerator, _ :=  GetFirstFactorFromEquation(numerator[endIndexFactorNumerator+1:len(numerator)])
+
+	firstFactorDenominator, endIndexFactorDenominator := GetFirstFactorFromEquation(denominator)
+	secondFactorDenominator, _ :=  GetFirstFactorFromEquation(denominator[endIndexFactorDenominator+1:len(denominator)])
+
+	fmt.Println("numerator factor 1", firstFactorNumerator, "numerator factor 2", secondFactorNumerator)
+
+	fmt.Println("denominator factor 1", firstFactorDenominator, "denominator factor 2", secondFactorDenominator)
+
+
+}
+
+func TryAllABCAndABOnlyFactorMethodsOnEquation(equationInput [][]complex128) [][]complex128 {
+
+
+
+	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+
+	equationCopy := CleanCopyEntire2DComplex128Slice(equationInput)
+
+	equation = FactorQuadraticsWithABCAllPresent(equation)
+
+	if(!TwoEquationsAreExactlyIdentical(equation, equationCopy)){
+		return equation
+	}
+
+
+	equation = FactorQuadraticsWithABOnlyPresent(equation)
+
+	if(!TwoEquationsAreExactlyIdentical(equation, equationCopy)){
+		return equation
+	}
+
+
+	equation = FactorQuadraticsWithACOnlyPresent(equation)
+
+	if(!TwoEquationsAreExactlyIdentical(equation, equationCopy)){
+		return equation
+	}
+
+
+	return equation
+
+
 
 
 }
@@ -2590,8 +2642,102 @@ func CleanCopyEntire1DComplex128Slice(sliceToCopy []complex128) []complex128 {
 
 }
 
+//returns the factor and the ending index of where the factor ended
+func GetFirstFactorFromEquation(equation [][]complex128) ([][]complex128, int) {
+
+	endingIndex := 0
+
+	foundValid := false
+
+	numbersHolder := [][]complex128{}		
+
+	for i := 0; i < len(equation); i ++ {
+
+		if(foundValid){
+			break
+		}
+
+		if(IsOP(equation[i][0], equation[i][1])){
 
 
+
+			checkingIfValid := true
+
+			sawOneNumber := false
+
+
+			//these two bools are used to make sure
+			//numbers and symbols alternate
+			indexShouldBeNumber := true
+			indexShouldBeOperator := false
+
+			cursor := i
+
+			//set these to null before each attempt to not have lingering data
+			numbersHolder = [][]complex128{}		
+			
+
+			for checkingIfValid {
+
+				cursor++
+
+				//cursor is out of bounds, nothing to check
+				if(cursor >= len(equation)){
+					return equation, 0
+				}
+
+				if(!sawOneNumber){
+
+					for(!IsCP(equation[cursor]) && !IsOP(equation[cursor][0], equation[cursor][1])){
+
+
+						if(cursor >= len(equation)){
+							checkingIfValid = false
+							foundValid = false
+							break
+						}
+
+						if(IsNumber(equation[cursor][0]) && indexShouldBeNumber){
+							numbersHolder = append(numbersHolder, equation[cursor])
+							indexShouldBeNumber = false
+							indexShouldBeOperator = true
+						}else if(IsOperator(equation[cursor]) && indexShouldBeOperator){
+							numbersHolder = append(numbersHolder, equation[cursor])
+							indexShouldBeNumber = true
+							indexShouldBeOperator = false
+						}else{
+							checkingIfValid = false
+							foundValid = false
+							break	
+						}
+
+						cursor++
+
+					}
+
+					//make sure what broke the loop was a closing parenthesis
+					if(IsCP(equation[cursor])){
+						endingIndex = cursor
+						checkingIfValid = false
+						foundValid = true
+						break
+					}else{
+						checkingIfValid = false
+						foundValid = false
+						break	
+					}
+
+			}
+
+		}
+
+
+	}
+}
+
+	return numbersHolder, endingIndex
+
+}
 
 
 

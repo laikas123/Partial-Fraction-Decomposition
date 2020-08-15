@@ -7,9 +7,46 @@ import (
 
 )
 
+func TestFactorNumeratorDenomiantor(t *testing.T){
+
+	numberSlice := gNum(1, 2, 1, 6, 0)
+
+
+	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(2, 1))
+
+	equation2 := CleanCopyEntire2DComplex128Slice(equation)
+
+	FactorNumeratorAndDenonminatorRemoveLikeFactors(equation, equation2)
+
+	panic("done testing")
+
+	if(false){
+		t.Errorf("failure")
+	}
+}
+
 func TestMakeSurePuttingAnEquationThroughFactorFunctionsDoesNotChangeIt(t *testing.T){
+
+	numberSlice := gNum(1, 9, 1, 6, 22)
+
+
+	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(2, 1))
+
+	copyOriginal := CleanCopyEntire2DComplex128Slice(equation)
+
+	fmt.Println("initial equation", DecodeFloatSliceToEquation(equation))
+
+	equation = FactorQuadraticsWithABCAllPresent(equation)
+	equation = FactorQuadraticsWithABOnlyPresent(equation)
+	equation = FactorQuadraticsWithACOnlyPresent(equation)
+
+
+	fmt.Println("post quadratic functions equation", DecodeFloatSliceToEquation(equation))
 	
-	
+
+	fmt.Println("two equations identical", TwoEquationsAreExactlyIdentical(equation, copyOriginal))
+
+	panic("done testing")
 
 	if(false){
 		t.Errorf("failure")
