@@ -64,16 +64,16 @@ func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
 
 
 		if(IsOP(firstIndex, secondIndex)){
-			equationString += "( ~"
+			equationString += "("
 			
 		}else if(IsCP(currentItem)){
-			equationString += " )~"
+			equationString += " )"
 			if(currentItem[2] != 0 && currentItem[2] != 1) {
 
-				equationString += "^" + strconv.FormatFloat(real(currentItem[2]), 'f', -1, 64) + " " + GetStringForCodeOfCP(real(currentItem[4])) + " ~"
+				equationString += "^" + strconv.FormatFloat(real(currentItem[2]), 'f', -1, 64) + " " + GetStringForCodeOfCP(real(currentItem[4])) 
 			}else{
 
-				equationString += GetStringForCodeOfCP(real(currentItem[4])) + " ~"
+				equationString += GetStringForCodeOfCP(real(currentItem[4])) + " "
 			}
 			
 		}else if(IsNumber(firstIndex)){
@@ -84,17 +84,17 @@ func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
 				exponent := currentItem[i+1]
 
 				if((i < len(currentItem) - 2) && exponent == 1){
-					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64)  + "s " + " ~ "
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64)  + "s " + " "
 				}else if((i < len(currentItem) - 2) && exponent == 0){
-					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + " ~  "
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "  "
 				}else if((i < len(currentItem) - 2) && exponent != 0 && exponent != 1){
-					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s^" + strconv.FormatFloat(real(exponent),'f', -1, 64) + " ~"
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s^" + strconv.FormatFloat(real(exponent),'f', -1, 64) 
 				}else if((i == len(currentItem) - 2) && exponent == 1){
-					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s ~" 
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s " 
 				}else if((i == len(currentItem) - 2) && exponent == 0){
 					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) +"~"
 				}else if((i ==  len(currentItem) - 2) && exponent != 0 && exponent != 1){
-					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s^" + strconv.FormatFloat(real(exponent),'f', -1, 64) + "~"
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s^" + strconv.FormatFloat(real(exponent),'f', -1, 64) 
 				}
 			}
 			
@@ -130,6 +130,11 @@ func gDivide() []complex128{
 }
 
 func gNum(nums ...complex128) [][]complex128 {
+
+	if(len(nums) == 2 && nums[0] != 0){
+		return [][]complex128{[]complex128{nums[0], nums[1]}}
+	}
+
 
 	if( (len(nums)%3) != 2 || len(nums) < 5){
 		panic("error, invalid amount of numbers gNum()")
@@ -1111,7 +1116,9 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 
 	equation := CleanCopyEntire2DComplex128Slice(equationInput)
 
-	numbersHolder := []complex128{}
+	equation = SimplifyInnerParenthesis(equation)
+
+	numbersHolder := [][]complex128{}
 
 	indexOpener := -1
 
@@ -1137,12 +1144,17 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 
 			checkingIfValid := true
 
-			sawOneNumberAndIsValidQuadratic := false
-
 			cursor := i
 
-			numbersHolder = []complex128{}
-		
+			numbersHolder = [][]complex128{}
+	
+			indexShouldBeNumber := true
+			indexShouldBeOperator := false		
+
+			secondDegreeExponentPresent := false
+			firstDegreeExponentPresent := false
+			zeroDegreeExponentPresent := false
+
 
 			for checkingIfValid {
 
@@ -1153,65 +1165,74 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 					return equation
 				}
 
-				if(!sawOneNumberAndIsValidQuadratic){
-					if(IsNumber(equation[cursor][0]) && len(equation[cursor]) == 6){
-						numbersHolder = append(numbersHolder, equation[cursor]...)
-						secondDegreeExponentPresent := false
-						firstDegreeExponentPresent := false
-						zeroDegreeExponentPresent := false
 
-						for k := 0; k < len(equation[cursor]); k = (k+2) {
+			
+					for(!IsCP(equation[cursor]) && !IsOP(equation[cursor][0], equation[cursor][1])) {
+						numbersHolder = append(numbersHolder, equation[cursor])
+						
+						if(IsNumber(equation[cursor][0]) && indexShouldBeNumber){
 
-							if(real(equation[cursor][k+1]) == 2){
+							fmt.Println("number", equation[cursor])
+
+							if(real(equation[cursor][1]) == 2){
 								secondDegreeExponentPresent = true
-								aTerm = equation[cursor][k]
-							}else if(real(equation[cursor][k+1]) == 1){
+								aTerm = equation[cursor][0]
+							}else if(real(equation[cursor][1]) == 1){
 								firstDegreeExponentPresent = true
-								bTerm = equation[cursor][k]
-							}else if(real(equation[cursor][k+1]) == 0){
+								bTerm = equation[cursor][0]
+							}else if(real(equation[cursor][1]) == 0){
 								zeroDegreeExponentPresent = true
-								cTerm = equation[cursor][k]
+								cTerm = equation[cursor][0]
 							}
 
-						}						
+							indexShouldBeNumber = false
+							indexShouldBeOperator = true
 
-						if(secondDegreeExponentPresent && firstDegreeExponentPresent && zeroDegreeExponentPresent){
-							sawOneNumberAndIsValidQuadratic = true
+							cursor++
+
+						}else if(IsOperator(equation[cursor]) && indexShouldBeOperator){
+							
+							fmt.Println("operator", equation[cursor])
+							//only plus or minuses are a valid quadratic, it's possible multipliers could be valid
+							//however the inner parenthesis should already be simplified since that function is called
+							//at the start of this function
+							if(equation[cursor][1] == 1 || equation[cursor][1] == 2){
+									indexShouldBeNumber = true
+									indexShouldBeOperator = false
+									cursor++
+							}else{
+								checkingIfValid = false
+								break
+							}
 						}else{
+							checkingIfValid = false
 							break
 						}
 
-						
-					}else{
-						//there was no integer after the opening parenthesis, not valid
-						checkingIfValid = false
-						break
-					}
-				}else if(sawOneNumberAndIsValidQuadratic){
-					if(IsNumber(equation[cursor][0])){
-						//there should only be one set of numbers inside parenthesis this should not be possible
-						panic("interesting case, should not get here FactorQuadraticsWithABCAllPresent()")
-						continue
-					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
-						checkingIfValid = false
-						break
-					}else if IsCP(equation[cursor]){
-						indexCloser = cursor
-						//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
-						checkingIfValid = false
-						foundValid = true
-						break
-					}
+					
 				}
-
+				if IsCP(equation[cursor]){
+						if(secondDegreeExponentPresent && firstDegreeExponentPresent && zeroDegreeExponentPresent){
+							indexCloser = cursor
+							checkingIfValid = false
+							foundValid = true
+							break
+						}else{
+							checkingIfValid = false
+							break
+						}
+						
+				}
 			}
 
-		}
+		
 
 
 	}
-
+}
 	if(foundValid){
+
+		fmt.Println("a", aTerm, "b", bTerm, "c", cTerm)
 
 		if(aTerm == 0 || bTerm == 0 || cTerm == 0 ){
 			panic("too many or too few values for a value for quadratic formula")
@@ -1221,11 +1242,13 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 
 			fmt.Println("root1", root1, "root2", root2)
 
-			root1Slice := []complex128{complex(1, 0), complex(1,0), -1*root1, complex(0,0)}
+			root1Slice := Create2DEquationFromSliceInputs(gOP(), gNum(1, 1, 1, -1*root1, 0), gCP(1, 1))
 
-			root2Slice := []complex128{complex(1, 0), complex(1,0), -1*root2, complex(0,0)}
+			root2Slice := Create2DEquationFromSliceInputs(gOP(), gNum(1, 1, 1, -1*root2, 0), gCP(1, 1))
 
-			slicesToInsert :=  [][]complex128{gOP(), root1Slice, gCP(1, 3), gOP(), root2Slice, gCP(1, 3)}			
+//			root2Slice := []complex128{complex(1, 0), complex(1,0), complex(0,0), complex(1,0), -1*root2, complex(0,0)}
+
+			slicesToInsert :=  Create2DEquationFromSliceInputs(root1Slice, root2Slice)
 
 			returnEquation := [][]complex128{}
 
@@ -1239,12 +1262,16 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 
 			fmt.Println("RETURN EQUATION", DecodeFloatSliceToEquation(returnEquation))		
 
+			// panic("ok")
+
 			//recursive call if there was a change will check if more foils possible
 			return FactorQuadraticsWithABCAllPresent(returnEquation)
 		}
 	}else{
 
 		//if no foils quadratic factors return input
+		fmt.Println("RETURN EQUATION", DecodeFloatSliceToEquation(equation))		
+
 		return equation
 	}	
 
@@ -1255,13 +1282,14 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 
 
 func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex128 {
-
 	
-	CheckEquationForSyntaxErrors(equationInput, "FactorQuadraticsWithABOnlyPresent()")
+	CheckEquationForSyntaxErrors(equationInput, "FactorQuadraticsWithABCAllPresent()")
 
 	equation := CleanCopyEntire2DComplex128Slice(equationInput)
 
-	numbersHolder := []complex128{}
+	equation = SimplifyInnerParenthesis(equation)
+
+	numbersHolder := [][]complex128{}
 
 	indexOpener := -1
 
@@ -1286,12 +1314,18 @@ func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex1
 
 			checkingIfValid := true
 
-			sawOneNumberAndIsValidQuadratic := false
-
 			cursor := i
 
-			numbersHolder = []complex128{}
-		
+			numbersHolder = [][]complex128{}
+	
+			indexShouldBeNumber := true
+			indexShouldBeOperator := false		
+
+			secondDegreeExponentPresent := false
+			firstDegreeExponentPresent := false
+			
+
+			breakBecauseCIsPresent := false
 
 			for checkingIfValid {
 
@@ -1302,59 +1336,81 @@ func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex1
 					return equation
 				}
 
-				if(!sawOneNumberAndIsValidQuadratic){
-					if(IsNumber(equation[cursor][0]) && len(equation[cursor]) == 4){
-						numbersHolder = append(numbersHolder, equation[cursor]...)
-						secondDegreeExponentPresent := false
-						firstDegreeExponentPresent := false
-						
-						for k := 0; k < len(equation[cursor]); k = (k+2) {
 
-							if(real(equation[cursor][k+1]) == 2){
+			
+					for(!IsCP(equation[cursor]) && !IsOP(equation[cursor][0], equation[cursor][1])) {
+						numbersHolder = append(numbersHolder, equation[cursor])
+						
+						if(IsNumber(equation[cursor][0]) && indexShouldBeNumber){
+
+							fmt.Println("number", equation[cursor])
+
+							if(real(equation[cursor][1]) == 2){
 								secondDegreeExponentPresent = true
-								aTerm = equation[cursor][k]
-							}else if(real(equation[cursor][k+1]) == 1){
+								aTerm = equation[cursor][0]
+							}else if(real(equation[cursor][1]) == 1){
 								firstDegreeExponentPresent = true
-								bTerm = equation[cursor][k]
+								bTerm = equation[cursor][0]
+							}else if(real(equation[cursor][1]) == 0){
+								secondDegreeExponentPresent = false
+								firstDegreeExponentPresent = false
+								breakBecauseCIsPresent = true
+								checkingIfValid = false
+								break
 							}
 
-						}						
+							indexShouldBeNumber = false
+							indexShouldBeOperator = true
 
-						if(secondDegreeExponentPresent && firstDegreeExponentPresent){
-							sawOneNumberAndIsValidQuadratic = true
+							cursor++
+
+						}else if(IsOperator(equation[cursor]) && indexShouldBeOperator){
+							
+							fmt.Println("operator", equation[cursor])
+							//only plus or minuses are a valid quadratic, it's possible multipliers could be valid
+							//however the inner parenthesis should already be simplified since that function is called
+							//at the start of this function
+							if(equation[cursor][1] == 1 || equation[cursor][1] == 2){
+									indexShouldBeNumber = true
+									indexShouldBeOperator = false
+									cursor++
+							}else{
+								checkingIfValid = false
+								break
+							}
 						}else{
+							checkingIfValid = false
 							break
 						}
 
-						
-					}else{
-						//there was no integer after the opening parenthesis, not valid
-						checkingIfValid = false
-						break
-					}
-				}else if(sawOneNumberAndIsValidQuadratic){
-					if(IsNumber(equation[cursor][0])){
-						//there should only be one set of numbers inside parenthesis this should not be possible
-						panic("interesting case, should not get here FactorQuadraticsWithABOnlyPresent()")
-						continue
-					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
-						checkingIfValid = false
-						break
-					}else if IsCP(equation[cursor]){
-						indexCloser = cursor
-						//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
-						checkingIfValid = false
-						foundValid = true
-						break
-					}
+					
 				}
+				if IsCP(equation[cursor]){
 
+						if(breakBecauseCIsPresent){
+							checkingIfValid = false
+							foundValid = false
+							break							
+						}
+
+						if(secondDegreeExponentPresent && firstDegreeExponentPresent){
+							indexCloser = cursor
+							checkingIfValid = false
+							foundValid = true
+							break
+						}else{
+							checkingIfValid = false
+							break
+						}
+						
+				}
 			}
 
-		}
+		
 
 
 	}
+}
 
 	if(foundValid){
 
@@ -1380,13 +1436,25 @@ func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex1
 
 			scaleDownASlice := []complex128{aTermBeforeScale, complex(0,0)}
 
-			root1Slice := []complex128{complex(1, 0), complex(1,0), -1*root1, complex(0,0)}
+			// root1Slice := []complex128{complex(1, 0), complex(1,0), -1*root1, complex(0,0)}
 
-			root2Slice := []complex128{complex(1, 0), complex(1,0), -1*root2, complex(0,0)}
+			// root2Slice := []complex128{complex(1, 0), complex(1,0), -1*root2, complex(0,0)}
 
-			completingTheSquareTermSlice := []complex128{(-1*cTerm*aTermBeforeScale), complex(0, 0)}
 
-			slicesToInsert :=  [][]complex128{gOP(), gOP(), scaleDownASlice, gCP(1, 3), gOP(), root1Slice, gCP(1, 3), gOP(), root2Slice, gCP(1, 3), completingTheSquareTermSlice, gCP(1, 3)}			
+			root1Slice := Create2DEquationFromSliceInputs(gOP(), gNum(1, 1, 1, -1*root1, 0), gCP(1, 3))
+
+			root2Slice := Create2DEquationFromSliceInputs(gOP(), gNum(1, 1, 1, -1*root2, 0), gCP(1, 3))
+
+			completingTheSquareTermSlice := Create2DEquationFromSliceInputs(gOP(), gNum((-1*cTerm*aTermBeforeScale), complex(0, 0)), gCP(1, 3))
+
+
+			slicesToInsert :=  Create2DEquationFromSliceInputs(gOP(), scaleDownASlice, root1Slice, root2Slice, gCP(1, 1), completingTheSquareTermSlice)			
+
+
+
+			// completingTheSquareTermSlice := []complex128{(-1*cTerm*aTermBeforeScale), complex(0, 0)}
+
+			// slicesToInsert :=  [][]complex128{gOP(), gOP(), scaleDownASlice, gCP(1, 3), gOP(), root1Slice, gCP(1, 3), gOP(), root2Slice, gCP(1, 3), completingTheSquareTermSlice, gCP(1, 3)}			
 
 			returnEquation := [][]complex128{}
 
@@ -1417,13 +1485,14 @@ func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex1
 
 
 func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex128 {
-
 	
-	CheckEquationForSyntaxErrors(equationInput, "FactorQuadraticsWithACOnlyPresent()")
+	CheckEquationForSyntaxErrors(equationInput, "FactorQuadraticsWithABCAllPresent()")
 
 	equation := CleanCopyEntire2DComplex128Slice(equationInput)
 
-	numbersHolder := []complex128{}
+	equation = SimplifyInnerParenthesis(equation)
+
+	numbersHolder := [][]complex128{}
 
 	indexOpener := -1
 
@@ -1434,7 +1503,6 @@ func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex1
 	aTerm := complex(0, 0)
 
 	cTerm := complex(0, 0)
-
 
 	for i := 0; i < len(equation); i ++ {
 
@@ -1448,12 +1516,18 @@ func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex1
 
 			checkingIfValid := true
 
-			sawOneNumberAndIsValidQuadratic := false
-
 			cursor := i
 
-			numbersHolder = []complex128{}
-		
+			numbersHolder = [][]complex128{}
+	
+			indexShouldBeNumber := true
+			indexShouldBeOperator := false		
+
+			secondDegreeExponentPresent := false
+			zeroDegreeExponentPresent := false
+
+			breakBecauseBIsPresent := false
+
 
 			for checkingIfValid {
 
@@ -1464,60 +1538,85 @@ func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex1
 					return equation
 				}
 
-				if(!sawOneNumberAndIsValidQuadratic){
-					if(IsNumber(equation[cursor][0]) && len(equation[cursor]) == 4){
-						numbersHolder = append(numbersHolder, equation[cursor]...)
-						secondDegreeExponentPresent := false
-						zeroDegreeExponentPresent := false
+
+			
+					for(!IsCP(equation[cursor]) && !IsOP(equation[cursor][0], equation[cursor][1])) {
+						numbersHolder = append(numbersHolder, equation[cursor])
 						
+						if(IsNumber(equation[cursor][0]) && indexShouldBeNumber){
 
-						for k := 0; k < len(equation[cursor]); k = (k+2) {
+							fmt.Println("number", equation[cursor])
 
-							if(real(equation[cursor][k+1]) == 2){
+							if(real(equation[cursor][1]) == 2){
 								secondDegreeExponentPresent = true
-								aTerm = equation[cursor][k]
-							}else if(real(equation[cursor][k+1]) == 0){
+								aTerm = equation[cursor][0]
+							}else if(real(equation[cursor][1]) == 1){
+								//set these false so that the program doesn't continue for these parenthesis
+								//that is because the b term is present
+								secondDegreeExponentPresent = false
+								zeroDegreeExponentPresent = false
+								breakBecauseBIsPresent = true
+								checkingIfValid = false
+								break
+							}else if(real(equation[cursor][1]) == 0){
 								zeroDegreeExponentPresent = true
-								cTerm = equation[cursor][k]
+								cTerm = equation[cursor][0]
 							}
 
-						}						
+							indexShouldBeNumber = false
+							indexShouldBeOperator = true
 
-						if(secondDegreeExponentPresent && zeroDegreeExponentPresent){
-							sawOneNumberAndIsValidQuadratic = true
+							cursor++
+
+						}else if(IsOperator(equation[cursor]) && indexShouldBeOperator){
+							
+
+
+							fmt.Println("operator", equation[cursor])
+							//only plus or minuses are a valid quadratic, it's possible multipliers could be valid
+							//however the inner parenthesis should already be simplified since that function is called
+							//at the start of this function
+							if(equation[cursor][1] == 1 || equation[cursor][1] == 2){
+									indexShouldBeNumber = true
+									indexShouldBeOperator = false
+									cursor++
+							}else{
+								checkingIfValid = false
+								break
+							}
 						}else{
+							checkingIfValid = false
 							break
 						}
 
-						
-					}else{
-						//there was no integer after the opening parenthesis, not valid
-						checkingIfValid = false
-						break
-					}
-				}else if(sawOneNumberAndIsValidQuadratic){
-					if(IsNumber(equation[cursor][0])){
-						//there should only be one set of numbers inside parenthesis this should not be possible
-						panic("interesting case, should not get here FactorQuadraticsWithACOnlyPresent()")
-						continue
-					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
-						checkingIfValid = false
-						break
-					}else if IsCP(equation[cursor]){
-						indexCloser = cursor
-						//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
-						checkingIfValid = false
-						foundValid = true
-						break
-					}
+					
 				}
+				if IsCP(equation[cursor]){
 
+						if(breakBecauseBIsPresent){
+							checkingIfValid = false
+							foundValid = false
+							break
+						}
+
+						if(secondDegreeExponentPresent && zeroDegreeExponentPresent){
+							indexCloser = cursor
+							checkingIfValid = false
+							foundValid = true
+							break
+						}else{
+							checkingIfValid = false
+							break
+						}
+						
+				}
 			}
 
-		}
+		
 
 
 	}
+}
 
 	if(foundValid){
 
@@ -1537,11 +1636,13 @@ func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex1
 
 			scaleDownASlice := []complex128{aTermBeforeScale, complex(0,0)}
 
-			root1Slice := []complex128{complex(1, 0), complex(1,0), cmplx.Pow(cTerm, complex(0.5, 0)), complex(0, 0)}
+			sqrtCTerm := cmplx.Pow(cTerm, complex(0.5, 0))
 
-			root2Slice := []complex128{complex(1, 0), complex(1,0), (-1* cmplx.Pow(cTerm, complex(0.5, 0))), complex(0, 0)}
+			root1Slice := Create2DEquationFromSliceInputs(gOP(), gNum(1, 1, 1, sqrtCTerm, 0), gCP(1, 3))
 
-			slicesToInsert :=  [][]complex128{gOP(), scaleDownASlice, gCP(1, 3), gOP(), root1Slice, gCP(1, 3), gOP(), root2Slice, gCP(1, 3)}			
+			root2Slice := Create2DEquationFromSliceInputs(gOP(), gNum(1, 1, 1, -1*sqrtCTerm, 0), gCP(1, 3))
+
+			slicesToInsert :=  Create2DEquationFromSliceInputs(gOP(), scaleDownASlice, gCP(1, 3), root1Slice, root2Slice)			
 
 			returnEquation := [][]complex128{}
 
@@ -1636,7 +1737,7 @@ func CheckEquationForSyntaxErrors(equation [][]complex128, parentFunction string
 			}else if(IsOperator(currentItem)){
 			
 			}else{
-				fmt.Println(currentItem)
+				fmt.Println("current item", currentItem)
 				panic("Syntax Error unknown item type CheckEquationForSyntaxErrors()")
 			}
 
@@ -1727,66 +1828,6 @@ func CleanCopyEntire2DComplex128Slice(equationToCopy [][]complex128) [][]complex
 
 }
 
-
-//returns the number of direct children for the opening parenthesis, 
-//where a direct child is a set of closing parenthesis where the parenthesis are 
-//one level of depth deeper...
-//for instance... ( ( (3S+2)(3S + 5)(20S) ) )
-//the outermost parenthesis have one child only since there's only one set of closing parenthesis
-//the second level in however has 3 direct children...
-//this function focuses on places where there is a double set of parenthesis that can be removed
-//
-//the other int returned is the index of the closing parenthesis for this opening parent parenthesis
-func GetDirectChildCountOfParenthesisCurrentOpeningParenthesis(startIndex int, equation [][]complex128) (int, int) {
-
-	depth := 0
-
-	canCountOpener := true
-	canCountCloser := false
-
-	openerCount := 0
-	closerCount := 0
-
-	indexOfCloserToParent := -1
-
-	//start query at 1 past the start index since the start index is the parent
-	for i := 1; i < len(equation); i++ {
-
-		firstIndex := equation[i][0]
-		secondIndex := equation[i][1]
-
-		if(IsOP(firstIndex, secondIndex)){
-			depth++
-			if(depth == 1 && canCountOpener){
-				openerCount++ 
-				canCountOpener = false
-				canCountCloser = true
-			}
-		}else if(IsCP(equation[i])){
-			depth--
-			if(depth == 0 && canCountCloser){
-				closerCount++ 
-				canCountOpener = true
-				canCountCloser = false
-			}else if(depth == -1){
-				indexOfCloserToParent = i
-			}
-		}
-
-	}
-
-
-	if(openerCount != closerCount){
-		fmt.Println("opener count", openerCount, "closer count ", closerCount)
-		panic("syntax error not all parenthesis closed GetDirectChildCountOfParenthesisCurrentOpeningParenthesis")
-	}else{
-		return openerCount, indexOfCloserToParent
-	}
-
-
-
-
-}
 
 
 
@@ -2017,6 +2058,7 @@ func CreateATreeFromCurrentEquation(equation [][]complex128) []*Container {
 					i = cursor
 					cleanCopyToAppend := CleanCopyEntire2DComplex128Slice(equation)
 					dataToAddToTree := cleanCopyToAppend[openerIndex+1:cursor]
+					fmt.Println("data added", dataToAddToTree)
 					sliceForChildren := []*Container{}
 					//creates a new struct with the parent equation and an empty slice for its children
 					equations = append(equations, &Container{&dataToAddToTree, sliceForChildren})
@@ -2493,6 +2535,12 @@ func DivideTwoAdjacentNumbers(number1 []complex128, number2 []complex128) []comp
 
 }
 
+func FactorNumeratorAndDenonminatorRemoveLikeFactors(numerator [][]complex128, denominator [][]complex128) {
+
+	
+
+
+}
 
 func InnerParenthesisCanBeSimplifiedFurther(numbersHolder [][]complex128, operatorsHolder [][]complex128) bool {
 

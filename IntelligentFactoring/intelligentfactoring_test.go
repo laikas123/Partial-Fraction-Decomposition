@@ -7,6 +7,15 @@ import (
 
 )
 
+func TestMakeSurePuttingAnEquationThroughFactorFunctionsDoesNotChangeIt(t *testing.T){
+	
+	
+
+	if(false){
+		t.Errorf("failure")
+	}
+}
+
 
 
 // func TestGenerateNumbersSliceAndSimplifyInnerParenthesis(t *testing.T){
@@ -63,31 +72,31 @@ import (
 // 	}
 // }
 
-func TestFoilingExponentParenthesis(t *testing.T){
+// func TestFoilingExponentParenthesis(t *testing.T){
 
 	
 
-	numberSlice := gNum(1, 7, 1, 2, 2, 1, 2,2)
+// 	numberSlice := gNum(1, 7, 1, 2, 2, 1, 2,2)
 
-	// numberSlice2 := gNum(1, 7, 1, 2, 2, 3, 2,2)
+// 	// numberSlice2 := gNum(1, 7, 1, 2, 2, 3, 2,2)
 
-	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(2, 1))
+// 	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(2, 1))
 
 
 
-	// equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
+// 	// equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
 
-	fmt.Println("initial equation", DecodeFloatSliceToEquation(equation))
+// 	fmt.Println("initial equation", DecodeFloatSliceToEquation(equation))
 
-	result := FoilOutParenthesisRaisedToExponent(equation)
+// 	result := FoilOutParenthesisRaisedToExponent(equation)
 
-	fmt.Println(DecodeFloatSliceToEquation(result))
+// 	fmt.Println(DecodeFloatSliceToEquation(result))
 	
 
-	if(false){
-		t.Errorf("failure")
-	}
-}
+// 	if(false){
+// 		t.Errorf("failure")
+// 	}
+// }
 
 
 // func TestSimplifyingInnerParenthesis(t *testing.T){
@@ -224,22 +233,111 @@ func TestFoilingExponentParenthesis(t *testing.T){
 // func TestQuadraticFactoringABCPresent(t *testing.T){
 
 
-// 	equation := [][]complex128{gOP(), gNum(2, 2, -3, 1, 5, 0), gCP(1, 3), gOP(), gCP(1, 3), gOP(), gCP(1, 3), gOP(), gCP(1, 3), gOP(), gCP(1, 3), gOP(), gCP(1, 3), gOP(), gNum(2, 2, -3, 1, 5, 0), gCP(1, 3), gOP(), gOP(), gCP(1, 3), gCP(1, 3)}       
 
-// 	fmt.Println("initial", DecodeFloatSliceToEquation(equation))
+// 	numberSlice := gNum(1, 2, 1, 1, 1, 1, -6, 0)
+
+// 	// numberSlice2 := gNum(1, 7, 1, 2, 2, 3, 2,2)
+
+// 	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(2, 1))
+
+
+
+// 	// equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
+
+// 	fmt.Println("initial equation", DecodeFloatSliceToEquation(equation))
+
+// 	result := FactorQuadraticsWithABCAllPresent(equation)
+
+// 	fmt.Println(DecodeFloatSliceToEquation(result))
 	
-// 	equation = FactorQuadraticsWithABCAllPresent(equation)
-
-// 	equation = RemoveParenthesisWith0DirectChildren(equation)
-
-// 	fmt.Println(" after", DecodeFloatSliceToEquation(equation))
-
-
 
 // 	if(false){
 // 		t.Errorf("failure")
 // 	}
+
 // }
+
+// func TestQuadraticFactoringACOnlyPresent(t *testing.T){
+
+
+
+// 	numberSlice := gNum(1, 2, 1, 6, 0)
+
+// 	// numberSlice2 := gNum(1, 7, 1, 2, 2, 3, 2,2)
+
+// 	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(2, 1))
+
+
+
+// 	// equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
+
+// 	fmt.Println("initial equation", DecodeFloatSliceToEquation(equation))
+
+// 	result := FactorQuadraticsWithACOnlyPresent(equation)
+
+// 	fmt.Println(DecodeFloatSliceToEquation(result))
+	
+
+// 	if(false){
+// 		t.Errorf("failure")
+// 	}
+
+// }
+
+
+func TestQuadraticFactoringABOnlyPresent(t *testing.T){
+
+
+
+	numberSlice := gNum(1, 2, 1, 6, 1)
+
+
+	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(2, 1))
+
+
+
+	// equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
+
+	fmt.Println("initial equation", DecodeFloatSliceToEquation(equation))
+
+	result := FactorQuadraticsWithABOnlyPresent(equation)
+
+	fmt.Println(DecodeFloatSliceToEquation(result))
+	
+
+	if(false){
+		t.Errorf("failure")
+	}
+
+}
+
+func TestCreatingATreeMap(t *testing.T){
+
+
+
+	numberSlice0 := gNum(4, 2, 1, 4, 0)
+	numberSlice1 := gNum(2, 2, 1, 3, 1)
+	numberSlice2 := gNum(4, 9, 1, 3, 0)
+
+
+	equation := Create2DEquationFromSliceInputs(gOP(), gOP(), numberSlice0, gCP(1, 1), gOP(), gOP(), numberSlice1, gCP(1, 1), gOP(), numberSlice2, gCP(1, 1), gCP(1, 1), gCP(1, 1))
+
+	fmt.Println("initial equation", DecodeFloatSliceToEquation(equation))
+
+	treeSlice := CreateEntireTreeForEquation(equation)
+
+	IntelligentlyPrintTree(treeSlice)
+
+
+
+
+	if(false){
+		t.Errorf("failure")
+	}
+
+
+
+}
 
 
 // func TestQuadraticFactoringABOnlyPresent(t *testing.T){
