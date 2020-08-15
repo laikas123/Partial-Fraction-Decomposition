@@ -9,31 +9,85 @@ import (
 
 
 
-func TestGenerateNumbersSlice(t *testing.T){
+// func TestGenerateNumbersSliceAndSimplifyInnerParenthesis(t *testing.T){
 
 	
 
-	numberSlice := gNum(1, 2, 1)
+// 	numberSlice := gNum(1, 7, 3, 2, 2, 3, 2,2)
 
-	fmt.Println(numberSlice)
+// 	numberSlice2 := gNum(1, 7, 1, 2, 2, 3, 2,2)
 
-	fmt.Println(DecodeFloatSliceToEquation(numberSlice))
+// 	equation := Create2DEquationFromSliceInputs(numberSlice, numberSlice2)
 
 
-	equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
 
-	fmt.Println(DecodeFloatSliceToEquation(equation))
+// 	// equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
 
-	fmt.Println(DecodeFloatSliceToEquation(SimplifyInnerParenthesis(equation)))
+// 	// fmt.Println(DecodeFloatSliceToEquation(equation))
+
+// 	result := SimplifyInnerParenthesis(equation)
+
+// 	fmt.Println(DecodeFloatSliceToEquation(result))
+	
+
+// 	if(false){
+// 		t.Errorf("failure")
+// 	}
+// }
+
+
+
+// func TestFoilingNeighborParenthesis(t *testing.T){
 
 	
+
+// 	numberSlice := gNum(1, 7, 1, 2, 2, 1, 2,2)
+
+// 	numberSlice2 := gNum(1, 7, 1, 2, 2, 3, 2,2)
+
+// 	equation := Create2DEquationFromSliceInputs(numberSlice, numberSlice2)
+
+
+
+// 	// equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
+
+// 	fmt.Println("initial equation", DecodeFloatSliceToEquation(equation))
+
+// 	result := FoilNeighborParenthesis(equation)
+
+// 	fmt.Println(DecodeFloatSliceToEquation(result))
+	
+
+// 	if(false){
+// 		t.Errorf("failure")
+// 	}
+// }
+
+func TestFoilingExponentParenthesis(t *testing.T){
+
+	
+
+	numberSlice := gNum(1, 7, 1, 2, 2, 1, 2,2)
+
+	// numberSlice2 := gNum(1, 7, 1, 2, 2, 3, 2,2)
+
+	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(2, 1))
+
+
+
+	// equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
+
+	fmt.Println("initial equation", DecodeFloatSliceToEquation(equation))
+
+	result := FoilOutParenthesisRaisedToExponent(equation)
+
+	fmt.Println(DecodeFloatSliceToEquation(result))
 	
 
 	if(false){
 		t.Errorf("failure")
 	}
 }
-
 
 
 // func TestSimplifyingInnerParenthesis(t *testing.T){

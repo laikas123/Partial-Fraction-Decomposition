@@ -16,16 +16,6 @@ type Container struct {
 }
 
 
-type NumberAndOperator struct {
-
-	Number []complex128
-	Operator float64
-
-}
-
-
-
-
 
 //TODO, when multiple variables get involved a third index needs to be added to the float slice
 //which will allow the third index to essentially span the alphabet 0-25 A-Z for variable names
@@ -67,21 +57,23 @@ func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
 		
 		currentItem := equation[i]
 
+
+
 		firstIndex := currentItem[0]
 		secondIndex := currentItem[1]
 
 
 		if(IsOP(firstIndex, secondIndex)){
-			equationString += "( "
+			equationString += "( ~"
 			
 		}else if(IsCP(currentItem)){
-			equationString += " )"
+			equationString += " )~"
 			if(currentItem[2] != 0 && currentItem[2] != 1) {
 
-				equationString += "^" + strconv.FormatFloat(real(currentItem[2]), 'f', -1, 64) + " " + GetStringForCodeOfCP(real(currentItem[4])) + " "
+				equationString += "^" + strconv.FormatFloat(real(currentItem[2]), 'f', -1, 64) + " " + GetStringForCodeOfCP(real(currentItem[4])) + " ~"
 			}else{
 
-				equationString += GetStringForCodeOfCP(real(currentItem[4])) + " "
+				equationString += GetStringForCodeOfCP(real(currentItem[4])) + " ~"
 			}
 			
 		}else if(IsNumber(firstIndex)){
@@ -92,20 +84,22 @@ func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
 				exponent := currentItem[i+1]
 
 				if((i < len(currentItem) - 2) && exponent == 1){
-					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64)  + "s " + " + "
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64)  + "s " + " ~ "
 				}else if((i < len(currentItem) - 2) && exponent == 0){
-					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + " + "
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + " ~  "
 				}else if((i < len(currentItem) - 2) && exponent != 0 && exponent != 1){
-					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s^" + strconv.FormatFloat(real(exponent),'f', -1, 64) + " + "
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s^" + strconv.FormatFloat(real(exponent),'f', -1, 64) + " ~"
 				}else if((i == len(currentItem) - 2) && exponent == 1){
-					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s " 
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s ~" 
 				}else if((i == len(currentItem) - 2) && exponent == 0){
-					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) 
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) +"~"
 				}else if((i ==  len(currentItem) - 2) && exponent != 0 && exponent != 1){
-					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s^" + strconv.FormatFloat(real(exponent),'f', -1, 64) 
+					equationString += strconv.FormatFloat(real(multiplier),'f', -1, 64) + "s^" + strconv.FormatFloat(real(exponent),'f', -1, 64) + "~"
 				}
 			}
 			
+		}else if(IsOperator(currentItem)){
+			equationString += " " + GetStringForCodeOfCP(real(currentItem[1])) + " "
 		}else{
 			panic("unknown equation item DecodeFloatSliceToEquation()")	
 		}
@@ -115,45 +109,49 @@ func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
 	}
 
 	
-	equationString = RemoveOperatorsBetweenTwoClosingParenthesisAndRemoveSpaces(equationString)
+	// equationString = RemoveOperatorsBetweenTwoClosingParenthesisAndRemoveSpaces(equationString)
 
 	return equationString
 
 }
 
 
+func gPlus() []complex128{
+	return []complex128{complex(0,0), complex(1,0)}
+}
+func gPMinus() []complex128{
+	return []complex128{complex(0,0), complex(2,0)}
+}
+func gPMultiply() []complex128{
+	return []complex128{complex(0,0), complex(3,0)}
+}
+func gDivide() []complex128{
+	return []complex128{complex(0,0), complex(4,0)}
+}
 
 func gNum(nums ...complex128) [][]complex128 {
 
-	if( (len(nums)%2) != 1 || len(nums) != 3){
+	if( (len(nums)%3) != 2 || len(nums) < 5){
 		panic("error, invalid amount of numbers gNum()")
 	}
 
-	if(nums[len(nums) - 1] != 1 && nums[len(nums) - 1] != 2 && nums[len(nums) - 1] != 3 && nums[len(nums) - 1] != 4 && nums[len(nums) - 1] != 5){
-		panic("error invalid int code gNum()")
-	}
 
 	returnSlice := [][]complex128{}
 
-	returnSlice = append(returnSlice, []complex128{complex(0, 0), complex(0, 0)})
+	// returnSlice = append(returnSlice, gOP())
+	
 
-	returnSliceNums := []complex128{}
+	for i := 0; i < len(nums); i = i+3 {
 
-	for i := 0; i < len(nums); i = (i + 2) {
-
-		if(i == (len(nums) - 1)){
-			break
+		returnSlice = append(returnSlice, []complex128{nums[i], nums[i+1]})
+		if((i+2) < len(nums)){
+			returnSlice = append(returnSlice, []complex128{complex(0, 0), nums[i+2]})
 		}
-
-		returnSliceNums = append(returnSliceNums, nums[i])
-		returnSliceNums = append(returnSliceNums, nums[i+1])
-
-
+		
 	}
 
-	returnSlice = append(returnSlice, returnSliceNums)
-
-	returnSlice = append(returnSlice, []complex128{complex(0, 0), complex(1, 0), complex(1, 0), complex(0,0), complex(real(nums[len(nums)-1]), 0)})
+	// returnSlice = append(returnSlice, gCP(1, 1))
+	
 
 	return returnSlice
 
@@ -177,194 +175,18 @@ func gCP(exponent complex128, operator complex128) []complex128 {
 
 
 func SimplifyInnerParenthesis(equationInput [][]complex128) [][]complex128 {
+
 	CheckEquationForSyntaxErrors(equationInput, "SimplifyInnerParenthesis()")
 
 	equation := CleanCopyEntire2DComplex128Slice(equationInput)
 
-	numbersHolder := []NumberAndOperator{}
+	numbersHolder := [][]complex128{}
 
-	// indexOpener := -1
-
-	// indexCloser := -1
-
-
-	foundValid := false
-
-	for i := 0; i < len(equation); i ++ {
-
-		if(foundValid){
-			break
-		}
-
-		if(IsOP(equation[i][0], equation[i][1])){
-
-			// indexOpener = i
-
-			
-
-			checkingIfValid := true
-
-			
-
-			cursor := i
-
-			numbersHolder = []NumberAndOperator{}
-		
-
-			depth := 1
-
-			for checkingIfValid {
-
-				cursor++
-
-				//cursor is out of bounds, nothing to check
-				if(cursor >= len(equation)){
-					return equation
-				}
-
-				
-
-
-				for(IsOP(equation[cursor][0], equation[cursor][0])) {
-
-					depth++
-
-					numberAndOperator := NumberAndOperator{}
-
-					//get all numbers before closing parenthesis
-					for IsNumber(equation[cursor][0]){
-						numberAndOperator.Number = equation[cursor]
-						
-						cursor++
-					}
-
-					//make sure the next character after the numbers is a CP so that this is all valid
-					if(IsCP(equation[cursor])){
-						depth--
-						numberAndOperator.Operator = real(equation[cursor][4])
-						numbersHolder = append(numbersHolder, numberAndOperator)
-						if(depth == 0){
-							// indexCloser = cursor
-							checkingIfValid = false
-							foundValid = true
-							break
-						}else{
-							cursor++
-							if(cursor >= len(equation)){
-								// indexCloser = cursor
-								checkingIfValid = false
-								foundValid =false
-								break
-							}
-						}
-						
-					}else{
-						checkingIfValid = false
-						break	
-					}
-
-					
-				}
-				
-			}
-
-		}
-
-
-	}
-
-	if(foundValid){
-
-		doneCombiningMultiplicationAndDivision := false
-
-		// roundResult := []NumberAndOperator{}
-
-		cursor := 0
-
-		for !doneCombiningMultiplicationAndDivision {
-
-			if(cursor + 1 >= len(numbersHolder)){
-				doneCombiningMultiplicationAndDivision = true
-			}
-
-			num1 := numbersHolder[cursor]
-			num2 := numbersHolder[cursor+1]
-
-			if(num1.Operator == 3){
-				newNum := MultiplyTwoAdjacentNumbers(num1.Number, num2.Number)
-
-				newNumAndOperator := NumberAndOperator{[]complex128{newNum[1][0], newNum[1][1]}, real(newNum[1][2])}
-
-				numbersHolderPart1 := numbersHolder[0:cursor]
-
-				numbersHolderPart2 := []NumberAndOperator{}
-
-				if(!(cursor+2 >= len(numbersHolder))) {
-					numbersHolderPart2 = numbersHolder[cursor+2:len(numbersHolder)]
-				}
-
-				numbersHolder = append(numbersHolderPart1, newNumAndOperator)
-
-				if(len(numbersHolderPart2) > 0){
-					numbersHolder = append(numbersHolder, numbersHolderPart2...)
-				}
-				
-
-			}else if(num1.Operator == 4){
-				newNum := DivideTwoAdjacentNumbers(num1.Number, num2.Number)
-				
-				newNumAndOperator := NumberAndOperator{[]complex128{newNum[1][0], newNum[1][1]}, real(newNum[1][2])} 
-
-				numbersHolderPart1 := numbersHolder[0:cursor]
-
-				numbersHolderPart2 := []NumberAndOperator{}
-
-				if(!(cursor+2 >= len(numbersHolder))) {
-					numbersHolderPart2 = numbersHolder[cursor+2:len(numbersHolder)]
-				}
-
-				numbersHolder = append(numbersHolderPart1, newNumAndOperator)
-
-				if(len(numbersHolderPart2) > 0){
-					numbersHolder = append(numbersHolder, numbersHolderPart2...)
-				}
-				
-
-			}else{
-				cursor++
-			}
-
-
-			fmt.Println("round result", numbersHolder)
-
-		}
-
-
-		return Create2DEquationFromSliceInputs(numbersHolder)
-
-	}else{
-
-		//if no foils possible return input
-		return equation
-	}	
-
-}
-
-
-// finds "(" followed by numbers followed by ")^x" where x is some power greater than 1
-func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]complex128 {
-
-	CheckEquationForSyntaxErrors(equationInput, "FoilOutParenthesisRaisedToExponent()")
-
-	equation := CleanCopyEntire2DComplex128Slice(equationInput)
-
-	numbersHolder := []complex128{}
+	operatorsHolder := [][]complex128{}
 
 	indexOpener := -1
 
 	indexCloser := -1
-
-	exponentCloser := -1
 
 	foundValid := false
 
@@ -382,12 +204,19 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 
 			checkingIfValid := true
 
-			sawOneInt := false
+			sawOneNumber := false
+
+
+			//these two bools are used to make sure
+			//numbers and symbols alternate
+			indexShouldBeNumber := true
+			indexShouldBeOperator := false
 
 			cursor := i
 
-			numbersHolder = []complex128{}
-		
+			//set these to null before each attempt to not have lingering data
+			numbersHolder = [][]complex128{}		
+			operatorsHolder = [][]complex128{}
 
 			for checkingIfValid {
 
@@ -398,36 +227,46 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 					return equation
 				}
 
-				if(!sawOneInt){
-					if(IsNumber(equation[cursor][0])){
-						numbersHolder = append(numbersHolder, equation[cursor]...)
-						sawOneInt = true
-					}else{
-						//there was no integer after the opening parenthesis, not valid
-						checkingIfValid = false
-						break
-					}
-				}else if(sawOneInt){
-					if(IsNumber(equation[cursor][0])){
-						//there should only be one set of numbers inside parenthesis this should not be possible
-						panic("interesting case, should not get here FoilOutParenthesisRaisedToExponent()")
-						continue
-					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
-						checkingIfValid = false
-						break
-					}else if IsCP(equation[cursor]){
-						if(real(equation[cursor][2]) > 1){
-							fmt.Println(equation[cursor:len(equation)])
-							fmt.Println("getting here")
-							indexCloser = cursor
-							//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
-							exponentCloser = int(real(equation[cursor][2]))
+				if(!sawOneNumber){
+
+					for(!IsCP(equation[cursor]) && !IsOP(equation[cursor][0], equation[cursor][1])){
+
+
+						if(cursor >= len(equation)){
 							checkingIfValid = false
-							foundValid = true
+							foundValid = false
+							break
 						}
-						break
+
+						if(IsNumber(equation[cursor][0]) && indexShouldBeNumber){
+							numbersHolder = append(numbersHolder, equation[cursor])
+							indexShouldBeNumber = false
+							indexShouldBeOperator = true
+						}else if(IsOperator(equation[cursor]) && indexShouldBeOperator){
+							operatorsHolder = append(operatorsHolder, equation[cursor])
+							indexShouldBeNumber = true
+							indexShouldBeOperator = false
+						}else{
+							checkingIfValid = false
+							foundValid = false
+							break	
+						}
+
+						cursor++
+
 					}
-				}
+
+					//make sure what broke the loop was a closing parenthesis
+					if(IsCP(equation[cursor]) && InnerParenthesisCanBeSimplifiedFurther(numbersHolder, operatorsHolder)){
+						indexCloser = cursor
+						checkingIfValid = false
+						foundValid = true
+						break
+					}else{
+						checkingIfValid = false
+						foundValid = false
+						break	
+					}
 
 			}
 
@@ -435,14 +274,273 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 
 
 	}
+}
+
+	if(foundValid){
+
+		
+		fmt.Println("index opener", indexOpener, "indexCloser", indexCloser)
+
+		fmt.Println("numbers found", numbersHolder)
+		fmt.Println("operators found", operatorsHolder)
+
+
+		for i := 0; i < len(operatorsHolder); i++ {
+
+			//if it equals multiply
+			if(real(operatorsHolder[i][1]) == 3){
+
+				leftNum := numbersHolder[i]
+				rightNum := numbersHolder[i+1]
+
+				result := MultiplyTwoAdjacentNumbers(leftNum, rightNum)
+
+				numbersHolder[i] = result
+
+				numbersHolder = append(numbersHolder[0:i+1], numbersHolder[(i+2):len(numbersHolder)]...)
+
+				operatorsHolder = append(operatorsHolder[0:i], operatorsHolder[(i+1):len(operatorsHolder)]...)
+				
+
+			//if it equals divide
+			}else if(real(operatorsHolder[i][1]) == 4){
+
+				leftNum := numbersHolder[i]
+				rightNum := numbersHolder[i+1]
+
+				result := DivideTwoAdjacentNumbers(leftNum, rightNum)
+
+				numbersHolder[i] = result
+
+				numbersHolder = append(numbersHolder[0:i+1], numbersHolder[(i+2):len(numbersHolder)]...)
+				
+				
+				operatorsHolder = append(operatorsHolder[0:i], operatorsHolder[i+1:len(operatorsHolder)]...)
+				
+			}
+
+		}
+
+		for i := 0; i < len(operatorsHolder); i++ {
+
+
+
+			//if it equals multiply
+			if(real(operatorsHolder[i][1]) == 1 && TwoAdjacentNumbersCanAddOrSubtract(numbersHolder[i], numbersHolder[i+1])){
+
+				leftNum := numbersHolder[i]
+				rightNum := numbersHolder[i+1]
+
+				result := AddTwoAdjacentNumbers(leftNum, rightNum)
+
+				numbersHolder[i] = result
+
+				numbersHolder = append(numbersHolder[0:i+1], numbersHolder[(i+2):len(numbersHolder)]...)
+
+				
+				operatorsHolder = append(operatorsHolder[0:i], operatorsHolder[(i+1):len(operatorsHolder)]...)
+				
+
+			//if it equals divide
+			}else if(real(operatorsHolder[i][1]) == 2 && TwoAdjacentNumbersCanAddOrSubtract(numbersHolder[i], numbersHolder[i+1])){
+
+				leftNum := numbersHolder[i]
+				rightNum := numbersHolder[i+1]
+
+				result := SubtractTwoAdjacentNumbers(leftNum, rightNum)
+
+				numbersHolder[i] = result
+
+				numbersHolder = append(numbersHolder[0:i+1], numbersHolder[(i+2):len(numbersHolder)]...)
+			
+				operatorsHolder = append(operatorsHolder[0:i], operatorsHolder[i+1:len(operatorsHolder)]...)
+				
+			}
+
+		}
+
+
+		fmt.Println("numbers after", numbersHolder)
+		fmt.Println("operators after", operatorsHolder)
+
+		resultOfOperations := [][]complex128{}
+
+		//if there is no operators then the parenthesis were simplified to one number
+		if(len(operatorsHolder) == 0){
+			resultOfOperations = numbersHolder
+		}
+
+
+		for i := 0; i < len(operatorsHolder); i++ {
+
+			resultOfOperations = append(resultOfOperations, numbersHolder[i])
+
+			resultOfOperations = append(resultOfOperations, operatorsHolder[i])
+
+			if(i == len(operatorsHolder) -1 ){
+				resultOfOperations = append(resultOfOperations, numbersHolder[i + 1])
+			}
+
+		}
+
+		returnEquation := [][]complex128{}
+
+		returnEquation = append(equation[0:indexOpener+1], resultOfOperations...)
+		returnEquation = append(returnEquation, equation[indexCloser:len(equation)]...)
+
+		return SimplifyInnerParenthesis(returnEquation)
+
+	}else{
+
+		fmt.Println("nothing valid")
+		
+		return equation
+	}	
+}
+
+
+// finds "(" followed by numbers followed by ")^x" where x is some power greater than 1
+func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]complex128 {
+
+	CheckEquationForSyntaxErrors(equationInput, "FoilOutParenthesisRaisedToExponent()")
+
+	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+
+	equation = SimplifyInnerParenthesis(equation)
+
+	numbersHolder := [][]complex128{}
+
+	indexOpener := -1
+
+	indexCloser := -1
+
+	exponentCloser := -1
+
+	foundValid := false
+
+		for i := 0; i < len(equation); i ++ {
+
+		if(foundValid){
+			break
+		}
+
+		if(IsOP(equation[i][0], equation[i][1])){
+
+			indexOpener = i
+
+			fmt.Println("character")
+
+			checkingIfValid := true
+
+			sawOneNumber := false
+
+
+			//these two bools are used to make sure
+			//numbers and symbols alternate
+			indexShouldBeNumber := true
+			indexShouldBeOperator := false
+
+			cursor := i
+
+			//set these to null before each attempt to not have lingering data
+			numbersHolder = [][]complex128{}		
+			
+
+			for checkingIfValid {
+
+				cursor++
+
+				//cursor is out of bounds, nothing to check
+				if(cursor >= len(equation)){
+					return equation
+				}
+
+				if(!sawOneNumber){
+
+					for(!IsCP(equation[cursor]) && !IsOP(equation[cursor][0], equation[cursor][1])){
+
+
+						if(cursor >= len(equation)){
+							checkingIfValid = false
+							foundValid = false
+							break
+						}
+
+						if(IsNumber(equation[cursor][0]) && indexShouldBeNumber){
+							numbersHolder = append(numbersHolder, equation[cursor])
+							indexShouldBeNumber = false
+							indexShouldBeOperator = true
+						}else if(IsOperator(equation[cursor]) && indexShouldBeOperator){
+							numbersHolder = append(numbersHolder, equation[cursor])
+							indexShouldBeNumber = true
+							indexShouldBeOperator = false
+						}else{
+							checkingIfValid = false
+							foundValid = false
+							break	
+						}
+
+						cursor++
+
+					}
+
+					//make sure what broke the loop was a closing parenthesis
+					if(IsCP(equation[cursor])){
+						if(real(equation[cursor][2]) > 1){
+							indexCloser = cursor
+							exponentCloser = int(real(equation[cursor][2]))
+							checkingIfValid = false
+							foundValid = true
+							break
+						}else{
+							checkingIfValid = false
+							foundValid = false
+							break	
+						}
+					}else{
+						checkingIfValid = false
+						foundValid = false
+						break	
+					}
+
+			}
+
+		}
+
+
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 	if(foundValid){
 
 		fmt.Println("NUMBERS FOUND", numbersHolder)
 		
-		sliceToInsert := MultiplyParenthesisGivenExponent(numbersHolder, exponentCloser)
+		exponentiationResult := numbersHolder
 
-		slicesToInsert :=  [][]complex128{gOP(), sliceToInsert, gCP(1, 3)}
+		//this is the times to perform the exponentiation of the parenthesis
+		for exponentCloser > 1 {
+
+			exponentiationResult = MultiplyNeighboringParenthesis(exponentiationResult, numbersHolder)
+
+			exponentCloser--
+		}
+
+
+		// sliceToInsert := MultiplyParenthesisGivenExponent(numbersHolder, exponentCloser)
+
+		slicesToInsert :=  Create2DEquationFromSliceInputs(gOP(), exponentiationResult, gCP(1, 3))
 
 		returnEquation := [][]complex128{}
 
@@ -461,6 +559,7 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 
 	}else{
 
+		fmt.Println("no valid found")
 		//if no foils possible return input
 		return equation
 	}	
@@ -492,8 +591,6 @@ func MultiplyParenthesisGivenExponent(numbers []complex128, exponent int) []comp
 		fmt.Println("allNumbersFromFoil", allNumbersFromFoil)
 
 		resultCurrentLoop := []complex128{}
-
-
 
 		for i := 0; i < len(leftTerm); i = (i+2) {
 
@@ -625,8 +722,12 @@ func FoilNeighborParenthesis(equationInput [][]complex128) [][]complex128 {
 
 	equation := CleanCopyEntire2DComplex128Slice(equationInput)
 
-	numbersHolderFirstNeighbor := []complex128{}
-	numbersHolderSecondNeighbor := []complex128{}
+	equation = SimplifyInnerParenthesis(equation)
+
+	numbersHolderFirstNeighbor := [][]complex128{}
+	numbersHolderSecondNeighbor := [][]complex128{}
+
+
 
 	indexOpener := -1
 
@@ -648,13 +749,21 @@ func FoilNeighborParenthesis(equationInput [][]complex128) [][]complex128 {
 
 			checkingIfValid := true
 
-			sawOneInt := false
+			sawOneNumber := false
 
 			cursor := i
 
-			numbersHolderFirstNeighbor = []complex128{}
-		
-			numbersHolderSecondNeighbor = []complex128{}
+			//set these to null before each attempt to not have lingering data
+			numbersHolderFirstNeighbor = [][]complex128{}
+			numbersHolderSecondNeighbor = [][]complex128{}
+			fmt.Println("should be only once here")
+
+			//these two bools are used to make sure
+			//numbers and symbols alternate
+			indexShouldBeNumber := true
+			indexShouldBeOperator := false
+
+			fmt.Println("OP")
 
 
 			for checkingIfValid {
@@ -666,81 +775,147 @@ func FoilNeighborParenthesis(equationInput [][]complex128) [][]complex128 {
 					return equation
 				}
 
-				if(!sawOneInt && !secondTerm){
-					if(IsNumber(equation[cursor][0])){
-						numbersHolderFirstNeighbor = append(numbersHolderFirstNeighbor, equation[cursor]...)
-						sawOneInt = true
-					}else{
-						//there was no integer after the opening parenthesis, not valid
-						checkingIfValid = false
-						break
-					}
-				}else if(sawOneInt && !secondTerm){
-					if(IsNumber(equation[cursor][0])){
-						//there should only be one set of numbers inside parenthesis this should not be possible
-						panic("interesting case, should not get here FoilNeighborParenthesis()")
-						continue
-					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
-						checkingIfValid = false
-						break
-					}else if IsCP(equation[cursor]){
-						if(real(equation[cursor][2]) == 1){
 
-							//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
-							// checkingIfValid = false
+
+				if(!sawOneNumber && !secondTerm){
+
+					for(!IsCP(equation[cursor]) && !IsOP(equation[cursor][0], equation[cursor][1])){
+
+						fmt.Println("NUM")
+
+						if(cursor >= len(equation)){
+							checkingIfValid = false
+							foundValid = false
+							break
+						}
+
+						if(IsNumber(equation[cursor][0]) && indexShouldBeNumber){
+							numbersHolderFirstNeighbor = append(numbersHolderFirstNeighbor, equation[cursor])
+							indexShouldBeNumber = false
+							indexShouldBeOperator = true
+						}else if(IsOperator(equation[cursor]) && indexShouldBeOperator){
+							numbersHolderFirstNeighbor = append(numbersHolderFirstNeighbor, equation[cursor])
+							// operatorsHolderFirstNeighbor = append(operatorsHolderFirstNeighbor, equation[cursor])
+							indexShouldBeNumber = true
+							indexShouldBeOperator = false
+						}else{
+							checkingIfValid = false
+							foundValid = false
+							break	
+						}
+
+						cursor++
+
+					}
+
+					//make sure what broke the loop was a closing parenthesis
+					if(IsCP(equation[cursor])){
+						if(real(equation[cursor][2]) == 1){
+							fmt.Println("VALID CP")
 							if((cursor+1) >= len(equation)){
 								break
 							}else if(IsOP(equation[cursor+1][0], equation[cursor+1][1])){
+								fmt.Println("VALID OP")
 								cursor++
+								//reset the booleans for second parenthesis
+								indexShouldBeNumber = true
+								indexShouldBeOperator = false
 								secondTerm = true
-								sawOneInt = false
+								sawOneNumber = false
 							}else{
 								break
 							}
-							
-							
 						}
-					}
-				}else if(!sawOneInt && secondTerm){
-					if(IsNumber(equation[cursor][0])){
-						numbersHolderSecondNeighbor = append(numbersHolderSecondNeighbor, equation[cursor]...)
-						sawOneInt = true
 					}else{
-						//there was no integer after the opening parenthesis, not valid
 						checkingIfValid = false
+						foundValid = false
+						break	
+					}
+
+			}else if(!sawOneNumber && secondTerm){
+
+				for(!IsCP(equation[cursor]) && !IsOP(equation[cursor][0], equation[cursor][1])){
+
+					fmt.Println("NUM 2")
+
+					if(cursor >= len(equation)){
+						checkingIfValid = false
+						foundValid = false
 						break
 					}
-				}else if(sawOneInt && secondTerm){
-					if(IsNumber(equation[cursor][0])){
-						//there should only be one set of numbers inside parenthesis this should not be possible
-						panic("interesting case, should not get here FoilNeighborParenthesis()")
-						continue
-					}else if(IsOP(equation[cursor][0], equation[cursor][1])){
+
+					if(IsNumber(equation[cursor][0]) && indexShouldBeNumber){
+						numbersHolderSecondNeighbor = append(numbersHolderSecondNeighbor, equation[cursor])
+						indexShouldBeNumber = false
+						indexShouldBeOperator = true
+					}else if(IsOperator(equation[cursor]) && indexShouldBeOperator){
+						// operatorsHolderSecondNeighbor = append(operatorsHolderSecondNeighbor, equation[cursor])
+						numbersHolderSecondNeighbor = append(numbersHolderSecondNeighbor, equation[cursor])
+						indexShouldBeNumber = true
+						indexShouldBeOperator = false
+					}else{
 						checkingIfValid = false
-						break
-					}else if IsCP(equation[cursor]){
-						if(real(equation[cursor][2]) == 1){
-							indexCloser = cursor
-							//TODO ALSO ADD FUNCTIONALITY FOR FRACTIONAL EXPONENTS
-							checkingIfValid = false
-							foundValid = true
-						}
-						break
+						foundValid = false
+						break	
 					}
+
+					cursor++
+
 				}
 
-			}
+				//make sure what broke the loop was a closing parenthesis
+				if(IsCP(equation[cursor]) ){
+					if(real(equation[cursor][2]) == 1){
+						fmt.Println("VALID CP")
+						indexCloser = cursor
+						checkingIfValid = false
+						foundValid = true
+						break
+					}else{
+						checkingIfValid = false
+						foundValid = false
+						break
+					}	
+				}else{
+					checkingIfValid = false
+					foundValid = false
+					break	
+				}
+
+			}		
+				
 
 		}
+
+	}
 
 
 	}
 
 	if(foundValid){
 
+	
+
+		// numbersHolderFirstNeighbor = SimplifyInnerParenthesis(numbersHolderFirstNeighbor)
+		// numbersHolderSecondNeighbor = SimplifyInnerParenthesis(numbersHolderSecondNeighbor)
+
+		// numbersHolderFirstNeighborWithParenthesis := Create2DEquationFromSliceInputs(gOP(), numbersHolderFirstNeighbor, gCP(1, 3))
+		// numbersHolderSecondNeighborWithParenthesis := Create2DEquationFromSliceInputs(gOP(), numbersHolderSecondNeighbor, gCP(1, 3))
+
+		// numbersHolderFirstNeighborWithParenthesis = SimplifyInnerParenthesis(numbersHolderFirstNeighborWithParenthesis)
+		// numbersHolderSecondNeighborWithParenthesis = SimplifyInnerParenthesis(numbersHolderSecondNeighborWithParenthesis)
+
+		// numbersHolderFirstNeighbor = numbersHolderFirstNeighborWithParenthesis[1:(len(numbersHolderFirstNeighborWithParenthesis)-1)]
+		// numbersHolderSecondNeighbor = numbersHolderSecondNeighborWithParenthesis[1:(len(numbersHolderSecondNeighborWithParenthesis)-1)]
+
+		fmt.Println("first number", numbersHolderFirstNeighbor)
+		fmt.Println("second number", numbersHolderSecondNeighbor)
+
+		// panic("got here")
+
 		sliceToInsert := MultiplyNeighboringParenthesis(numbersHolderFirstNeighbor, numbersHolderSecondNeighbor)
 
-		slicesToInsert :=  [][]complex128{gOP(), sliceToInsert, gCP(1, 3)}
+		slicesToInsert :=  Create2DEquationFromSliceInputs(gOP(), sliceToInsert, gCP(1, 3))
 
 		returnEquation := [][]complex128{}
 
@@ -770,37 +945,58 @@ func FoilNeighborParenthesis(equationInput [][]complex128) [][]complex128 {
 
 
 
-func MultiplyNeighboringParenthesis(numbers1 []complex128, numbers2 []complex128) []complex128{
+func MultiplyNeighboringParenthesis(numbers1 [][]complex128, numbers2 [][]complex128) [][]complex128{
 
 	leftTerm := numbers1
 	rightTerm := numbers2
 
 
-	allNumbersFromFoil := []complex128{}
+	allNumbersFromFoil := [][]complex128{}
 
 
 	fmt.Println("left term", leftTerm)
 	fmt.Println("right term", rightTerm)
 	fmt.Println("allNumbersFromFoil", allNumbersFromFoil)
 
-	resultCurrentLoop := []complex128{}
-
+	resultCurrentLoop := [][]complex128{}
 
 
 	for i := 0; i < len(leftTerm); i = (i+2) {
 
-		currentNumberMultiplier := leftTerm[i]
+		currentNumberMultiplier := leftTerm[i][0]
 
-		currentNumberExponent := leftTerm[i+1]
+		currentNumberExponent := leftTerm[i][1]
+
+		//if its not the first term then each number has a plus
+		//or a minus behind it, if there's a minus then the number needs to 
+		//turned negative
+		if(i != 0){
+			operator := leftTerm[i-1]
+			//minus sign check
+			if(real(operator[1]) == 2){
+				currentNumberMultiplier = currentNumberMultiplier*-1
+			}
+		}
+		
 
 		for j := 0; j < len(rightTerm); j = (j+2) {
 
-			foilNumberMultiplier := rightTerm[j]
-			foilNumberExponent := rightTerm[j+1]
+			foilNumberMultiplier := rightTerm[j][0]
+			foilNumberExponent := rightTerm[j][1]
 
+			//if its not the first term then each number has a plus
+			//or a minus behind it, if there's a minus then the number needs to 
+			//turned negative
+			if(j != 0){
+				operator := leftTerm[j-1]
+				//minus sign check
+				if(real(operator[1]) == 2){
+					foilNumberMultiplier = foilNumberMultiplier*-1
+				}
+			}
 			
-			resultCurrentLoop = append(resultCurrentLoop, currentNumberMultiplier*foilNumberMultiplier)
-			resultCurrentLoop = append(resultCurrentLoop, currentNumberExponent+foilNumberExponent)
+			resultCurrentLoop = append(resultCurrentLoop, []complex128{currentNumberMultiplier*foilNumberMultiplier, currentNumberExponent+foilNumberExponent})
+
 		}
 	}
 
@@ -809,16 +1005,15 @@ func MultiplyNeighboringParenthesis(numbers1 []complex128, numbers2 []complex128
 	fmt.Println("allNumbersFromFoil", allNumbersFromFoil)
 
 	allNumbersFromFoil = resultCurrentLoop
-	
-	
+		
 	mapOfExponents := make(map[complex128][]complex128)
 
-	for i := 0; i < len(allNumbersFromFoil); i = (i+2) {
+	for i := 0; i < len(allNumbersFromFoil); i++ {
 
-		if(mapOfExponents[allNumbersFromFoil[i+1]] == nil){
-			mapOfExponents[allNumbersFromFoil[i+1]] = []complex128{allNumbersFromFoil[i]} 
+		if(mapOfExponents[allNumbersFromFoil[i][1]] == nil){
+			mapOfExponents[allNumbersFromFoil[i][1]] = []complex128{allNumbersFromFoil[i][0]} 
 		}else{
-			mapOfExponents[allNumbersFromFoil[i+1]] = append(mapOfExponents[allNumbersFromFoil[i+1]], allNumbersFromFoil[i])
+			mapOfExponents[allNumbersFromFoil[i][1]] = append(mapOfExponents[allNumbersFromFoil[i][1]], allNumbersFromFoil[i][0])
 		}
 
 	}
@@ -885,11 +1080,16 @@ func MultiplyNeighboringParenthesis(numbers1 []complex128, numbers2 []complex128
 			copyOfExponentsComplex[newIndices[i]] = sliceOfExponentsComplex[i]
 		}
 
-		returnNumbers := []complex128{}
+		returnNumbers := [][]complex128{}
 
 		for i := 0; i < len(copyOfExponentsComplex); i++ {
-			returnNumbers = append(returnNumbers, mapOfSimpliefiedMultipliersForExponents[copyOfExponentsComplex[i]])
-			returnNumbers = append(returnNumbers, copyOfExponentsComplex[i])
+			returnNumbers = append(returnNumbers, []complex128{mapOfSimpliefiedMultipliersForExponents[copyOfExponentsComplex[i]], copyOfExponentsComplex[i]})
+
+			if(i < (len(copyOfExponentsComplex)-1)){
+				returnNumbers = append(returnNumbers, []complex128{complex(0,0), complex(1,0)})
+			}
+
+
 		}
 
 
@@ -937,7 +1137,7 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 
 			checkingIfValid := true
 
-			sawOneIntAndIsValidQuadratic := false
+			sawOneNumberAndIsValidQuadratic := false
 
 			cursor := i
 
@@ -953,7 +1153,7 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 					return equation
 				}
 
-				if(!sawOneIntAndIsValidQuadratic){
+				if(!sawOneNumberAndIsValidQuadratic){
 					if(IsNumber(equation[cursor][0]) && len(equation[cursor]) == 6){
 						numbersHolder = append(numbersHolder, equation[cursor]...)
 						secondDegreeExponentPresent := false
@@ -976,7 +1176,7 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 						}						
 
 						if(secondDegreeExponentPresent && firstDegreeExponentPresent && zeroDegreeExponentPresent){
-							sawOneIntAndIsValidQuadratic = true
+							sawOneNumberAndIsValidQuadratic = true
 						}else{
 							break
 						}
@@ -987,7 +1187,7 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 						checkingIfValid = false
 						break
 					}
-				}else if(sawOneIntAndIsValidQuadratic){
+				}else if(sawOneNumberAndIsValidQuadratic){
 					if(IsNumber(equation[cursor][0])){
 						//there should only be one set of numbers inside parenthesis this should not be possible
 						panic("interesting case, should not get here FactorQuadraticsWithABCAllPresent()")
@@ -1086,7 +1286,7 @@ func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex1
 
 			checkingIfValid := true
 
-			sawOneIntAndIsValidQuadratic := false
+			sawOneNumberAndIsValidQuadratic := false
 
 			cursor := i
 
@@ -1102,7 +1302,7 @@ func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex1
 					return equation
 				}
 
-				if(!sawOneIntAndIsValidQuadratic){
+				if(!sawOneNumberAndIsValidQuadratic){
 					if(IsNumber(equation[cursor][0]) && len(equation[cursor]) == 4){
 						numbersHolder = append(numbersHolder, equation[cursor]...)
 						secondDegreeExponentPresent := false
@@ -1121,7 +1321,7 @@ func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex1
 						}						
 
 						if(secondDegreeExponentPresent && firstDegreeExponentPresent){
-							sawOneIntAndIsValidQuadratic = true
+							sawOneNumberAndIsValidQuadratic = true
 						}else{
 							break
 						}
@@ -1132,7 +1332,7 @@ func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex1
 						checkingIfValid = false
 						break
 					}
-				}else if(sawOneIntAndIsValidQuadratic){
+				}else if(sawOneNumberAndIsValidQuadratic){
 					if(IsNumber(equation[cursor][0])){
 						//there should only be one set of numbers inside parenthesis this should not be possible
 						panic("interesting case, should not get here FactorQuadraticsWithABOnlyPresent()")
@@ -1248,7 +1448,7 @@ func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex1
 
 			checkingIfValid := true
 
-			sawOneIntAndIsValidQuadratic := false
+			sawOneNumberAndIsValidQuadratic := false
 
 			cursor := i
 
@@ -1264,7 +1464,7 @@ func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex1
 					return equation
 				}
 
-				if(!sawOneIntAndIsValidQuadratic){
+				if(!sawOneNumberAndIsValidQuadratic){
 					if(IsNumber(equation[cursor][0]) && len(equation[cursor]) == 4){
 						numbersHolder = append(numbersHolder, equation[cursor]...)
 						secondDegreeExponentPresent := false
@@ -1284,7 +1484,7 @@ func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex1
 						}						
 
 						if(secondDegreeExponentPresent && zeroDegreeExponentPresent){
-							sawOneIntAndIsValidQuadratic = true
+							sawOneNumberAndIsValidQuadratic = true
 						}else{
 							break
 						}
@@ -1295,7 +1495,7 @@ func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex1
 						checkingIfValid = false
 						break
 					}
-				}else if(sawOneIntAndIsValidQuadratic){
+				}else if(sawOneNumberAndIsValidQuadratic){
 					if(IsNumber(equation[cursor][0])){
 						//there should only be one set of numbers inside parenthesis this should not be possible
 						panic("interesting case, should not get here FactorQuadraticsWithACOnlyPresent()")
@@ -1384,9 +1584,13 @@ func IsCP(nums []complex128) bool {
 	}
 }
 
-func IsOperator(num1 complex128, num2 complex128) bool {
-	if(num1 == 0 && num2 != 0){
-		return true
+func IsOperator(nums []complex128) bool {
+	if(len(nums) == 2){
+		if(nums[0] == 0 && nums[1] != 0){
+			return true
+		}else{
+			return false
+		}
 	}else{
 		return false
 	}
@@ -1429,6 +1633,8 @@ func CheckEquationForSyntaxErrors(equation [][]complex128, parentFunction string
 				depthLevel--
 			}else if(IsNumber(firstIndex)){
 
+			}else if(IsOperator(currentItem)){
+			
 			}else{
 				fmt.Println(currentItem)
 				panic("Syntax Error unknown item type CheckEquationForSyntaxErrors()")
@@ -2230,83 +2436,111 @@ func TwoAdjacentNumbersCanAddOrSubtract(number1 []complex128, number2 []complex1
 
 }
 
-func AddTwoAdjacentNumbers(number1 []complex128, number2 []complex128) [][]complex128 {
+func AddTwoAdjacentNumbers(number1 []complex128, number2 []complex128) []complex128 {
 
 	if(!TwoAdjacentNumbersCanAddOrSubtract(number1, number2)){
 		panic("error invalid add")
 	}
 
-	if(real(number2[2]) == 3 || real(number2[2]) == 4){
-		panic("second number is involved in a multiplying term this operation should not occur")
-	}
 
-	if(number1[0]-+number2[0] == 0){
-		return [][]complex128{}
+	if(number1[0]+number2[0] == 0){
+		return []complex128{complex(0, 0), complex(0, 0)}
 	}else{
-		return gNum(number1[0]+number2[0], number1[1], number2[2])
+		return []complex128{number1[0]+number2[0], number1[1]}
 	}
 
 }
 
-func SubtractTwoAdjacentNumbers(number1 []complex128, number2 []complex128) [][]complex128 {
+func SubtractTwoAdjacentNumbers(number1 []complex128, number2 []complex128) []complex128 {
 
 	if(!TwoAdjacentNumbersCanAddOrSubtract(number1, number2)){
 		panic("error invalid add")
 	}
 
-	if(real(number2[2]) == 3 || real(number2[2]) == 4){
-		panic("second number is involved in a multiplying term this operation should not occur")
-	}
 
 	if(number1[0]-number2[0] == 0){
-		return [][]complex128{}
+		return []complex128{complex(0, 0), complex(0, 0)}
 	}else{
-		return gNum(number1[0]-number2[0], number1[1], number2[2])
+		return []complex128{number1[0]-number2[0], number1[1]}
+	}
+}
+
+
+func MultiplyTwoAdjacentNumbers(number1 []complex128, number2 []complex128) []complex128 {
+
+
+	
+	//if the exponents add to 0 the result is 1
+	if(number1[1] + number2[1] == 0){
+		return []complex128{complex(1, 0), complex(0,0)}
+	}else{
+		return []complex128{number1[0]*number2[0], number1[1]+number2[1]} 
+	}
+
+
+}
+
+func DivideTwoAdjacentNumbers(number1 []complex128, number2 []complex128) []complex128 {
+
+	
+	//if the exponents subtract to 0 the result is 1
+	if(number1[1] - number2[1] == 0){
+		return []complex128{complex(1, 0), complex(0,0)}
+	}else{
+		return []complex128{number1[0]/number2[0], number1[1]-number2[1]} 
+	}
+
+
+}
+
+
+func InnerParenthesisCanBeSimplifiedFurther(numbersHolder [][]complex128, operatorsHolder [][]complex128) bool {
+
+	
+	for i := 0; i < len(operatorsHolder); i++ {
+
+		if(i <= len(operatorsHolder) -1){		
+			leftNum := numbersHolder[i]
+			rightNum := numbersHolder[i+ 1]
+
+
+			
+
+			if(real(operatorsHolder[i][1]) == 3 || real(operatorsHolder[i][1]) == 4){
+				
+				return true
+			}else{
+				if(TwoAdjacentNumbersCanAddOrSubtract(leftNum, rightNum)){
+					
+					return true
+				}
+			}
+		}
+
 	}
 
 	
+	return false
+
+
+
 
 }
 
 
-func MultiplyTwoAdjacentNumbers(number1 []complex128, number2 []complex128) [][]complex128 {
+func CleanCopyEntire1DComplex128Slice(sliceToCopy []complex128) []complex128 {
 
-	if(!TwoAdjacentNumbersCanAddOrSubtract(number1, number2)){
-		panic("error invalid add")
-	}
+	returnCopy := make([]complex128, len(sliceToCopy))
 
-	//if the exponents add to 0 the result is 1
-	if(number1[1] + number2[1] == 0){
-		return gNum(1, 0, number2[2])
+	itemsCopied := copy(returnCopy, sliceToCopy)
+
+	if(itemsCopied != len(sliceToCopy)){
+		panic("error copying slice CleanCopyEntire1DComplex128Slice()")
 	}else{
-		return gNum(number1[0]*number2[0], number1[1]+number2[1], number2[2])
+		return returnCopy
 	}
-
 
 }
-
-func DivideTwoAdjacentNumbers(number1 []complex128, number2 []complex128) [][]complex128 {
-
-	if(!TwoAdjacentNumbersCanAddOrSubtract(number1, number2)){
-		panic("error invalid add")
-	}
-
-	//if the exponents subtract to 0 the result is 1
-	if(number1[1] - number2[1] == 0){
-		return gNum(1, 0, number2[2])
-	}else{
-		return gNum(number1[0]/number2[0], number1[1]-number2[1], number2[2])
-	}
-
-
-}
-
-
-
-
-
-
-
 
 
 
