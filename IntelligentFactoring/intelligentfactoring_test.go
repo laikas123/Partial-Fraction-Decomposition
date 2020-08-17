@@ -45,6 +45,122 @@ import (
 // }
 
 
+// func TestFoilingExponentParenthesis(t *testing.T){
+
+	
+
+// 	numberSlice := gNum(1, 7, 1, 2, 2, 1, 2,2)
+
+// 	// numberSlice2 := gNum(1, 7, 1, 2, 2, 3, 2,2)
+
+// 	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(2, 1))
+
+
+
+// 	// equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
+
+// 	fmt.Println("initial equation", DecodeFloatSliceToEquation(equation))
+
+// 	result := FoilOutParenthesisRaisedToExponent(equation)
+// 	fmt.Println("initial equation", DecodeFloatSliceToEquation(equation))
+
+
+// 	fmt.Println("resutl", DecodeFloatSliceToEquation(result))
+
+// 	panic("exit")
+	
+
+// 	if(false){
+// 		t.Errorf("failure")
+// 	}
+// }
+
+
+// func TestGenerateNumbersSliceAndSimplifyInnerParenthesis(t *testing.T){
+
+	
+
+// 	numberSlice := gNum(1, 7, 3, 2, 2, 3, 2,2)
+
+	
+
+// 	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(1, 1))
+
+
+
+// 	// equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
+
+// 	// fmt.Println(DecodeFloatSliceToEquation(equation))
+
+// 	result := SimplifyInnerParenthesis(equation)
+
+// 	fmt.Println("result result", DecodeFloatSliceToEquation(result))
+	
+
+// 	panic("exit")
+
+// 	if(false){
+// 		t.Errorf("failure")
+// 	}
+// }
+
+
+
+//this function gathers terms in series that multiply or divide each other
+//it also performs foils for any factor raised to an exponent greater than 1
+//if two factors adjacent have powers >= 1 they get foiled
+func TestGatherFactorsIntoSeriesThatMultiplyOrDivideEachOtherSimplify(t *testing.T){
+
+	
+	numberSlice1 := gNum(14, 1, 2, 28, 0)
+
+	numberSlice2 := gNum(14, 1, 1, 28, 0, 1, 15, 1, 1, -15, 2)
+
+	// equation1 := Create2DEquationFromSliceInputs(gOP(), numberSlice2, gCP(1, 1))
+
+	// numbersHolder, operatorsHolder := SortParenthesisContainingOnlyPlusAndMinusBySExponent([][]complex128{[]complex128{complex(14, 0), complex(1, 0)}, []complex128{complex(28, 0), complex(0, 0)}, []complex128{complex(15, 0), complex(1, 0)}, []complex128{complex(15, 0), complex(2, 0)}},  [][]complex128{[]complex128{complex(0, 0), complex(1, 0)}, []complex128{complex(0, 0), complex(1, 0)}, []complex128{complex(0, 0), complex(2, 0)}})
+
+	// fmt.Println("numbers", DecodeFloatSliceToEquation(numbersHolder), "operators", DecodeFloatSliceToEquation(operatorsHolder))
+
+	// panic("error")
+
+	// fmt.Println("simplified further", DecodeFloatSliceToEquation(SimplifyInnerParenthesis(equation1)))
+
+	// panic("end test")
+
+	numberSlice3 := gNum(2, 1, 1, 28, 0)
+
+	numberSlice4 := gNum(222, 1, 1, 28, 0)
+
+	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice1, gCP(2, 3), gOP(), numberSlice2, gCP(1, 4), gOP(), numberSlice3, gCP(1, 1), gOP(), numberSlice4, gCP(1, 3),)
+
+	factors2dslice := GatherFactorsInSeriesThatMultiplyOrDivideEachOther(equation)
+
+	for i := 0; i < len(factors2dslice); i++ {
+
+		currentFactorsInSeries := factors2dslice[i]
+
+		fmt.Println("New Factors In Series ", i)
+
+		for j := 0; j < len(currentFactorsInSeries); j++ {
+			fmt.Println("factor ", j, " ", DecodeFloatSliceToEquation(currentFactorsInSeries[j].Data))
+		}
+
+	}
+
+
+
+
+
+	panic("done testing")
+
+	if(false){
+		t.Errorf("failure")
+	}
+}
+
+
+
 //returns the exact same data when there are no factor mathces,
 //returns the factors properly removed when there are matches
 //test is setup to show this right now
@@ -91,7 +207,7 @@ func TestMakeSurePuttingAnEquationThroughFactorFunctionsDoesNotChangeIt(t *testi
 
 	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(2, 1))
 
-	copyOriginal := CleanCopyEntire2DComplex128Slice(equation)
+	copyOriginal := CleanCopyEntire2Dcomplex128Slice(equation)
 
 	fmt.Println("initial equation", DecodeFloatSliceToEquation(equation))
 
@@ -113,32 +229,6 @@ func TestMakeSurePuttingAnEquationThroughFactorFunctionsDoesNotChangeIt(t *testi
 }
 
 
-
-// func TestGenerateNumbersSliceAndSimplifyInnerParenthesis(t *testing.T){
-
-	
-
-// 	numberSlice := gNum(1, 7, 3, 2, 2, 3, 2,2)
-
-// 	numberSlice2 := gNum(1, 7, 1, 2, 2, 3, 2,2)
-
-// 	equation := Create2DEquationFromSliceInputs(numberSlice, numberSlice2)
-
-
-
-// 	// equation := Create2DEquationFromSliceInputs(gOP(), gNum(3, 0, 3), gNum(1, 1, 2), gNum(3, 0, 5), gCP(1, 3))
-
-// 	// fmt.Println(DecodeFloatSliceToEquation(equation))
-
-// 	result := SimplifyInnerParenthesis(equation)
-
-// 	fmt.Println(DecodeFloatSliceToEquation(result))
-	
-
-// 	if(false){
-// 		t.Errorf("failure")
-// 	}
-// }
 
 
 

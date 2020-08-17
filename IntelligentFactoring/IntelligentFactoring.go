@@ -19,6 +19,10 @@ type Factor struct {
 	Data [][]complex128
 }
 
+type Fraction struct {
+	Numerator []Factor
+	Denominator []Factor
+}
 
 //TODO, when multiple variables get involved a third index needs to be added to the float slice
 //which will allow the third index to essentially span the alphabet 0-25 A-Z for variable names
@@ -50,7 +54,7 @@ func DecodeFloatSliceToEquation(equationInput [][]complex128 ) string {
 
 //	CheckEquationForSyntaxErrors(equation)
 
-	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
 	
 	equationString := ""
 
@@ -186,7 +190,7 @@ func SimplifyInnerParenthesis(equationInput [][]complex128) [][]complex128 {
 
 	CheckEquationForSyntaxErrors(equationInput, "SimplifyInnerParenthesis()")
 
-	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
 
 	numbersHolder := [][]complex128{}
 
@@ -197,6 +201,8 @@ func SimplifyInnerParenthesis(equationInput [][]complex128) [][]complex128 {
 	indexCloser := -1
 
 	foundValid := false
+
+	fmt.Println("SimplifyInnerParenthesis() equation", DecodeFloatSliceToEquation(equation))
 
 	for i := 0; i < len(equation); i ++ {
 
@@ -265,7 +271,7 @@ func SimplifyInnerParenthesis(equationInput [][]complex128) [][]complex128 {
 					}
 
 					//make sure what broke the loop was a closing parenthesis
-					if(IsCP(equation[cursor]) && InnerParenthesisCanBeSimplifiedFurther(numbersHolder, operatorsHolder)){
+					if(IsCP(equation[cursor])){
 						indexCloser = cursor
 						checkingIfValid = false
 						foundValid = true
@@ -292,7 +298,7 @@ func SimplifyInnerParenthesis(equationInput [][]complex128) [][]complex128 {
 		fmt.Println("numbers found", numbersHolder)
 		fmt.Println("operators found", operatorsHolder)
 
-
+		
 		for i := 0; i < len(operatorsHolder); i++ {
 
 			//if it equals multiply
@@ -328,6 +334,12 @@ func SimplifyInnerParenthesis(equationInput [][]complex128) [][]complex128 {
 			}
 
 		}
+
+		fmt.Println("pre numbersHolder", numbersHolder, "pre operators holder", operatorsHolder)
+
+		numbersHolder, operatorsHolder = SortParenthesisContainingOnlyPlusAndMinusBySExponent(numbersHolder, operatorsHolder)
+
+		fmt.Println("post numbersHolder", numbersHolder, "post operators holder", operatorsHolder)
 
 		for i := 0; i < len(operatorsHolder); i++ {
 
@@ -396,7 +408,13 @@ func SimplifyInnerParenthesis(equationInput [][]complex128) [][]complex128 {
 		returnEquation = append(equation[0:indexOpener+1], resultOfOperations...)
 		returnEquation = append(returnEquation, equation[indexCloser:len(equation)]...)
 
-		return SimplifyInnerParenthesis(returnEquation)
+		if(InnerParenthesisCanBeSimplifiedFurther(numbersHolder, operatorsHolder)){
+			return SimplifyInnerParenthesis(returnEquation)
+		}else{
+			return returnEquation
+		}
+
+		
 
 	}else{
 
@@ -412,7 +430,7 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 
 	CheckEquationForSyntaxErrors(equationInput, "FoilOutParenthesisRaisedToExponent()")
 
-	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
 
 	equation = SimplifyInnerParenthesis(equation)
 
@@ -558,7 +576,7 @@ func FoilOutParenthesisRaisedToExponent(equationInput [][]complex128) [][]comple
 		
 		returnEquation = append(returnEquation, equation[indexCloser+1:len(equation)]...)
 	
-		returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
+		returnEquation = CleanCopyEntire2Dcomplex128Slice(returnEquation)
 
 		fmt.Println("RETURN EQUATION", DecodeFloatSliceToEquation(returnEquation))		
 
@@ -728,7 +746,7 @@ func FoilNeighborParenthesis(equationInput [][]complex128) [][]complex128 {
 
 	CheckEquationForSyntaxErrors(equationInput, "FoilNeighborParenthesis()")
 
-	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
 
 	equation = SimplifyInnerParenthesis(equation)
 
@@ -933,7 +951,7 @@ func FoilNeighborParenthesis(equationInput [][]complex128) [][]complex128 {
 		
 		returnEquation = append(returnEquation, equation[indexCloser+1:len(equation)]...)
 
-		returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
+		returnEquation = CleanCopyEntire2Dcomplex128Slice(returnEquation)
 
 		fmt.Println("RETURN EQUATION", DecodeFloatSliceToEquation(returnEquation))		
 
@@ -1117,7 +1135,7 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 	
 	CheckEquationForSyntaxErrors(equationInput, "FactorQuadraticsWithABCAllPresent()")
 
-	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
 
 	equation = SimplifyInnerParenthesis(equation)
 
@@ -1261,7 +1279,7 @@ func FactorQuadraticsWithABCAllPresent(equationInput [][]complex128)[][]complex1
 			
 			returnEquation = append(returnEquation, equation[indexCloser+1:len(equation)]...)
 		
-			returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
+			returnEquation = CleanCopyEntire2Dcomplex128Slice(returnEquation)
 
 			fmt.Println("RETURN EQUATION", DecodeFloatSliceToEquation(returnEquation))		
 
@@ -1288,7 +1306,7 @@ func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex1
 	
 	CheckEquationForSyntaxErrors(equationInput, "FactorQuadraticsWithABCAllPresent()")
 
-	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
 
 	equation = SimplifyInnerParenthesis(equation)
 
@@ -1467,7 +1485,7 @@ func FactorQuadraticsWithABOnlyPresent(equationInput [][]complex128)[][]complex1
 			
 			returnEquation = append(returnEquation, equation[indexCloser+1:len(equation)]...)
 		
-			returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
+			returnEquation = CleanCopyEntire2Dcomplex128Slice(returnEquation)
 
 			fmt.Println("RETURN EQUATION", DecodeFloatSliceToEquation(returnEquation))		
 
@@ -1491,7 +1509,7 @@ func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex1
 	
 	CheckEquationForSyntaxErrors(equationInput, "FactorQuadraticsWithABCAllPresent()")
 
-	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
 
 	equation = SimplifyInnerParenthesis(equation)
 
@@ -1655,7 +1673,7 @@ func FactorQuadraticsWithACOnlyPresent(equationInput [][]complex128)[][]complex1
 			
 			returnEquation = append(returnEquation, equation[indexCloser+1:len(equation)]...)
 		
-			returnEquation = CleanCopyEntire2DComplex128Slice(returnEquation)
+			returnEquation = CleanCopyEntire2Dcomplex128Slice(returnEquation)
 
 			//recursive call if there was a change will check if more foils possible
 			return FactorQuadraticsWithACOnlyPresent(returnEquation)
@@ -1689,6 +1707,11 @@ func IsCP(nums []complex128) bool {
 }
 
 func IsOperator(nums []complex128) bool {
+	
+	if(real(nums[1]) != 1 && real(nums[1]) != 2 && real(nums[1]) != 3 && real(nums[1]) != 4){
+		panic("invalid operator IsOperator()")
+	}
+
 	if(len(nums) == 2){
 		if(nums[0] == 0 && nums[1] != 0){
 			return true
@@ -1738,7 +1761,7 @@ func CheckEquationForSyntaxErrors(equation [][]complex128, parentFunction string
 			}else if(IsNumber(firstIndex)){
 
 			}else if(IsOperator(currentItem)){
-			
+				
 			}else{
 				fmt.Println("current item", currentItem)
 				panic("Syntax Error unknown item type CheckEquationForSyntaxErrors()")
@@ -1765,7 +1788,7 @@ func CheckEquationForSyntaxErrors(equation [][]complex128, parentFunction string
 func RemoveUnusedParenthesis(equationInput [][]complex128) [][]complex128 {
 
 
-	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
 
 
 	equation = RemoveLastItemIfItIsOpeningParenthesis(equation)
@@ -1808,7 +1831,7 @@ func QuadraticFormula(a complex128, b complex128, c complex128) (complex128, com
 }
 
 
-func CleanCopyEntire2DComplex128Slice(equationToCopy [][]complex128) [][]complex128 {
+func CleanCopyEntire2Dcomplex128Slice(equationToCopy [][]complex128) [][]complex128 {
 
 	returnEquation := [][]complex128{}
 
@@ -1819,7 +1842,7 @@ func CleanCopyEntire2DComplex128Slice(equationToCopy [][]complex128) [][]complex
 		itemsCopied := copy(cleanCopyToAppend, equationToCopy[i])
 
 		if(itemsCopied != len(equationToCopy[i])){
-			panic("invalid copy CleanCopyEntire2DComplex128Slice()")
+			panic("invalid copy CleanCopyEntire2Dcomplex128Slice()")
 		}else{
 			returnEquation = append(returnEquation, cleanCopyToAppend)
 		}
@@ -1836,7 +1859,7 @@ func CleanCopyEntire2DComplex128Slice(equationToCopy [][]complex128) [][]complex
 
 func RemoveLastItemIfItIsOpeningParenthesis(equation [][]complex128) [][]complex128{
 
-	cleanCopyToReturn := CleanCopyEntire2DComplex128Slice(equation)
+	cleanCopyToReturn := CleanCopyEntire2Dcomplex128Slice(equation)
 
 
 	for (IsOP(cleanCopyToReturn[len(cleanCopyToReturn)-1][0], cleanCopyToReturn[len(cleanCopyToReturn)-1][1])) {
@@ -1853,7 +1876,7 @@ func RemoveLastItemIfItIsOpeningParenthesis(equation [][]complex128) [][]complex
 
 func RemoveExcessParenthesisViaDepthCheck(equationInput [][]complex128) [][]complex128 {
 
-	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
 
 	depthLevel := 0
 
@@ -1956,7 +1979,7 @@ func TwoEquationsAreExactlyIdentical(equation1 [][]complex128, equation2 [][]com
 
 func RemoveParenthesisWith0DirectChildren(equationInput [][]complex128) [][]complex128 {
 
-	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
 
 	breakAll := false
 
@@ -2059,7 +2082,7 @@ func CreateATreeFromCurrentEquation(equation [][]complex128) []*Container {
 
 				if(depth == 0){
 					i = cursor
-					cleanCopyToAppend := CleanCopyEntire2DComplex128Slice(equation)
+					cleanCopyToAppend := CleanCopyEntire2Dcomplex128Slice(equation)
 					dataToAddToTree := cleanCopyToAppend[openerIndex+1:cursor]
 					fmt.Println("data added", dataToAddToTree)
 					sliceForChildren := []*Container{}
@@ -2416,9 +2439,9 @@ func Create2DEquationFromSliceInputs(inputSlices ...interface{}) [][]complex128 
 						valueOf2DSlice := reflect.ValueOf(currentInputSlice)
 
 						//REPLACETYPECASE
-						typeComplex128 := reflect.TypeOf([][]complex128{})
+						typecomplex128 := reflect.TypeOf([][]complex128{})
 
-						firstConversion2DSlice := valueOf2DSlice.Convert(typeComplex128)
+						firstConversion2DSlice := valueOf2DSlice.Convert(typecomplex128)
 
 						//REPLACETYPECASE
 						finalConversion2DSlice := firstConversion2DSlice.Interface().([][]complex128)
@@ -2443,9 +2466,9 @@ func Create2DEquationFromSliceInputs(inputSlices ...interface{}) [][]complex128 
 						valueOf2DSlice := reflect.ValueOf(currentInputSlice)
 
 						//REPLACETYPECASE
-						typeComplex128 := reflect.TypeOf([]complex128{})
+						typecomplex128 := reflect.TypeOf([]complex128{})
 
-						firstConversion2DSlice := valueOf2DSlice.Convert(typeComplex128)
+						firstConversion2DSlice := valueOf2DSlice.Convert(typecomplex128)
 
 						//REPLACETYPECASE
 						finalConversion2DSlice := firstConversion2DSlice.Interface().([]complex128)
@@ -2751,9 +2774,9 @@ func TryAllABCAndACOnlyFactorMethodsOnEquation(equationInput [][]complex128) [][
 
 
 
-	equation := CleanCopyEntire2DComplex128Slice(equationInput)
+	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
 
-	equationCopy := CleanCopyEntire2DComplex128Slice(equationInput)
+	equationCopy := CleanCopyEntire2Dcomplex128Slice(equationInput)
 
 	equation = FactorQuadraticsWithABCAllPresent(equation)
 
@@ -2784,7 +2807,10 @@ func TryAllABCAndACOnlyFactorMethodsOnEquation(equationInput [][]complex128) [][
 
 func InnerParenthesisCanBeSimplifiedFurther(numbersHolder [][]complex128, operatorsHolder [][]complex128) bool {
 
-	
+	fmt.Println("inner parenthesis values", numbersHolder, "inner parenthesis operators", operatorsHolder)
+
+
+
 	for i := 0; i < len(operatorsHolder); i++ {
 
 		if(i <= len(operatorsHolder) -1){		
@@ -2795,11 +2821,11 @@ func InnerParenthesisCanBeSimplifiedFurther(numbersHolder [][]complex128, operat
 			
 
 			if(real(operatorsHolder[i][1]) == 3 || real(operatorsHolder[i][1]) == 4){
-				
+				fmt.Println("true")
 				return true
 			}else{
 				if(TwoAdjacentNumbersCanAddOrSubtract(leftNum, rightNum)){
-					
+					fmt.Println("true")
 					return true
 				}
 			}
@@ -2807,7 +2833,7 @@ func InnerParenthesisCanBeSimplifiedFurther(numbersHolder [][]complex128, operat
 
 	}
 
-	
+	fmt.Println("false")
 	return false
 
 
@@ -2816,14 +2842,14 @@ func InnerParenthesisCanBeSimplifiedFurther(numbersHolder [][]complex128, operat
 }
 
 
-func CleanCopyEntire1DComplex128Slice(sliceToCopy []complex128) []complex128 {
+func CleanCopyEntire1Dcomplex128Slice(sliceToCopy []complex128) []complex128 {
 
 	returnCopy := make([]complex128, len(sliceToCopy))
 
 	itemsCopied := copy(returnCopy, sliceToCopy)
 
 	if(itemsCopied != len(sliceToCopy)){
-		panic("error copying slice CleanCopyEntire1DComplex128Slice()")
+		panic("error copying slice CleanCopyEntire1Dcomplex128Slice()")
 	}else{
 		return returnCopy
 	}
@@ -3004,5 +3030,326 @@ func IsRestrictedIndex(indexToCheck int, restrictedIndices []int ) bool {
 	return false
 
 }
+
+
+func GatherFactorsInSeriesThatMultiplyOrDivideEachOther(equationInput [][]complex128) [][]Factor {
+
+	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
+
+	equationFactor, endIndex := GetFirstFactorFromEquation(equation)
+
+	factors := []Factor{}
+
+	for len(equationFactor) > 0 {
+
+		factors = append(factors, Factor{equationFactor})
+
+		equation = equation[(endIndex+1):len(equation)]
+
+		equationFactor, endIndex = GetFirstFactorFromEquation(equation)
+
+	}
+
+	operatorsForEachFactor := []float64{}
+
+
+	for i := 0; i < len(factors); i++ {
+
+		operatorsForEachFactor = append(operatorsForEachFactor, GetOperatorAppendedToClosingParenthesisOfFactor(factors[i]))
+
+	}
+
+	if(len(factors) != len(operatorsForEachFactor)){
+		panic("not one operator per factor GatherFactorsInSeriesThatMultiplyOrDivideEachOther()")
+	}
+
+	factorsAndOperatorsCursor := 0
+
+	factorsInSeriesWithEachOther := [][]Factor{}
+
+	for factorsAndOperatorsCursor < len(factors) {
+
+		currentSeries := []Factor{}
+
+		inSeries := true
+
+		for inSeries {
+
+			currentSeries = append(currentSeries, factors[factorsAndOperatorsCursor])
+
+			currentOperator := operatorsForEachFactor[factorsAndOperatorsCursor]
+
+			factorsAndOperatorsCursor++
+
+			if(currentOperator == 3 || currentOperator == 4){
+				inSeries = true
+			}else {
+				inSeries = false
+			}
+
+			if(factorsAndOperatorsCursor >= len(factors)){
+				inSeries = false
+			}
+		}
+
+		factorsInSeriesWithEachOther = append(factorsInSeriesWithEachOther, currentSeries)
+
+
+	}
+
+
+	//run every factor through simplifying its inner parenthesis, and foiling if the exponent is greater than 1
+	//for the closing parenthesis
+	for i := 0; i < len(factorsInSeriesWithEachOther); i++ {
+
+		currentFactors := factorsInSeriesWithEachOther[i]
+
+		for j := 0; j < len(currentFactors); j++ {
+
+			factorsInSeriesWithEachOther[i][j] = Factor{SimplifyInnerParenthesis(factorsInSeriesWithEachOther[i][j].Data)}
+
+			factorsInSeriesWithEachOther[i][j] = Factor{FoilOutParenthesisRaisedToExponent(factorsInSeriesWithEachOther[i][j].Data)}
+
+		}
+
+	}
+
+
+
+
+	return factorsInSeriesWithEachOther
+
+}
+
+
+func SeperateBaseEquationIntoFractions(equationInput [][]complex128) []Fraction {
+
+
+	return []Fraction{}
+
+}
+
+func GetPowerOfClosingParenthesisOfFactor(factor Factor) complex128 {
+
+	return factor.Data[len(factor.Data)-1][2]	
+}
+
+func GetOperatorAppendedToClosingParenthesisOfFactor(factor Factor) float64 {
+
+	return real(factor.Data[len(factor.Data)-1][4])
+
+}
+
+
+
+//returns a new numbers and operators holder for function SimplifyInnerParenthesi()
+func SortParenthesisContainingOnlyPlusAndMinusBySExponent(numbersHolder [][]complex128, operatorsHolder [][]complex128) ([][]complex128, [][]complex128) {
+
+	// equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
+
+
+	// numbersHolder := [][]complex128{}
+
+	// operatorsHolder := [][]complex128{}
+
+	// sExponentHolder := []float64{}
+
+	// foundValid := false
+
+	// fmt.Println("SimplifyInnerParenthesis() equation", DecodeFloatSliceToEquation(equation))
+
+	// for i := 0; i < len(equation); i ++ {
+
+	// 	if(foundValid){
+	// 		break
+	// 	}
+
+	// 	if(IsOP(equation[i][0], equation[i][1])){
+
+
+
+	// 		fmt.Println("character")
+
+	// 		checkingIfValid := true
+
+	// 		sawOneNumber := false
+
+
+	// 		//these two bools are used to make sure
+	// 		//numbers and symbols alternate
+	// 		indexShouldBeNumber := true
+	// 		indexShouldBeOperator := false
+
+	// 		cursor := i
+
+	// 		//set these to null before each attempt to not have lingering data
+	// 		numbersHolder = [][]complex128{}		
+	// 		operatorsHolder = [][]complex128{}
+	// 		sExponentHolder = []float64{}
+
+	// 		for checkingIfValid {
+
+	// 			cursor++
+
+
+	// 			if(!sawOneNumber){
+
+	// 				for(!IsCP(equation[cursor]) && !IsOP(equation[cursor][0], equation[cursor][1])){
+
+
+	// 					if(cursor >= len(equation)){
+	// 						checkingIfValid = false
+	// 						foundValid = false
+	// 						break
+	// 					}
+
+	// 					if(IsNumber(equation[cursor][0]) && indexShouldBeNumber){
+	// 						numbersHolder = append(numbersHolder, equation[cursor])
+	// 						sExponentHolder = append(sExponentHolder, real(equation[cursor][1]))
+	// 						indexShouldBeNumber = false
+	// 						indexShouldBeOperator = true
+	// 					}else if(IsOperator(equation[cursor]) && indexShouldBeOperator){
+	// 						operatorsHolder = append(operatorsHolder, equation[cursor])
+	// 						indexShouldBeNumber = true
+	// 						indexShouldBeOperator = false
+	// 					}else{
+	// 						checkingIfValid = false
+	// 						foundValid = false
+	// 						break	
+	// 					}
+
+	// 					cursor++
+
+	// 				}
+
+	// 				//make sure what broke the loop was a closing parenthesis
+	// 				if(IsCP(equation[cursor])){
+
+	// 					checkingIfValid = false
+	// 					foundValid = true
+	// 					break
+	// 				}
+
+
+	// 			}
+
+
+	// 		}
+
+	// 	}
+
+	// }
+
+
+	//double check there are no mutliplication or division operators present
+	for i := 0; i < len(operatorsHolder); i++ {
+
+		if(real(operatorsHolder[i][1]) == 3 || real(operatorsHolder[i][1]) == 4){
+			panic("should not be any * or / operators SortParenthesisContainingOnlyPlusAndMinusBySExponent()")
+		}
+
+	}
+
+	sExponentHolder := []float64{}
+
+	for i := 0; i < len(numbersHolder); i++ {
+		sExponentHolder = append(sExponentHolder, real(numbersHolder[i][1]))
+	}
+
+
+	//start at index 1 because each iteration also needs the previous item
+	//starting at 0 would cause error
+	sExponentCursor := 1
+
+	oneSortOccurred := false
+
+	needToSortAgain := true
+
+
+	//since there are less operators than numbers, prepend a plus or minus for the first number depending
+	//on its sign since it could get swappped and needs an operator to swap with it, 
+	//at the end of the swapping the first operator is removed, and the sign of the number for
+	//that sign is altered accordingly
+	firstNumberPositive := (real(numbersHolder[0][0])) >= 0
+
+	if(firstNumberPositive){
+		operatorsHolder = append([][]complex128{[]complex128{complex(0, 0), complex(1, 0)}}, operatorsHolder...)
+	}else{
+		operatorsHolder = append([][]complex128{[]complex128{complex(0, 0), complex(2, 0)}}, operatorsHolder...)
+	}
+
+
+	for needToSortAgain {
+
+			fmt.Println(sExponentHolder)
+			fmt.Println(numbersHolder)
+			fmt.Println(operatorsHolder)
+
+			oneSortOccurred = false
+
+			for sExponentCursor < len(sExponentHolder) {
+				sPowerCurrent := sExponentHolder[sExponentCursor]
+				sPowerPrevious := sExponentHolder[sExponentCursor-1]
+			
+				fmt.Println("previous power", sPowerPrevious, "current power", sPowerCurrent)
+
+				if(sPowerCurrent > sPowerPrevious){
+					sort.Float64Slice(sExponentHolder).Swap(sExponentCursor, sExponentCursor-1)
+					
+					//no swap function for type [][]complex128 so do it manually
+					copyNumberSlice1 := numbersHolder[sExponentCursor]
+					copyNumberSlice2 := numbersHolder[sExponentCursor-1]
+					numbersHolder[sExponentCursor] = copyNumberSlice2
+					numbersHolder[sExponentCursor-1] = copyNumberSlice1
+
+					//no swap function for type [][]complex128 so do it manually
+					copyOperatorSlice1 := operatorsHolder[sExponentCursor]
+					copyOperatorSlice2 := operatorsHolder[sExponentCursor-1]
+					operatorsHolder[sExponentCursor] = copyOperatorSlice2
+					operatorsHolder[sExponentCursor-1] = copyOperatorSlice1
+
+					oneSortOccurred = true
+				}
+
+				sExponentCursor++
+
+				
+			}
+
+			sExponentCursor = 1
+
+			// fmt.Println("stuck")
+
+			if(oneSortOccurred){
+				needToSortAgain = true
+			}else{
+				needToSortAgain = false
+				
+			}
+
+
+	}
+
+	firstOperatorIsPlusSign := (real(operatorsHolder[0][1]) == 1)
+
+	//if it is a negative sign prepended to the first element
+	//multiply by -1 to adjust for the removal, if its a plus sign
+	//then nothing needs to happen
+	if(!firstOperatorIsPlusSign){
+		numbersHolder[0][0] = numbersHolder[0][0] * -1 
+	}
+
+	fmt.Println("operators holder", operatorsHolder)
+
+	operatorsHolder = operatorsHolder[1:len(operatorsHolder)]
+
+	fmt.Println("operators holder", operatorsHolder)
+
+	return numbersHolder, operatorsHolder
+
+}
+
+
+
 
 
