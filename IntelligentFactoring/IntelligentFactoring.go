@@ -3035,7 +3035,7 @@ func IsRestrictedIndex(indexToCheck int, restrictedIndices []int ) bool {
 
 }
 
-
+//deleting this...
 func GatherFactorsInSeriesThatMultiplyOrDivideEachOther(equationInput [][]complex128) ([][]Factor, [][]float64) {
 
 	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
