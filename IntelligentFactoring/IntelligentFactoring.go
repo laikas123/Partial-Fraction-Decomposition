@@ -15,6 +15,10 @@ type Container struct {
 	Children []*Container
 }
 
+type Operators struct {
+	Data [][]complex128
+}
+
 type Factor struct {
 	Data [][]complex128
 }
@@ -3032,7 +3036,7 @@ func IsRestrictedIndex(indexToCheck int, restrictedIndices []int ) bool {
 }
 
 
-func GatherFactorsInSeriesThatMultiplyOrDivideEachOther(equationInput [][]complex128) [][]Factor {
+func GatherFactorsInSeriesThatMultiplyOrDivideEachOther(equationInput [][]complex128) ([][]Factor, [][]float64) {
 
 	equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
 
@@ -3067,9 +3071,13 @@ func GatherFactorsInSeriesThatMultiplyOrDivideEachOther(equationInput [][]comple
 
 	factorsInSeriesWithEachOther := [][]Factor{}
 
+	operatorsForEachSeries := [][]float64{}
+
 	for factorsAndOperatorsCursor < len(factors) {
 
 		currentSeries := []Factor{}
+
+		currentSeriesOperators := []float64{}
 
 		inSeries := true
 
@@ -3081,8 +3089,11 @@ func GatherFactorsInSeriesThatMultiplyOrDivideEachOther(equationInput [][]comple
 
 			factorsAndOperatorsCursor++
 
+			fmt.Println("decoded series", DecodeFloatSliceToEquation(factors[factorsAndOperatorsCursor].Data))
+
 			if(currentOperator == 3 || currentOperator == 4){
 				inSeries = true
+				currentSeriesOperators = append(currentSeriesOperators, currentOperator)
 			}else {
 				inSeries = false
 			}
@@ -3092,11 +3103,24 @@ func GatherFactorsInSeriesThatMultiplyOrDivideEachOther(equationInput [][]comple
 			}
 		}
 
+		fmt.Println(currentSeries, currentSeriesOperators)
+
+		//there should always be one less operator than number in the seris
+		if((len(currentSeries) - len(currentSeriesOperators)) != 1){
+			panic("mismatch in numbers of items in series and numbers of operators for series")
+		}
+
 		factorsInSeriesWithEachOther = append(factorsInSeriesWithEachOther, currentSeries)
 
+		operatorsForEachSeries = append(operatorsForEachSeries, currentSeriesOperators)
 
 	}
 
+
+
+	if(len(operatorsForEachSeries) != len(factorsInSeriesWithEachOther)){
+		panic("not one row of operators per row of factors GatherFactorsInSeriesThatMultiplyOrDivideEachOther()")
+	}
 
 	//run every factor through simplifying its inner parenthesis, and foiling if the exponent is greater than 1
 	//for the closing parenthesis
@@ -3114,10 +3138,49 @@ func GatherFactorsInSeriesThatMultiplyOrDivideEachOther(equationInput [][]comple
 
 	}
 
+	newFactorsInSeries := [][]Factor{}
+
+	newOperatorsForEachSeries := [][]float64{}
+
+	//here terms multiplying  can now be combined since everything has been foiled out
+	//index to second to last item because each iteration gets current and next item
+	//this also makes sure when indexing the operators slice it does not go out of bounds
+	for i := 0; i < (len(factorsInSeriesWithEachOther)); i++ {
+
+		currentFactors := factorsInSeriesWithEachOther[i]
+		currentOperators := operatorsForEachSeries[i]
+
+		newFactorsForRow := []Factor{}
+
+		newOperatorsForRow := []float64{}
+
+		//here terms multiplying  can now be combined since everything has been foiled out
+		//index to second to last item because each iteration gets current and next item
+		//this also makes sure when indexing the operators slice it does not go out of bounds
+		for j := 0; j < (len(currentFactors)-1); j++ {
+
+			if(currentOperators[i] == 3){
+				newFactorsForRow = append(newFactorsForRow, Factor{MultiplyNeighboringParenthesis(currentFactors[j].Data, currentFactors[j+1].Data)})
+				//iterate j once more so it skips the next index that was combined
+				j++
+			}else{
+				newOperatorsForRow = append(newOperatorsForRow, 4)
+				newFactorsForRow = append(newFactorsForRow, currentFactors[j])
+			}
+
+		}
+
+		newFactorsInSeries  = append(newFactorsInSeries, newFactorsForRow)
+
+		newOperatorsForEachSeries  = append(newOperatorsForEachSeries, newOperatorsForRow)
+
+	}
 
 
 
-	return factorsInSeriesWithEachOther
+
+
+	return newFactorsInSeries, newOperatorsForEachSeries
 
 }
 
@@ -3144,102 +3207,6 @@ func GetOperatorAppendedToClosingParenthesisOfFactor(factor Factor) float64 {
 
 //returns a new numbers and operators holder for function SimplifyInnerParenthesi()
 func SortParenthesisContainingOnlyPlusAndMinusBySExponent(numbersHolder [][]complex128, operatorsHolder [][]complex128) ([][]complex128, [][]complex128) {
-
-	// equation := CleanCopyEntire2Dcomplex128Slice(equationInput)
-
-
-	// numbersHolder := [][]complex128{}
-
-	// operatorsHolder := [][]complex128{}
-
-	// sExponentHolder := []float64{}
-
-	// foundValid := false
-
-	// fmt.Println("SimplifyInnerParenthesis() equation", DecodeFloatSliceToEquation(equation))
-
-	// for i := 0; i < len(equation); i ++ {
-
-	// 	if(foundValid){
-	// 		break
-	// 	}
-
-	// 	if(IsOP(equation[i][0], equation[i][1])){
-
-
-
-	// 		fmt.Println("character")
-
-	// 		checkingIfValid := true
-
-	// 		sawOneNumber := false
-
-
-	// 		//these two bools are used to make sure
-	// 		//numbers and symbols alternate
-	// 		indexShouldBeNumber := true
-	// 		indexShouldBeOperator := false
-
-	// 		cursor := i
-
-	// 		//set these to null before each attempt to not have lingering data
-	// 		numbersHolder = [][]complex128{}		
-	// 		operatorsHolder = [][]complex128{}
-	// 		sExponentHolder = []float64{}
-
-	// 		for checkingIfValid {
-
-	// 			cursor++
-
-
-	// 			if(!sawOneNumber){
-
-	// 				for(!IsCP(equation[cursor]) && !IsOP(equation[cursor][0], equation[cursor][1])){
-
-
-	// 					if(cursor >= len(equation)){
-	// 						checkingIfValid = false
-	// 						foundValid = false
-	// 						break
-	// 					}
-
-	// 					if(IsNumber(equation[cursor][0]) && indexShouldBeNumber){
-	// 						numbersHolder = append(numbersHolder, equation[cursor])
-	// 						sExponentHolder = append(sExponentHolder, real(equation[cursor][1]))
-	// 						indexShouldBeNumber = false
-	// 						indexShouldBeOperator = true
-	// 					}else if(IsOperator(equation[cursor]) && indexShouldBeOperator){
-	// 						operatorsHolder = append(operatorsHolder, equation[cursor])
-	// 						indexShouldBeNumber = true
-	// 						indexShouldBeOperator = false
-	// 					}else{
-	// 						checkingIfValid = false
-	// 						foundValid = false
-	// 						break	
-	// 					}
-
-	// 					cursor++
-
-	// 				}
-
-	// 				//make sure what broke the loop was a closing parenthesis
-	// 				if(IsCP(equation[cursor])){
-
-	// 					checkingIfValid = false
-	// 					foundValid = true
-	// 					break
-	// 				}
-
-
-	// 			}
-
-
-	// 		}
-
-	// 	}
-
-	// }
-
 
 	//double check there are no mutliplication or division operators present
 	for i := 0; i < len(operatorsHolder); i++ {
@@ -3349,7 +3316,31 @@ func SortParenthesisContainingOnlyPlusAndMinusBySExponent(numbersHolder [][]comp
 
 }
 
+//if true the return slice is only one long and is the combined fraction
+//if false the return slice is 2 long and contains the original fractions
+func CheckIfTwoFractionsCanCombineAndCombineIfSo(fraction1 Fraction, fraction2 Fraction) ([]Fraction) {
 
+	originalFractions := []Fraction{fraction1, fraction2}
 
+	if(len(fraction1.Denominator) != len(fraction2.Denominator)){
+		return originalFractions
+	}
+
+	for i := 0; i < len(fraction1.Denominator); i++ {
+
+		fraction1CurrentDenominatorData := fraction1.Denominator[i].Data
+		fraction2CurrentDenominatorData := fraction2.Denominator[i].Data
+
+		if(!TwoEquationsAreExactlyIdentical(fraction1CurrentDenominatorData, fraction2CurrentDenominatorData)){
+			return originalFractions
+		}
+
+	}
+
+	fmt.Println("fractions can combine!")
+
+	return originalFractions
+
+}
 
 

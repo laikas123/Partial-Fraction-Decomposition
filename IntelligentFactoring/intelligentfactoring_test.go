@@ -105,59 +105,69 @@ import (
 // }
 
 
+func 
+
+
+//this function commented out below is more trouble than its worth...
 
 //this function gathers terms in series that multiply or divide each other
 //it also performs foils for any factor raised to an exponent greater than 1
 //if two factors adjacent have powers >= 1 they get foiled
-func TestGatherFactorsIntoSeriesThatMultiplyOrDivideEachOtherSimplify(t *testing.T){
+// func TestGatherFactorsIntoSeriesThatMultiplyOrDivideEachOtherSimplify(t *testing.T){
 
 	
-	numberSlice1 := gNum(14, 1, 2, 28, 0)
+// 	numberSlice1 := gNum(14, 1, 2, 28, 0)
 
-	numberSlice2 := gNum(14, 1, 1, 28, 0, 1, 15, 1, 1, -15, 2)
+// 	numberSlice2 := gNum(14, 1, 1, 28, 0, 1, 15, 1, 1, -15, 2)
 
-	// equation1 := Create2DEquationFromSliceInputs(gOP(), numberSlice2, gCP(1, 1))
+// 	// equation1 := Create2DEquationFromSliceInputs(gOP(), numberSlice2, gCP(1, 1))
 
-	// numbersHolder, operatorsHolder := SortParenthesisContainingOnlyPlusAndMinusBySExponent([][]complex128{[]complex128{complex(14, 0), complex(1, 0)}, []complex128{complex(28, 0), complex(0, 0)}, []complex128{complex(15, 0), complex(1, 0)}, []complex128{complex(15, 0), complex(2, 0)}},  [][]complex128{[]complex128{complex(0, 0), complex(1, 0)}, []complex128{complex(0, 0), complex(1, 0)}, []complex128{complex(0, 0), complex(2, 0)}})
+// 	// numbersHolder, operatorsHolder := SortParenthesisContainingOnlyPlusAndMinusBySExponent([][]complex128{[]complex128{complex(14, 0), complex(1, 0)}, []complex128{complex(28, 0), complex(0, 0)}, []complex128{complex(15, 0), complex(1, 0)}, []complex128{complex(15, 0), complex(2, 0)}},  [][]complex128{[]complex128{complex(0, 0), complex(1, 0)}, []complex128{complex(0, 0), complex(1, 0)}, []complex128{complex(0, 0), complex(2, 0)}})
 
-	// fmt.Println("numbers", DecodeFloatSliceToEquation(numbersHolder), "operators", DecodeFloatSliceToEquation(operatorsHolder))
+// 	// fmt.Println("numbers", DecodeFloatSliceToEquation(numbersHolder), "operators", DecodeFloatSliceToEquation(operatorsHolder))
 
-	// panic("error")
+// 	// panic("error")
 
-	// fmt.Println("simplified further", DecodeFloatSliceToEquation(SimplifyInnerParenthesis(equation1)))
+// 	// fmt.Println("simplified further", DecodeFloatSliceToEquation(SimplifyInnerParenthesis(equation1)))
 
-	// panic("end test")
+// 	// panic("end test")
 
-	numberSlice3 := gNum(2, 1, 1, 28, 0)
+// 	numberSlice3 := gNum(2, 1, 1, 28, 0)
 
-	numberSlice4 := gNum(222, 1, 1, 28, 0)
+// 	numberSlice4 := gNum(222, 1, 1, 28, 0)
 
-	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice1, gCP(2, 3), gOP(), numberSlice2, gCP(1, 4), gOP(), numberSlice3, gCP(1, 1), gOP(), numberSlice4, gCP(1, 3),)
+// 	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice1, gCP(2, 3), gOP(), numberSlice2, gCP(1, 4), gOP(), numberSlice3, gCP(1, 1), gOP(), numberSlice4, gCP(1, 3),)
 
-	factors2dslice := GatherFactorsInSeriesThatMultiplyOrDivideEachOther(equation)
+// 	factors2dslice, operators2dslice := GatherFactorsInSeriesThatMultiplyOrDivideEachOther(equation)
 
-	for i := 0; i < len(factors2dslice); i++ {
+// 	for i := 0; i < len(factors2dslice); i++ {
 
-		currentFactorsInSeries := factors2dslice[i]
+// 		currentFactorsInSeries := factors2dslice[i]
 
-		fmt.Println("New Factors In Series ", i)
+// 		fmt.Println("New Factors In Series ", i)
 
-		for j := 0; j < len(currentFactorsInSeries); j++ {
-			fmt.Println("factor ", j, " ", DecodeFloatSliceToEquation(currentFactorsInSeries[j].Data))
-		}
+// 		for j := 0; j < len(currentFactorsInSeries); j++ {
+// 			fmt.Println("factor ", j, " ", DecodeFloatSliceToEquation(currentFactorsInSeries[j].Data))
+// 			if(j < (len(currentFactorsInSeries)-1) ){
+// 				fmt.Println("operator after factor", operators2dslice[j])
+// 			}
+// 		}
 
-	}
+// 	}
 
 
 
 
 
-	panic("done testing")
 
-	if(false){
-		t.Errorf("failure")
-	}
-}
+
+
+// 	panic("done testing")
+
+// 	if(false){
+// 		t.Errorf("failure")
+// 	}
+// }
 
 
 
@@ -629,3 +639,9 @@ func TestCreatingATreeMap(t *testing.T){
 
 	
 // }
+
+
+
+
+
+
