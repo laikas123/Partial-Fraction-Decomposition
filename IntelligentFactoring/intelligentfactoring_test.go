@@ -7,16 +7,75 @@ import (
 
 )
 
+// func TestGetFirstIndexOfEquation(t *testing.T){
+
+// 	numberSlice := gNum(1, 2, 1, 6, 0, 1, 3, 3)
+
+// 	numberSlice2 := gNum(3, 2, 1, 6, 0, 1, 3, 3)
+
+// 	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice2, gCP(2, 1), gOP(), numberSlice, gCP(2, 1))
+
+
+// 	factor, endIndex := GetFirstFactorFromEquation(equation)
+
+// 	fmt.Println("equation", DecodeFloatSliceToEquation(equation), "\n", "first factor", DecodeFloatSliceToEquation(factor), "\n", "index first factor", endIndex)
+
+// 	panic("done testing")
+
+// 	if(false){
+// 		t.Errorf("failure")
+// 	}
+// }
+
+// func TestFactorRestrictedIndices(t *testing.T){
+
+
+// 	restrictedIndices := []int{3, 4, 6}
+
+
+// 	indexToCheck := 8
+
+// 	fmt.Println("is restricted", IsRestrictedIndex(indexToCheck, restrictedIndices))
+
+// 	panic("done testing")
+
+// 	if(false){
+// 		t.Errorf("failure")
+// 	}
+// }
+
+
+//returns the exact same data when there are no factor mathces,
+//returns the factors properly removed when there are matches
+//test is setup to show this right now
 func TestFactorNumeratorDenomiantor(t *testing.T){
 
-	numberSlice := gNum(1, 2, 1, 6, 0)
+	// numberSlice := gNum(14, 2, 1, 28, 0)
+
+	// numberSlice2 := gNum(7, 2, 1, 14, 0)
+
+	numbersSlice1 := gNum(14, 1, 2, 28, 0)
+
+	numbersSlice2 := gNum(14, 1, 1, 28, 0)
+
+	numbersSlice3 := gNum(222, 1, 1, 28, 0)
+
+	numbersSlice4 := gNum(222, 1, 1, 28, 0)
 
 
-	equation := Create2DEquationFromSliceInputs(gOP(), numberSlice, gCP(2, 1))
+	numerator := Create2DEquationFromSliceInputs(gOP(), numbersSlice1, gCP(3, 1), gOP(), numbersSlice2, gCP(1, 1), gOP(), numbersSlice3, gCP(1, 1))
 
-	equation2 := CleanCopyEntire2DComplex128Slice(equation)
+	denominator := Create2DEquationFromSliceInputs(gOP(), numbersSlice1, gCP(1, 1), gOP(), numbersSlice2, gCP(3, 1), gOP(), numbersSlice4, gCP(1, 1))
 
-	FactorNumeratorAndDenonminatorRemoveLikeFactors(equation, equation2)
+	newNumeratorFactors, newDenominatorFactors := FactorNumeratorAndDenonminatorRemoveLikeFactors(numerator, denominator)
+
+	for i := 0; i < len(newNumeratorFactors); i++ {
+		fmt.Println("New Numerator factor ", i, " ", DecodeFloatSliceToEquation(newNumeratorFactors[i].Data) )
+	}
+
+	for i := 0; i < len(newDenominatorFactors); i++ {
+		fmt.Println("New Denominator factor ", i, " ", DecodeFloatSliceToEquation(newDenominatorFactors[i].Data) )
+	}
 
 	panic("done testing")
 

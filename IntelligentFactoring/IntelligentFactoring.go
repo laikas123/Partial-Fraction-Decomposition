@@ -15,6 +15,9 @@ type Container struct {
 	Children []*Container
 }
 
+type Factor struct {
+	Data [][]complex128
+}
 
 
 //TODO, when multiple variables get involved a third index needs to be added to the float slice
@@ -2538,27 +2541,213 @@ func DivideTwoAdjacentNumbers(number1 []complex128, number2 []complex128) []comp
 
 //returns the new and improved or returns exactly the same as input depending if anything was removed
 //this function so far only works for formats such as (s^2 + s + 2) nothing complicated like ((s+1)^2 - (3s^2))
-func FactorNumeratorAndDenonminatorRemoveLikeFactors(numeratorInput [][]complex128, denominatorInput [][]complex128) {
+func FactorNumeratorAndDenonminatorRemoveLikeFactors(numeratorInput [][]complex128, denominatorInput [][]complex128) ([]Factor, []Factor) {
 
 	
-	numerator := TryAllABCAndABOnlyFactorMethodsOnEquation(numeratorInput)
+	numerator := TryAllABCAndACOnlyFactorMethodsOnEquation(numeratorInput)
 
-	denominator := TryAllABCAndABOnlyFactorMethodsOnEquation(denominatorInput)
+	denominator := TryAllABCAndACOnlyFactorMethodsOnEquation(denominatorInput)
 
-	firstFactorNumerator, endIndexFactorNumerator := GetFirstFactorFromEquation(numerator)
-	secondFactorNumerator, _ :=  GetFirstFactorFromEquation(numerator[endIndexFactorNumerator+1:len(numerator)])
+	fmt.Println("numerator", DecodeFloatSliceToEquation(numerator))
+	fmt.Println("denominator", DecodeFloatSliceToEquation(denominator))
 
-	firstFactorDenominator, endIndexFactorDenominator := GetFirstFactorFromEquation(denominator)
-	secondFactorDenominator, _ :=  GetFirstFactorFromEquation(denominator[endIndexFactorDenominator+1:len(denominator)])
+	// var firstFactorNumerator [][]complex128
+	// var endIndexFactorNumerator int
 
-	fmt.Println("numerator factor 1", firstFactorNumerator, "numerator factor 2", secondFactorNumerator)
+	factorsNumerator := []Factor{}
 
-	fmt.Println("denominator factor 1", firstFactorDenominator, "denominator factor 2", secondFactorDenominator)
+	numeratorFactor, endIndexFactorNumerator := GetFirstFactorFromEquation(numerator)
+	//secondFactorNumerator, _ :=  GetFirstFactorFromEquation(numerator[endIndexFactorNumerator+1:len(numerator)])
+
+
+
+	//while the numerator still has factors keep appending them to the factors slice
+	for len(numeratorFactor) != 0 {
+
+		factorsNumerator = append(factorsNumerator, Factor{numeratorFactor})
+
+		fmt.Println("end index", endIndexFactorNumerator)
+
+		numerator = numerator[endIndexFactorNumerator+1:len(numerator)]
+
+		numeratorFactor, endIndexFactorNumerator = GetFirstFactorFromEquation(numerator)
+
+	}
+
+
+	for i := 0; i < len(factorsNumerator); i++ {
+		fmt.Println("numerator factor ", i, " ", DecodeFloatSliceToEquation(factorsNumerator[i].Data) )
+	}
+
+
+
+
+	factorsDenominator := []Factor{}
+
+	denominatorFactor, endIndexFactorDenominator := GetFirstFactorFromEquation(denominator)
+	//secondFactorDenominator, _ :=  GetFirstFactorFromEquation(Denominator[endIndexFactorDenominator+1:len(Denominator)])
+
+
+
+	//while the Denominator still has factors keep appending them to the factors slice
+	for len(denominatorFactor) != 0 {
+
+		factorsDenominator = append(factorsDenominator, Factor{denominatorFactor})
+
+		fmt.Println("end index", endIndexFactorDenominator)
+
+		denominator = denominator[endIndexFactorDenominator+1:len(denominator)]
+
+		denominatorFactor, endIndexFactorDenominator = GetFirstFactorFromEquation(denominator)
+
+	}
+
+
+	for i := 0; i < len(factorsDenominator); i++ {
+		fmt.Println("Denominator factor ", i, " ", DecodeFloatSliceToEquation(factorsDenominator[i].Data) )
+	}
+
+	restrictedIndicesNumeratorsFactors := []int{}
+
+	restrictedIndicesDenominatorFactors := []int{}
+
+	//each inner slice is the i and j pair for matching factors
+	numeratorDenominatorIndicesForMatch := [][]int{}
+
+	for i := 0; i < len(factorsNumerator); i++ {
+		if(!(IsRestrictedIndex(i, restrictedIndicesNumeratorsFactors))){
+			factorNumerator := factorsNumerator[i]
+		
+
+			for j := 0; j < len(factorsDenominator); j++ {
+				if(!(IsRestrictedIndex(j, restrictedIndicesDenominatorFactors))){
+					factorDenominator := factorsDenominator[j]
+
+					if(TwoFactorsAreEqual(factorNumerator, factorDenominator)){
+						fmt.Println(i, j, " two factors equal", DecodeFloatSliceToEquation(factorNumerator.Data), DecodeFloatSliceToEquation(factorDenominator.Data))
+						restrictedIndicesNumeratorsFactors = append(restrictedIndicesNumeratorsFactors, i)
+						restrictedIndicesDenominatorFactors = append(restrictedIndicesDenominatorFactors, j)
+						numeratorDenominatorIndicesForMatch = append(numeratorDenominatorIndicesForMatch, []int{i, j})
+						break
+					}
+
+
+				}
+
+			}
+
+		}
+
+	}
+
+	newNumeratorFactors := []Factor{}
+
+	newDenominatorFactors := []Factor{}
+
+	for i := 0; i < len(numeratorDenominatorIndicesForMatch); i++ {
+
+		numeratorIndex := numeratorDenominatorIndicesForMatch[i][0]
+
+		numeratorItemData := factorsNumerator[numeratorIndex].Data
+
+		denominatorIndex := numeratorDenominatorIndicesForMatch[i][1]
+
+		denominatorItemData := factorsDenominator[denominatorIndex].Data
+
+
+		//get the power of the closing parenthesis for the factor for the numerator
+		powerParenthesisNumerator := numeratorItemData[len(numeratorItemData)-1][2]
+
+		//get the power of the closing parenthesis for the factor for the denominator
+		powerParenthesisDenominator := denominatorItemData[len(numeratorItemData)-1][2]
+
+		fmt.Println("numerator factor", DecodeFloatSliceToEquation(numeratorItemData), "numerator factor power", powerParenthesisNumerator)
+
+		fmt.Println("denominator factor", DecodeFloatSliceToEquation(denominatorItemData), "denominator factor power", powerParenthesisDenominator)
+
+		numeratorMinusDenominator := powerParenthesisNumerator - powerParenthesisDenominator
+
+		if(real(numeratorMinusDenominator) > 0){
+
+			
+			//set the power of the numerators closing parenthesis equal to the difference
+			numeratorItemData[len(numeratorItemData)-1][2] = numeratorMinusDenominator
+
+			newNumeratorFactors = append(newNumeratorFactors, Factor{numeratorItemData})
+
+			// //remove the term from the denominator
+			// factorsDenominator = append(factorsDenominator[0:denominatorIndex], factorsDenominator[(denominatorIndex+1):len(factorsDenominator)]
+
+
+		}else if (real(numeratorMinusDenominator) < 0){
+
+			//set the power of the denominator closing parenthesis equal to the difference
+			//since the difference is negative but the denominator already implies negative
+			//reset the sign to return accurate data
+			denominatorItemData[len(numeratorItemData)-1][2] = (-1*numeratorMinusDenominator)
+
+			newDenominatorFactors = append(newDenominatorFactors, Factor{denominatorItemData})
+
+
+
+			//remove the term from the numerator
+			// factorsNumerator = append(factorsNumerator[0:numeratorIndex], factorNumerator[(numeratorIndex+1):len(factorNumerator)]
+
+
+		}else if(real(numeratorMinusDenominator) == 0){
+
+			newNumeratorFactors = append(newNumeratorFactors, Factor{Create2DEquationFromSliceInputs(gOP(), gNum(1, 0), gCP(1, 1))} )
+			newDenominatorFactors = append(newDenominatorFactors, Factor{Create2DEquationFromSliceInputs(gOP(), gNum(1, 0), gCP(1, 1))})
+
+		}else{
+			panic("there isn't a 4th case... FactorNumeratorAndDenonminatorRemoveLikeFactors")
+		}
+
+	}
+
+	
+
+
+	//for terms that did not have any matches, they need to be added back into the final result
+	//they were located at the non restricted indices
+	for i := 0; i < len(factorsNumerator); i++ {
+
+		fmt.Println("num factor",  DecodeFloatSliceToEquation(factorsNumerator[i].Data))
+
+		if(!IsRestrictedIndex(i, restrictedIndicesNumeratorsFactors)){
+			newNumeratorFactors = append(newNumeratorFactors, factorsNumerator[i])
+		}
+
+	}
+
+	for i := 0; i < len(factorsDenominator); i++ {
+
+		fmt.Println("denom factor",  DecodeFloatSliceToEquation(factorsNumerator[i].Data))
+
+		if(!IsRestrictedIndex(i, restrictedIndicesDenominatorFactors)){
+			newDenominatorFactors = append(newDenominatorFactors, factorsDenominator[i])
+		}
+
+	}
+
+	// for i := 0; i < len(newNumeratorFactors); i++ {
+	// 	fmt.Println("New Numerator factor ", i, " ", DecodeFloatSliceToEquation(newNumeratorFactors[i].Data) )
+	// }
+
+	// for i := 0; i < len(newDenominatorFactors); i++ {
+	// 	fmt.Println("New Denominator factor ", i, " ", DecodeFloatSliceToEquation(newDenominatorFactors[i].Data) )
+	// }
+
+
+
+	return newNumeratorFactors, newDenominatorFactors
 
 
 }
 
-func TryAllABCAndABOnlyFactorMethodsOnEquation(equationInput [][]complex128) [][]complex128 {
+//the reason only ABC and AB methods are tried is they don't yield a complete the square odd 
+//factor
+func TryAllABCAndACOnlyFactorMethodsOnEquation(equationInput [][]complex128) [][]complex128 {
 
 
 
@@ -2569,13 +2758,7 @@ func TryAllABCAndABOnlyFactorMethodsOnEquation(equationInput [][]complex128) [][
 	equation = FactorQuadraticsWithABCAllPresent(equation)
 
 	if(!TwoEquationsAreExactlyIdentical(equation, equationCopy)){
-		return equation
-	}
-
-
-	equation = FactorQuadraticsWithABOnlyPresent(equation)
-
-	if(!TwoEquationsAreExactlyIdentical(equation, equationCopy)){
+		fmt.Println("abc factorization TryAllABCAndABOnlyFactorMethodsOnEquation()")
 		return equation
 	}
 
@@ -2583,8 +2766,13 @@ func TryAllABCAndABOnlyFactorMethodsOnEquation(equationInput [][]complex128) [][
 	equation = FactorQuadraticsWithACOnlyPresent(equation)
 
 	if(!TwoEquationsAreExactlyIdentical(equation, equationCopy)){
+		
+		fmt.Println("ac only factorization TryAllABCAndABOnlyFactorMethodsOnEquation()")
 		return equation
 	}
+
+
+	
 
 
 	return equation
@@ -2665,6 +2853,13 @@ func GetFirstFactorFromEquation(equation [][]complex128) ([][]complex128, int) {
 
 			sawOneNumber := false
 
+			//set this to null before each attempt to not have lingering data
+			numbersHolder = [][]complex128{}
+
+
+			numbersHolder = append(numbersHolder, equation[i])
+
+			fmt.Println("numbers holder", numbersHolder)
 
 			//these two bools are used to make sure
 			//numbers and symbols alternate
@@ -2673,8 +2868,7 @@ func GetFirstFactorFromEquation(equation [][]complex128) ([][]complex128, int) {
 
 			cursor := i
 
-			//set these to null before each attempt to not have lingering data
-			numbersHolder = [][]complex128{}		
+			
 			
 
 			for checkingIfValid {
@@ -2718,6 +2912,7 @@ func GetFirstFactorFromEquation(equation [][]complex128) ([][]complex128, int) {
 					//make sure what broke the loop was a closing parenthesis
 					if(IsCP(equation[cursor])){
 						endingIndex = cursor
+						numbersHolder = append(numbersHolder, equation[cursor])
 						checkingIfValid = false
 						foundValid = true
 						break
@@ -2735,6 +2930,13 @@ func GetFirstFactorFromEquation(equation [][]complex128) ([][]complex128, int) {
 	}
 }
 
+	fmt.Println("numbers holder return ", numbersHolder)
+
+	//if its only the opening parenthesis null it
+	if(len(numbersHolder) == 1){
+		numbersHolder = [][]complex128{}
+	}
+
 	return numbersHolder, endingIndex
 
 }
@@ -2742,13 +2944,65 @@ func GetFirstFactorFromEquation(equation [][]complex128) ([][]complex128, int) {
 
 
 
+func TwoFactorsAreEqual(factor1 Factor, factor2 Factor) bool {
+
+	factor1Data := factor1.Data
+	factor2Data := factor2.Data
+
+	//if the outer lenght of the whole 2d slice differs return false
+	if(len(factor1Data) != len(factor2Data)){
+		return false
+	}
+
+	for i := 0 ; i <len(factor1Data); i++ {
+		//the closing parenthesis should not be counted for factors,
+		//factors are equal even if the power of their closing parethesis differs
+		if(i != len(factor1Data)-1){
+			currentItemFactor1 := factor1Data[i]
+
+			currentItemFactor2 := factor2Data[i]
+
+			//if the inner length of two 1d slices at the same index differs return false
+			if(len(currentItemFactor1) != len(currentItemFactor2)){
+				return false
+			}
+
+			for j := 0; j < len(currentItemFactor1); j++ {
+
+				fmt.Println("compare items", currentItemFactor1, currentItemFactor2)
+
+				
+					if(currentItemFactor1[j] != currentItemFactor2[j]){
+						return false
+					}
+				
+
+			}
+
+		}
+
+
+	}
+
+	return true
+
+
+}
 
 
 
 
 
+func IsRestrictedIndex(indexToCheck int, restrictedIndices []int ) bool {
 
+	for i := 0; i < len(restrictedIndices); i++ {
+		if(restrictedIndices[i] == indexToCheck){
+			return true
+		}
+	}
 
+	return false
 
+}
 
 
